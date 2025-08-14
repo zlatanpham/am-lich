@@ -28,6 +28,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm run format:check` - Check code formatting with Prettier
 - `pnpm run format:write` - Format code with Prettier
 
+### Testing
+
+- `pnpm run test` - Run tests in watch mode with Vitest
+- `pnpm run test:run` - Run tests once
+- `pnpm run test:watch` - Run tests in watch mode
+- `pnpm run test:ui` - Run tests with Vitest UI
+- `pnpm run test:coverage` - Run tests with coverage report
+
 ### UI Components
 
 - `pnpm run ui:add` - Add new shadcn/ui components
@@ -44,6 +52,7 @@ This is **Next Starter** - a full-stack Next.js 15 boilerplate with authenticati
 - **Backend**: tRPC for type-safe APIs, NextAuth.js for authentication
 - **Database**: PostgreSQL with Prisma ORM
 - **Email**: Resend integration for password reset functionality
+- **Testing**: Vitest with React Testing Library for unit, component, and integration tests
 
 ### Database Schema
 
@@ -110,6 +119,18 @@ Requires `.env` file with:
 3. Start development server with `pnpm run dev`
 4. Use `pnpm run db:studio` for database inspection
 5. Run `pnpm run check` before committing to ensure code quality
+6. Use `pnpm run test` to run tests during development
+
+### Testing Architecture
+
+- **Vitest Configuration**: Located in `vitest.config.ts` with React plugin and jsdom environment
+- **Test Setup**: `src/test/setup.ts` configures testing-library/jest-dom matchers and mocks
+- **Test Utilities**: `src/test/utils.tsx` provides custom render function with tRPC and React Query providers
+- **Example Tests**: 
+  - Unit tests: `src/lib/utils.test.ts` (utility functions)
+  - Component tests: `src/components/ui/button.test.tsx` (UI components)  
+  - Integration tests: `src/server/api/routers/user.test.ts` (API logic)
+  - React integration: `src/app/(protected)/account/_components/edit-name-dialog.test.tsx` (components with tRPC)
 
 ### Extending the Boilerplate
 

@@ -20,6 +20,11 @@
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
     "start": "next start",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -66,12 +71,17 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.11",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.1.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^9.32.0",
     "eslint-config-next": "^15.4.5",
     "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
@@ -80,7 +90,8 @@
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "vitest": "^3.2.4"
   },
   "ct3aMetadata": {
     "initVersion": "7.39.3"
