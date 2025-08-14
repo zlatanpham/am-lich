@@ -20,8 +20,3 @@ export async function login(formData: FormData) {
   }
 }
 
-export async function githubSignIn() {
-  await signIn("github", {
-    redirectTo: "/",
-  });
-}
