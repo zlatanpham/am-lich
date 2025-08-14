@@ -73,6 +73,18 @@ export const userRouter = createTRPCRouter({
         },
       });
 
+      // Create default notification preferences for the new user
+      await ctx.db.notificationPreference.create({
+        data: {
+          userId: newUser.id,
+          enablePushNotifications: false,
+          enableEmailNotifications: true,
+          defaultReminderDays: 3,
+          remindFor15thDay: true,
+          remindFor1stDay: true,
+        },
+      });
+
       return newUser;
     }),
 

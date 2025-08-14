@@ -1,32 +1,36 @@
-# Lunar Calendar/Reminder Web Application - Requirements Document
+# Vietnamese Lunar Calendar/Reminder Web Application - Requirements Document
 
-**Document Version**: 1.0  
+**Document Version**: 2.0  
 **Date**: August 14, 2025  
-**Project**: Am Lich (Lunar Calendar)  
-**Status**: Draft  
+**Project**: Âm Lịch (Vietnamese Lunar Calendar)  
+**Status**: Updated for Vietnamese Market  
+**Target Users**: Vietnamese speakers and Vietnamese cultural community  
 
 ## Executive Summary
 
-This document outlines the requirements for developing a lunar calendar and reminder web application that allows users to view lunar dates, manage events, and receive notifications for important lunar calendar dates. The application will support both authenticated and unauthenticated users with different feature sets, and will be delivered as a Progressive Web App (PWA).
+This document outlines the requirements for developing a Vietnamese lunar calendar (Âm lịch) and reminder web application specifically designed for Vietnamese users. The application allows users to view Vietnamese lunar dates, manage cultural events, and receive notifications for important Vietnamese lunar calendar observances. The application will support both authenticated and unauthenticated users with different feature sets, delivered as a Progressive Web App (PWA) with full Vietnamese localization.
 
 ## Business Context and Problem Statement
 
 ### Problem Statement
-Users need a reliable way to track and receive reminders for important dates in the lunar calendar system, particularly the 1st and 15th days of each lunar month, which hold cultural and religious significance. Currently, users must manually track these dates and may miss important observances.
+Vietnamese users need a reliable way to track and receive reminders for important dates in the Vietnamese lunar calendar system (Âm lịch), particularly the 1st and 15th days of each lunar month (Mồng 1 và Rằm), which hold deep cultural and religious significance in Vietnamese culture. Additionally, users need to track traditional Vietnamese holidays, ancestor worship dates, and personal important dates according to the lunar calendar. Currently, Vietnamese users must manually track these dates using generic lunar calendars that don't account for Vietnamese cultural context and terminology.
 
 ### Business Objectives
-- Provide accurate lunar calendar information to users
-- Enable users to set and manage reminders for lunar calendar events
-- Deliver notifications through multiple channels (push notifications and email)
+- Provide accurate Vietnamese lunar calendar information with proper Vietnamese terminology
+- Enable users to set and manage reminders for Vietnamese cultural events and observances
+- Support Vietnamese lunar calendar traditions including ancestor worship scheduling
+- Deliver notifications in Vietnamese language through multiple channels
 - Ensure accessibility across devices through PWA functionality
-- Support both casual browsers and registered users with different feature sets
+- Support both casual browsers and registered users with Vietnamese-specific features
+- Preserve and promote Vietnamese lunar calendar cultural knowledge
 
 ## Stakeholder Analysis
 
 ### Primary Stakeholders
-- **End Users**: Individuals interested in lunar calendar tracking and reminders
-- **Development Team**: Full-stack developers, UI/UX designers, QA engineers
-- **Product Owner**: Responsible for feature prioritization and business value
+- **End Users**: Vietnamese individuals and Vietnamese diaspora interested in traditional lunar calendar tracking
+- **Cultural Community**: Vietnamese cultural organizations and religious communities
+- **Development Team**: Full-stack developers with Vietnamese localization experience, UI/UX designers familiar with Vietnamese design preferences, QA engineers
+- **Product Owner**: Responsible for Vietnamese market feature prioritization and cultural accuracy
 
 ### Secondary Stakeholders
 - **System Administrators**: Responsible for deployment and maintenance
@@ -59,47 +63,60 @@ Users need a reliable way to track and receive reminders for important dates in 
 
 ### 2. Lunar Calendar Display
 
-#### 2.1 Current Date Display
+#### 2.1 Current Vietnamese Lunar Date Display
 **Priority**: High  
-**Description**: All users can view the current lunar date and corresponding Gregorian date.
+**Description**: All users can view the current Vietnamese lunar date (ngày âm lịch) with proper Vietnamese terminology and formatting.
 
 **Acceptance Criteria**:
-- Display current lunar month, day, and year
-- Show corresponding Gregorian date
-- Indicate current lunar phase
-- Update automatically at midnight
+- Display current lunar date using Vietnamese format (e.g., "Ngày 15 tháng 8 năm Giáp Thìn")
+- Show Vietnamese lunar month names (tháng Giêng, tháng Hai, etc.)
+- Display corresponding Gregorian date (dương lịch)
+- Show Vietnamese zodiac year name (e.g., "Năm Giáp Thìn" - Year of the Dragon)
+- Indicate current lunar phase with Vietnamese terminology
+- Display Vietnamese day names (Mồng 1, Mồng 2, ... Rằm, 16, 17, ... 30)
+- Update automatically at midnight Vietnam time (UTC+7)
+- Show cultural significance indicators for important days (Mồng 1, Rằm)
 
-#### 2.2 Calendar Navigation
+#### 2.2 Vietnamese Lunar Calendar Navigation
 **Priority**: High  
-**Description**: Users can browse lunar calendar months and view historical/future dates.
+**Description**: Users can browse Vietnamese lunar calendar months with proper Vietnamese naming and cultural context.
 
 **Acceptance Criteria**:
-- Navigate between lunar months using previous/next controls
-- Jump to specific lunar months/years
-- View lunar dates overlaid on Gregorian calendar grid
-- Highlight special lunar dates (1st and 15th of each month)
+- Navigate between lunar months using Vietnamese month names (Tháng Giêng, Tháng Hai, Tháng Ba, etc.)
+- Jump to specific Vietnamese lunar years using zodiac cycle names
+- View Vietnamese lunar dates overlaid on Gregorian calendar grid
+- Highlight culturally significant dates (Mồng 1 - New Moon, Rằm - Full Moon)
+- Display Vietnamese traditional holidays (Tết Nguyên Đán, Tết Trung Thu, etc.)
+- Show ancestor worship recommended dates (1st, 15th, death anniversaries)
+- Use Vietnamese date formatting throughout navigation
 
-#### 2.3 Upcoming Important Dates
+#### 2.3 Upcoming Vietnamese Cultural Important Dates
 **Priority**: High  
-**Description**: Display the next occurrence of the 1st or 15th lunar day.
+**Description**: Display the next occurrence of culturally significant Vietnamese lunar dates.
 
 **Acceptance Criteria**:
-- Show next 1st lunar day with countdown
-- Show next 15th lunar day with countdown
-- Display both dates if they occur within a reasonable timeframe
-- Include Gregorian date equivalents
+- Show next Mồng 1 (1st lunar day) with countdown in Vietnamese
+- Show next Rằm (15th lunar day) with countdown in Vietnamese
+- Display upcoming Vietnamese traditional holidays with cultural explanations
+- Show ancestor worship dates (ngày giỗ) reminders
+- Include both lunar and Gregorian date equivalents
+- Provide cultural context for each important date
+- Display zodiac day characteristics for cultural planning
 
 ### 3. Event Management (Authenticated Users Only)
 
-#### 3.1 Event Creation
+#### 3.1 Vietnamese Cultural Event Creation
 **Priority**: High  
-**Description**: Logged-in users can create and manage lunar calendar events.
+**Description**: Logged-in users can create and manage Vietnamese lunar calendar events including traditional celebrations and personal observances.
 
 **Acceptance Criteria**:
-- Create events with title, description, and lunar date
-- Set events as one-time or annually recurring
-- Associate events with specific lunar dates
-- Save events to user's personal calendar
+- Create events with Vietnamese title, description, and lunar date
+- Support Vietnamese cultural event templates (giỗ tổ, lễ cưới, etc.)
+- Set events as one-time or annually recurring according to Vietnamese traditions
+- Associate events with specific Vietnamese lunar dates and zodiac considerations
+- Support ancestor worship scheduling (ngày giỗ) with proper intervals
+- Save events to user's personal Vietnamese lunar calendar
+- Include cultural significance notes for traditional events
 
 #### 3.2 Event Editing and Deletion
 **Priority**: High  
@@ -123,37 +140,43 @@ Users need a reliable way to track and receive reminders for important dates in 
 
 ### 4. Reminder and Notification System
 
-#### 4.1 Reminder Configuration
+#### 4.1 Vietnamese Cultural Reminder Configuration
 **Priority**: High  
-**Description**: Users can set reminders for events and important lunar dates.
+**Description**: Users can set culturally appropriate reminders for Vietnamese lunar events and observances.
 
 **Acceptance Criteria**:
-- Global reminder settings: 1, 3, or 7 days before events
-- Override global settings for individual events
-- Set reminders for next 1st and 15th lunar days
-- Enable/disable reminders per event
+- Global reminder settings with Vietnamese cultural timing (1, 3, 7 days for regular events; specific timing for ancestor worship)
+- Override global settings for individual Vietnamese cultural events
+- Set automatic reminders for Mồng 1 and Rằm days with cultural context
+- Configure ancestor worship reminders (giỗ tổ tiên) with traditional scheduling
+- Enable/disable reminders per event type (personal, cultural, religious)
+- Support Vietnamese time preferences and cultural considerations for reminder timing
 
-#### 4.2 Push Notifications
+#### 4.2 Vietnamese Push Notifications
 **Priority**: High  
-**Description**: Deliver real-time notifications to users' devices.
+**Description**: Deliver real-time notifications in Vietnamese with cultural context.
 
 **Acceptance Criteria**:
-- Request notification permissions from users
-- Send push notifications at configured reminder times
-- Include event details in notification content
-- Handle notification clicks to open relevant app section
-- Support notification scheduling for future dates
+- Request notification permissions with Vietnamese language prompts
+- Send push notifications in Vietnamese at culturally appropriate times
+- Include Vietnamese event details and cultural significance in notifications
+- Use proper Vietnamese honorifics and cultural language
+- Handle notification clicks to open relevant Vietnamese app sections
+- Support scheduling for Vietnamese cultural events and ancestor worship
+- Respect Vietnamese cultural timing preferences (avoid inauspicious hours)
 
-#### 4.3 Email Notifications
+#### 4.3 Vietnamese Email Notifications
 **Priority**: Medium  
-**Description**: Send email reminders using existing Resend integration.
+**Description**: Send Vietnamese email reminders with proper cultural formatting.
 
 **Acceptance Criteria**:
-- Send formatted email reminders at configured times
-- Include event details and lunar date information
-- Provide unsubscribe functionality
-- Handle email delivery failures gracefully
-- Support HTML email templates
+- Send Vietnamese formatted email reminders with cultural appropriate greetings
+- Include Vietnamese event details and lunar date information with cultural context
+- Use traditional Vietnamese calendar terminology in emails
+- Provide Vietnamese language unsubscribe functionality
+- Handle email delivery failures with Vietnamese error messages
+- Support Vietnamese HTML email templates with cultural design elements
+- Include educational content about Vietnamese lunar calendar traditions
 
 ### 5. Progressive Web App Features
 
@@ -207,17 +230,22 @@ Users need a reliable way to track and receive reminders for important dates in 
 
 ### 8. Usability Requirements
 
-#### 8.1 User Interface
-- Responsive design for desktop, tablet, and mobile
-- Accessible design following WCAG 2.1 AA guidelines
-- Intuitive navigation between calendar views
-- Clear visual distinction between lunar and Gregorian dates
+#### 8.1 Vietnamese User Interface
+- Responsive design optimized for Vietnamese users across all devices
+- Accessible design following WCAG 2.1 AA guidelines with Vietnamese screen reader support
+- Intuitive navigation using Vietnamese cultural calendar concepts
+- Clear visual distinction between âm lịch (lunar) and dương lịch (Gregorian) dates
+- Vietnamese typography with proper diacritical mark support
+- Cultural color schemes appropriate for Vietnamese lunar calendar (red for auspicious dates, etc.)
+- Support for Vietnamese reading patterns and cultural UI expectations
 
-#### 8.2 User Experience
-- Onboarding flow for new users
-- Helpful tooltips and guidance
-- Error messages are clear and actionable
-- Consistent design language throughout application
+#### 8.2 Vietnamese User Experience
+- Culturally appropriate onboarding flow explaining Vietnamese lunar calendar concepts
+- Vietnamese language tooltips with cultural context and education
+- Error messages in Vietnamese that are culturally sensitive and clear
+- Consistent Vietnamese design language respecting cultural preferences
+- Educational content about Vietnamese lunar calendar traditions integrated throughout
+- Support for users unfamiliar with traditional lunar calendar concepts
 
 ### 9. Compatibility Requirements
 
@@ -248,48 +276,61 @@ Users need a reliable way to track and receive reminders for important dates in 
 - Resend for email notifications
 
 #### 10.3 Third-Party Integrations
-- Web Push API for notifications
-- Lunar calendar calculation library or API
-- Email service provider (Resend)
+- Web Push API for Vietnamese notifications
+- Vietnamese lunar calendar calculation library (supporting Vietnamese cultural variations)
+- Email service provider (Resend) with Vietnamese language support
+- Vietnamese localization libraries for proper diacritical mark handling
+- Vietnamese zodiac and cultural data sources
 
 ### 11. Database Schema Extensions
 
 #### 11.1 New Database Models Required
 
 ```sql
--- Events table for user-created lunar events
-model LunarEvent {
-  id              String    @id @default(cuid())
-  userId          String
-  title           String
-  description     String?
-  lunarYear       Int
-  lunarMonth      Int
-  lunarDay        Int
-  isRecurring     Boolean   @default(false)
-  isActive        Boolean   @default(true)
-  reminderDays    Int       @default(3) // 1, 3, or 7 days
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+-- Events table for Vietnamese lunar events
+model VietnameseLunarEvent {
+  id                    String    @id @default(cuid())
+  userId                String
+  title                 String
+  description           String?
+  lunarYear             Int
+  lunarMonth            Int       // Vietnamese lunar month (1-12, with leap months)
+  lunarDay              Int       // Vietnamese lunar day (1-30)
+  vietnameseZodiacYear  String    // e.g., "Giáp Thìn", "Tân SỮu"
+  eventType             String    @default("personal") // personal, cultural, ancestor_worship, holiday
+  culturalSignificance  String?   // Cultural notes and significance
+  isRecurring           Boolean   @default(false)
+  isActive              Boolean   @default(true)
+  reminderDays          Int       @default(3)
+  isAncestorWorship     Boolean   @default(false)
+  ancestorName          String?   // For giỗ tổ events
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
   
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId, lunarYear, lunarMonth])
+  @@index([eventType, lunarMonth, lunarDay])
 }
 
--- User notification preferences
-model NotificationPreference {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
-  enablePushNotifications Boolean @default(false)
-  enableEmailNotifications Boolean @default(true)
-  defaultReminderDays   Int      @default(3)
-  remindFor15thDay      Boolean  @default(true)
-  remindFor1stDay       Boolean  @default(true)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+-- Vietnamese notification preferences
+model VietnameseNotificationPreference {
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  enablePushNotifications    Boolean  @default(false)
+  enableEmailNotifications   Boolean  @default(true)
+  defaultReminderDays        Int      @default(3)
+  remindForMong1             Boolean  @default(true)  // Mồng 1 (1st lunar day)
+  remindForRam               Boolean  @default(true)  // Rằm (15th lunar day)
+  remindForAncestorWorship   Boolean  @default(true)  // Giỗ tổ tiên
+  remindForTraditionalHolidays Boolean @default(true)  // Traditional Vietnamese holidays
+  preferredLanguage          String   @default("vi")   // Vietnamese language preference
+  timezone                   String   @default("Asia/Ho_Chi_Minh")
+  culturalReminderLevel      String   @default("moderate") // minimal, moderate, detailed
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
   
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 -- Push notification subscriptions
@@ -314,49 +355,65 @@ model PushSubscription {
 
 ## User Stories
 
-### Epic 1: Basic Calendar Viewing
-**As a visitor**, I want to view the current lunar date so that I can know today's lunar calendar information without creating an account.
+### Epic 1: Vietnamese Lunar Calendar Viewing
+**As a Vietnamese user**, I want to view the current âm lịch date with proper Vietnamese terminology so that I can know today's lunar calendar information in my cultural context without creating an account.
 
-**As a visitor**, I want to browse different lunar months so that I can see historical and future lunar dates.
+**As a Vietnamese user**, I want to browse different Vietnamese lunar months (Tháng Giêng, Tháng Hai, etc.) so that I can see historical and future lunar dates with cultural significance.
 
-**As a visitor**, I want to see when the next 1st and 15th lunar days occur so that I can plan for important observances.
+**As a Vietnamese user**, I want to see when the next Mồng 1 and Rằm occur with cultural context so that I can plan for ancestor worship and traditional observances.
 
-### Epic 2: Event Management
-**As a registered user**, I want to create lunar calendar events so that I can track personal important dates.
+**As a Vietnamese user**, I want to see upcoming Vietnamese traditional holidays (Tết, Trung Thu, etc.) so that I can prepare for cultural celebrations.
 
-**As a registered user**, I want to set events as annually recurring so that I don't need to recreate them each year.
+### Epic 2: Vietnamese Cultural Event Management
+**As a registered Vietnamese user**, I want to create âm lịch events with Vietnamese cultural context so that I can track personal important dates according to Vietnamese traditions.
 
-**As a registered user**, I want to edit my events so that I can update details as needed.
+**As a registered Vietnamese user**, I want to schedule ancestor worship events (giỗ tổ) with proper Vietnamese cultural guidelines so that I can honor my ancestors appropriately.
 
-### Epic 3: Notification System
-**As a registered user**, I want to receive push notifications for my events so that I'm reminded in real-time.
+**As a registered Vietnamese user**, I want to set Vietnamese cultural events as annually recurring so that I don't need to recreate traditional observances each year.
 
-**As a registered user**, I want to receive email reminders so that I have backup notification delivery.
+**As a registered Vietnamese user**, I want to use pre-defined Vietnamese cultural event templates so that I can easily create traditional celebrations with proper cultural context.
 
-**As a registered user**, I want to customize reminder timing so that I can get notifications when most helpful to me.
+### Epic 3: Vietnamese Cultural Notification System
+**As a registered Vietnamese user**, I want to receive push notifications in Vietnamese for my cultural events so that I'm reminded in real-time with proper cultural context.
 
-### Epic 4: Progressive Web App
-**As a mobile user**, I want to install the app on my device so that I can access it like a native application.
+**As a registered Vietnamese user**, I want to receive Vietnamese email reminders with cultural explanations so that I have comprehensive notification delivery.
 
-**As a user**, I want the app to work offline so that I can view my calendar without an internet connection.
+**As a registered Vietnamese user**, I want to customize reminder timing according to Vietnamese cultural preferences so that I get notifications at culturally appropriate times.
+
+**As a registered Vietnamese user**, I want automatic reminders for Mồng 1 and Rằm days so that I never miss important worship opportunities.
+
+### Epic 4: Vietnamese Progressive Web App
+**As a Vietnamese mobile user**, I want to install the Vietnamese lunar calendar app on my device so that I can access Vietnamese cultural calendar information like a native application.
+
+**As a Vietnamese user**, I want the app to work offline with cached Vietnamese cultural content so that I can view my âm lịch calendar without an internet connection.
+
+**As a Vietnamese user**, I want the app to provide cultural education about Vietnamese lunar calendar traditions so that I can learn about my heritage while using the calendar.
 
 ## Assumptions and Constraints
 
 ### Assumptions
-1. Users have basic familiarity with lunar calendar concepts
-2. Majority of users will access the application on mobile devices
-3. Users are comfortable with web-based applications
-4. Lunar date calculations can be implemented using existing libraries or algorithms
-5. Push notification support is available in target browsers
-6. Email notification delivery will be handled by Resend service
+1. **Cultural Context**: Primary users are Vietnamese or familiar with Vietnamese cultural traditions
+2. **Language Preference**: Users prefer Vietnamese language interface with cultural terminology
+3. **Cultural Knowledge**: Users have varying levels of familiarity with Vietnamese lunar calendar traditions (app will provide education)
+4. **Device Usage**: Majority of Vietnamese users will access the application on mobile devices
+5. **Technology Comfort**: Users are comfortable with web-based applications and PWA installation
+6. **Calendar System**: Vietnamese lunar calendar follows Chinese lunar calendar base with Vietnamese cultural adaptations
+7. **Cultural Variations**: Vietnamese lunar calendar may have specific cultural variations in calculation or observance
+8. **Notification Timing**: Vietnamese users prefer culturally appropriate timing for notifications (respecting traditional beliefs about auspicious times)
+9. **Ancestor Worship**: Significant portion of users will use app for ancestor worship date tracking
+10. **Traditional Holidays**: Users want integrated support for Vietnamese traditional holidays and their lunar calendar dates
 
 ### Constraints
 1. Must build upon existing Next.js boilerplate architecture
 2. Must use PostgreSQL database with Prisma ORM
 3. Authentication must use existing NextAuth.js implementation
-4. Email notifications limited to Resend service capabilities
+4. Email notifications limited to Resend service capabilities (must support Vietnamese language)
 5. PWA functionality limited by browser support
-6. Budget constraints may limit third-party service usage
+6. Budget constraints may limit third-party Vietnamese localization services
+7. **Cultural Accuracy**: Must ensure cultural accuracy for Vietnamese lunar calendar traditions
+8. **Language Support**: Must provide complete Vietnamese localization including proper diacritical marks
+9. **Timezone**: Must handle Vietnam timezone (UTC+7) correctly for lunar date calculations
+10. **Cultural Sensitivity**: Must respect Vietnamese cultural and religious sensitivities in design and functionality
 
 ## Success Metrics
 
@@ -414,29 +471,78 @@ model PushSubscription {
 ## Dependencies and External Requirements
 
 ### Technical Dependencies
-- Lunar calendar calculation library (e.g., lunar-javascript, chinese-lunar-calendar)
-- Web Push protocol implementation
-- Service worker for PWA functionality
-- Push notification service (Firebase Cloud Messaging or similar)
+- **Vietnamese Lunar Calendar Library**: Library supporting Vietnamese lunar calendar calculations with cultural variations
+- **Vietnamese Localization**: Libraries for proper Vietnamese text handling, diacritical marks, and formatting
+- **Timezone Handling**: Vietnam timezone (Asia/Ho_Chi_Minh) support for accurate date calculations
+- **Web Push Protocol**: Implementation supporting Vietnamese language notifications
+- **Service Worker**: PWA functionality with Vietnamese offline content
+- **Push Notification Service**: Firebase Cloud Messaging or similar with Vietnamese language support
+- **Vietnamese Cultural Data**: Database of Vietnamese traditional holidays, zodiac information, and cultural observances
 
 ### External Services
 - Resend for email delivery
 - Database hosting (existing PostgreSQL setup)
 - CDN for static assets (if needed for performance)
 
-## Glossary
+## Vietnamese Cultural Glossary
 
-- **Lunar Calendar**: Traditional calendar system based on lunar cycles
-- **1st Lunar Day**: New moon day, beginning of lunar month
-- **15th Lunar Day**: Full moon day, middle of lunar month
+- **Âm Lịch**: Vietnamese lunar calendar system based on lunar cycles with Vietnamese cultural adaptations
+- **Dương Lịch**: Gregorian (solar) calendar system
+- **Mồng 1**: First day of lunar month (new moon), culturally significant for new beginnings
+- **Rằm**: Fifteenth day of lunar month (full moon), important for worship and cultural observances
+- **Giỗ Tổ Tiên**: Ancestor worship ceremonies typically observed on lunar calendar dates
+- **Tết Nguyên Đán**: Vietnamese New Year, most important Vietnamese holiday
+- **Tết Trung Thu**: Mid-Autumn Festival, celebrated on 15th day of 8th lunar month
+- **Ngày Giỗ**: Death anniversary observance dates according to lunar calendar
+- **Can Chi**: Vietnamese zodiac system with 12 animals and 10 heavenly stems (60-year cycle)
+- **Tháng Giêng**: First lunar month of Vietnamese calendar year
+- **Năm Giáp Thìn**: Example of Vietnamese zodiac year naming (Year of the Dragon)
 - **PWA**: Progressive Web App - web application with native app-like features
-- **Push Notification**: Real-time message delivered to user's device
+- **Push Notification**: Real-time message delivered to user's device in Vietnamese
 - **tRPC**: TypeScript Remote Procedure Call library for type-safe APIs
 
 ---
 
+## Implementation Changes Required for Vietnamese Market
+
+### Language and Localization Changes
+1. **Complete Vietnamese Translation**: All UI text, messages, and content must be translated to Vietnamese
+2. **Cultural Terminology**: Replace generic lunar calendar terms with proper Vietnamese terminology
+3. **Vietnamese Typography**: Implement proper font support for Vietnamese diacritical marks
+4. **Date Formatting**: Vietnamese date formats and cultural conventions
+5. **Time Zone**: Default to Vietnam timezone (Asia/Ho_Chi_Minh) for all calculations
+
+### Calendar System Modifications
+1. **Vietnamese Month Names**: Implement Vietnamese lunar month names (Tháng Giêng, Tháng Hai, etc.)
+2. **Zodiac Integration**: Vietnamese zodiac animals and Can Chi system
+3. **Cultural Dates**: Pre-populate Vietnamese traditional holidays and observances
+4. **Ancestor Worship Support**: Special features for giỗ tổ scheduling and reminders
+5. **Cultural Significance Indicators**: Visual and textual indicators for culturally important dates
+
+### Database Schema Updates
+1. **Event Types**: Add Vietnamese cultural event categories
+2. **Cultural Data**: Store Vietnamese zodiac, holiday, and traditional observance information
+3. **Language Preferences**: User language and cultural preference settings
+4. **Ancestor Information**: Fields for ancestor worship event details
+
+### User Experience Enhancements
+1. **Cultural Onboarding**: Educational content about Vietnamese lunar calendar traditions
+2. **Cultural Context**: Explanatory content for cultural significance of dates and events
+3. **Vietnamese Design Patterns**: UI/UX adapted for Vietnamese cultural preferences
+4. **Educational Integration**: Built-in learning resources about Vietnamese lunar calendar
+
+### Technical Implementation
+1. **Lunar Calculation Library**: Ensure Vietnamese cultural variations are supported
+2. **Localization Framework**: Implement robust Vietnamese language support
+3. **Cultural Data Sources**: Integrate authoritative Vietnamese cultural calendar data
+4. **Vietnamese SEO**: Optimize for Vietnamese search terms and cultural keywords
+
+---
+
 **Next Steps**: 
-1. Review and approve requirements with stakeholders
-2. Create technical design document
-3. Develop project timeline and resource allocation
-4. Begin Phase 1 implementation planning
+1. **Cultural Review**: Review requirements with Vietnamese cultural experts and community stakeholders
+2. **Technical Assessment**: Evaluate existing lunar calendar libraries for Vietnamese cultural accuracy
+3. **Localization Planning**: Develop comprehensive Vietnamese translation and cultural adaptation plan
+4. **Cultural Validation**: Establish process for ongoing cultural accuracy validation
+5. **Community Engagement**: Engage Vietnamese community for feedback and cultural guidance
+6. Begin Phase 1 implementation with Vietnamese cultural foundation

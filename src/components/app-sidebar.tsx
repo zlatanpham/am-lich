@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
-import { Send, SquareTerminal, ComponentIcon } from "lucide-react";
+import { Send, SquareTerminal, Calendar, CalendarPlus, Bell, Home } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -22,15 +22,30 @@ import { Skeleton } from "./ui/skeleton";
 const data = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Trang chủ",
       url: "/",
-      icon: SquareTerminal,
+      icon: Home,
+    },
+    {
+      title: "Lịch âm",
+      url: "/calendar",
+      icon: Calendar,
+    },
+    {
+      title: "Sự kiện của tôi",
+      url: "/events",
+      icon: CalendarPlus,
+    },
+    {
+      title: "Cài đặt thông báo",
+      url: "/notifications",
+      icon: Bell,
     },
   ],
   navSecondary: [
     {
-      title: "Feedback",
-      url: "https://github.com/your-username/next-starter/issues",
+      title: "Góp ý phản hồi",
+      url: "https://github.com/your-username/am-lich/issues",
       icon: Send,
     },
   ],
@@ -65,11 +80,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <ComponentIcon className="size-4" />
+                  <Calendar className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Next Starter</span>
-                  <span className="truncate text-xs">Boilerplate</span>
+                  <span className="truncate font-medium">Lịch âm</span>
+                  <span className="truncate text-xs">Phiên bản cá nhân</span>
                 </div>
               </Link>
             </SidebarMenuButton>

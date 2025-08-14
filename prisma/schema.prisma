@@ -71,6 +71,11 @@ model User {
     Organization           Organization[]
     OrganizationMember     OrganizationMember[]
     Session                Session[]
+    LunarEvent             LunarEvent[]
+    VietnameseLunarEvent   VietnameseLunarEvent[]
+    NotificationPreference NotificationPreference?
+    VietnameseNotificationPreference VietnameseNotificationPreference?
+    PushSubscription       PushSubscription[]
 }
 
 model VerificationToken {
@@ -79,4 +84,157 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+// Vietnamese Lunar Calendar Models
+
+model VietnameseLunarEvent {
+    id                    String    @id @default(cuid())
+    userId                String
+    title                 String    @db.VarChar(255)
+    description           String?   @db.Text
+    lunarYear             Int
+    lunarMonth            Int       @db.SmallInt // 1-12, Vietnamese lunar month
+    lunarDay              Int       @db.SmallInt // 1-30, Vietnamese lunar day
+    vietnameseZodiacYear  String    @db.VarChar(50) // e.g., "Giáp Thìn", "Tân Sửu"
+    eventType             String    @default("personal") @db.VarChar(50) // personal, cultural, ancestor_worship, holiday
+    culturalSignificance  String?   @db.Text // Cultural notes and significance
+    isRecurring           Boolean   @default(false)
+    isActive              Boolean   @default(true)
+    reminderDays          Int       @default(3) @db.SmallInt // 1, 3, or 7 days
+    isAncestorWorship     Boolean   @default(false)
+    ancestorName          String?   @db.VarChar(255) // For giỗ tổ events
+    isLeapMonth           Boolean   @default(false) // Vietnamese leap month support
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
+    
+    user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    @@index([userId, lunarYear, lunarMonth])
+    @@index([eventType, lunarMonth, lunarDay])
+    @@index([isAncestorWorship, userId])
+}
+
+// Legacy model for backwards compatibility
+model LunarEvent {
+    id              String    @id @default(cuid())
+    userId          String
+    title           String    @db.VarChar(255)
+    description     String?   @db.Text
+    lunarYear       Int
+    lunarMonth      Int       @db.SmallInt // 1-12
+    lunarDay        Int       @db.SmallInt // 1-30
+    isRecurring     Boolean   @default(false)
+    isActive        Boolean   @default(true)
+    reminderDays    Int       @default(3) @db.SmallInt // 1, 3, or 7 days
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+    
+    user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    @@index([userId, lunarYear, lunarMonth])
+    @@index([lunarYear, lunarMonth, lunarDay])
+}
+
+model VietnameseNotificationPreference {
+    id                         String   @id @default(cuid())
+    userId                     String   @unique
+    enablePushNotifications    Boolean  @default(false)
+    enableEmailNotifications   Boolean  @default(true)
+    defaultReminderDays        Int      @default(3) @db.SmallInt
+    remindForMong1             Boolean  @default(true)  // Mồng 1 (1st lunar day)
+    remindForRam               Boolean  @default(true)  // Rằm (15th lunar day)
+    remindForAncestorWorship   Boolean  @default(true)  // Giỗ tổ tiên
+    remindForTraditionalHolidays Boolean @default(true)  // Traditional Vietnamese holidays
+    preferredLanguage          String   @default("vi") @db.VarChar(10)   // Vietnamese language preference
+    timezone                   String   @default("Asia/Ho_Chi_Minh") @db.VarChar(50)
+    culturalReminderLevel      String   @default("moderate") @db.VarChar(20) // minimal, moderate, detailed
+    createdAt                  DateTime @default(now())
+    updatedAt                  DateTime @updatedAt
+    
+    user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Legacy model for backwards compatibility
+model NotificationPreference {
+    id                    String   @id @default(cuid())
+    userId                String   @unique
+    enablePushNotifications Boolean @default(false)
+    enableEmailNotifications Boolean @default(true)
+    defaultReminderDays   Int      @default(3) @db.SmallInt
+    remindFor15thDay      Boolean  @default(true)
+    remindFor1stDay       Boolean  @default(true)
+    createdAt            DateTime  @default(now())
+    updatedAt            DateTime  @updatedAt
+    
+    user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+    id          String   @id @default(cuid())
+    userId      String
+    endpoint    String   @db.VarChar(500)
+    p256dh      String   @db.VarChar(255)
+    auth        String   @db.VarChar(255)
+    userAgent   String?  @db.Text
+    createdAt   DateTime @default(now())
+    
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    @@unique([userId, endpoint])
+}
+
+// Vietnamese Cultural Data Models
+
+model VietnameseHoliday {
+    id                String   @id @default(cuid())
+    name              String   @db.VarChar(255) // Vietnamese holiday name
+    lunarMonth        Int?     @db.SmallInt // Lunar month (null for Gregorian holidays)
+    lunarDay          Int?     @db.SmallInt // Lunar day (null for Gregorian holidays)
+    gregorianMonth    Int?     @db.SmallInt // Gregorian month (null for lunar holidays)
+    gregorianDay      Int?     @db.SmallInt // Gregorian day (null for lunar holidays)
+    description       String?  @db.Text // Cultural significance and description
+    category          String   @db.VarChar(50) // traditional, national, cultural, religious
+    culturalSignificance String? @db.Text // Detailed cultural meaning
+    isActive          Boolean  @default(true)
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+    
+    @@index([lunarMonth, lunarDay])
+    @@index([gregorianMonth, gregorianDay])
+    @@index([category])
+}
+
+model VietnameseZodiacInfo {
+    id                String   @id @default(cuid())
+    year              Int      @unique // Gregorian year
+    vietnameseYear    String   @db.VarChar(50) // Vietnamese zodiac year (e.g., "Giáp Thìn")
+    canChi            String   @db.VarChar(20) // Can Chi combination
+    animalName        String   @db.VarChar(50) // Vietnamese animal name
+    element           String   @db.VarChar(20) // Kim, Mộc, Thủy, Hỏa, Thổ
+    characteristics   String?  @db.Text // Zodiac characteristics
+    luckyNumbers      String?  @db.VarChar(100) // Lucky numbers
+    luckyColors       String?  @db.VarChar(100) // Lucky colors
+    culturalNotes     String?  @db.Text // Cultural notes and beliefs
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+    
+    @@index([year])
+}
+
+model VietnameseCulturalTip {
+    id                String   @id @default(cuid())
+    lunarDay          Int      @db.SmallInt // 1-30, which lunar day this applies to
+    tipCategory       String   @db.VarChar(50) // worship, business, travel, ceremony
+    title             String   @db.VarChar(255) // Tip title
+    content           String   @db.Text // Tip content
+    culturalContext   String?  @db.Text // Cultural background explanation
+    isGoodDay         Boolean  @default(true) // Whether this is considered auspicious
+    priority          Int      @default(1) @db.SmallInt // 1-5, importance level
+    isActive          Boolean  @default(true)
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+    
+    @@index([lunarDay, tipCategory])
+    @@index([isGoodDay, priority])
 }
