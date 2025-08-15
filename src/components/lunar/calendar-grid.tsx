@@ -70,7 +70,7 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     );
   }
 
-  if (!data || !data.days || !data.lunarMonthInfo) return null;
+  if (!data?.days || !data.lunarMonthInfo) return null;
 
   const { zodiacYear } = data;
   const weekDays = vietnameseText.weekdaysShort;
@@ -182,21 +182,21 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
                 )}
               </div>
 
-              {/* Events (if enabled) */}
+              {/* Personal Events (if enabled) */}
               {showEvents && day.events && day.events.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {day.events.slice(0, 2).map((event, eventIndex) => (
                     <div
                       key={`${index}-event-${eventIndex}`}
-                      className="text-xs px-1 py-0.5 bg-primary/10 text-primary rounded truncate"
-                      title={event?.title || 'Sự kiện'}
+                      className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md truncate border border-blue-200"
+                      title={event?.title || 'Sự kiện cá nhân'}
                     >
-                      {event?.title || 'Sự kiện'}
+                      📅 {event?.title || 'Sự kiện'}
                     </div>
                   ))}
                   {day.events.length > 2 && (
-                    <div className="text-xs text-muted-foreground">
-                      +{day.events.length - 2} khác
+                    <div className="text-xs text-blue-600 font-medium">
+                      +{day.events.length - 2} sự kiện khác
                     </div>
                   )}
                 </div>
@@ -221,8 +221,8 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
           </div>
           {showEvents && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-primary/10"></div>
-              <span>Có sự kiện</span>
+              <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
+              <span>Sự kiện cá nhân</span>
             </div>
           )}
         </div>

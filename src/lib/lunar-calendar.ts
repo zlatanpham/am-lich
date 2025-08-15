@@ -117,7 +117,7 @@ export function getVietnameseZodiacAnimal(year: number): string {
  */
 function getVietnameseCanChi(ganZhi: string): string {
   // First try complete Can Chi mappings
-  const canChiMap: { [key: string]: string } = {
+  const canChiMap: Record<string, string> = {
     // Complete 60-year cycle of Can Chi combinations in Vietnamese
     '甲子': 'Giáp Tý', '乙丑': 'Ất Sửu', '丙寅': 'Bính Dần', '丁卯': 'Đinh Mão',
     '戊辰': 'Mậu Thìn', '己巳': 'Kỷ Tỵ', '庚午': 'Canh Ngọ', '辛未': 'Tân Mùi',
@@ -142,12 +142,12 @@ function getVietnameseCanChi(ganZhi: string): string {
   }
   
   // If not found, try individual character mapping
-  const canMap: { [key: string]: string } = {
+  const canMap: Record<string, string> = {
     '甲': 'Giáp', '乙': 'Ất', '丙': 'Bính', '丁': 'Đinh', '戊': 'Mậu', 
     '己': 'Kỷ', '庚': 'Canh', '辛': 'Tân', '壬': 'Nhâm', '癸': 'Quý'
   };
   
-  const chiMap: { [key: string]: string } = {
+  const chiMap: Record<string, string> = {
     '子': 'Tý', '丑': 'Sửu', '寅': 'Dần', '卯': 'Mão', '辰': 'Thìn', '巳': 'Tỵ',
     '午': 'Ngọ', '未': 'Mùi', '申': 'Thân', '酉': 'Dậu', '戌': 'Tuất', '亥': 'Hợi'
   };
@@ -504,7 +504,7 @@ export function getEventsInRange(
  */
 export function getUpcomingVietnameseEvents(
   events: VietnameseLunarEvent[],
-  days: number = 7
+  days = 7
 ): VietnameseLunarEvent[] {
   const now = new Date();
   const today = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
@@ -518,7 +518,7 @@ export function getUpcomingVietnameseEvents(
 // Legacy function for backwards compatibility
 export function getUpcomingEvents(
   events: LunarCalendarEvent[],
-  days: number = 7
+  days = 7
 ): LunarCalendarEvent[] {
   return getUpcomingVietnameseEvents(events, days);
 }
