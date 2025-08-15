@@ -23,26 +23,48 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { format } from "date-fns";
 
 const editEventSchema = z.object({
   title: z.string().min(1, "Tên sự kiện không được để trống"),
   description: z.string().optional(),
-  date: z.string().min(1, "Ngày không được để trống"),
-  time: z.string().optional(),
+  lunarYear: z
+    .number()
+    .min(1900, "Năm phải từ 1900 trở lên")
+    .max(2100, "Năm phải nhỏ hơn 2100"),
+  lunarMonth: z
+    .number()
+    .min(1, "Tháng phải từ 1-12")
+    .max(12, "Tháng phải từ 1-12"),
+  lunarDay: z.number().min(1, "Ngày phải từ 1-30").max(30, "Ngày phải từ 1-30"),
+  isRecurring: z.boolean().optional(),
 });
 
 type EditEventFormData = z.infer<typeof editEventSchema>;
 
+interface LunarEvent {
+  id: string;
+  title: string;
+  description?: string | null;
+  lunarYear: number;
+  lunarMonth: number;
+  lunarDay: number;
+  isRecurring: boolean;
+}
+
 interface EventEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  event: any;
+  event: LunarEvent | null;
 }
 
-export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogProps) {
+export function EventEditDialog({
+  open,
+  onOpenChange,
+  event,
+}: EventEditDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const utils = api.useUtils();
 
@@ -51,28 +73,32 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
     defaultValues: {
       title: "",
       description: "",
-      date: "",
-      time: "",
+      lunarYear: new Date().getFullYear(),
+      lunarMonth: 1,
+      lunarDay: 1,
+      isRecurring: false,
     },
   });
 
   // Update form when event changes
   useEffect(() => {
     if (event) {
-      const eventDate = new Date(event.date);
       form.reset({
-        title: event.title || "",
-        description: event.description || "",
-        date: format(eventDate, "yyyy-MM-dd"),
-        time: format(eventDate, "HH:mm"),
+        title: event.title ?? "",
+        description: event.description ?? "",
+        lunarYear: event.lunarYear ?? new Date().getFullYear(),
+        lunarMonth: event.lunarMonth ?? 1,
+        lunarDay: event.lunarDay ?? 1,
+        isRecurring: event.isRecurring ?? false,
       });
     }
   }, [event, form]);
 
-  const updateEvent = api.event.update.useMutation({
+  const updateEvent = api.lunarEvents.update.useMutation({
     onSuccess: () => {
       toast.success("Đã cập nhật sự kiện thành công!");
-      utils.event.list.invalidate();
+      void utils.lunarEvents.getAll.invalidate();
+      void utils.lunarEvents.getUpcoming.invalidate();
       onOpenChange(false);
       setIsSubmitting(false);
     },
@@ -84,25 +110,17 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
 
   const onSubmit = async (data: EditEventFormData) => {
     if (!event) return;
-    
+
     setIsSubmitting(true);
-    
-    // Combine date and time if time is provided
-    const dateTime = new Date(data.date);
-    if (data.time) {
-      const timeParts = data.time.split(':');
-      const hours = parseInt(timeParts[0] || '0', 10);
-      const minutes = parseInt(timeParts[1] || '0', 10);
-      if (!isNaN(hours) && !isNaN(minutes)) {
-        dateTime.setHours(hours, minutes);
-      }
-    }
 
     updateEvent.mutate({
       id: event.id,
       title: data.title,
-      description: data.description || null,
-      date: dateTime,
+      description: data.description ?? undefined,
+      lunarYear: data.lunarYear,
+      lunarMonth: data.lunarMonth,
+      lunarDay: data.lunarDay,
+      isRecurring: data.isRecurring ?? false,
     });
   };
 
@@ -112,9 +130,9 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa sự kiện</DialogTitle>
+          <DialogTitle>Chỉnh sửa sự kiện âm lịch</DialogTitle>
           <DialogDescription>
-            Cập nhật thông tin sự kiện của bạn
+            Cập nhật thông tin sự kiện âm lịch của bạn
           </DialogDescription>
         </DialogHeader>
 
@@ -141,11 +159,34 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
                 <FormItem>
                   <FormLabel>Mô tả (tuỳ chọn)</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Ghi chú thêm về sự kiện..."
                       className="resize-none"
                       rows={2}
-                      {...field} 
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lunarYear"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Năm âm lịch</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1900"
+                      max="2100"
+                      placeholder={`Ví dụ: ${new Date().getFullYear()}`}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -156,12 +197,21 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="date"
+                name="lunarMonth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ngày</FormLabel>
+                    <FormLabel>Tháng âm lịch</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="number"
+                        min="1"
+                        max="12"
+                        placeholder="1-12"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -170,18 +220,45 @@ export function EventEditDialog({ open, onOpenChange, event }: EventEditDialogPr
 
               <FormField
                 control={form.control}
-                name="time"
+                name="lunarDay"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Giờ (tuỳ chọn)</FormLabel>
+                    <FormLabel>Ngày âm lịch</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} />
+                      <Input
+                        type="number"
+                        min="1"
+                        max="30"
+                        placeholder="1-30"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="isRecurring"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Lặp lại hàng năm</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <DialogFooter>
               <Button
