@@ -10,7 +10,6 @@ import { userRouter } from "./routers/user";
 import { lunarCalendarRouter } from "./routers/lunar-calendar";
 import { lunarEventsRouter } from "./routers/lunar-events";
 import { notificationsRouter } from "./routers/notifications";
-import { eventRouter } from "./routers/event";
 
 export const appRouter = createTRPCRouter({
   organization: organizationRouter,
@@ -18,7 +17,6 @@ export const appRouter = createTRPCRouter({
   lunarCalendar: lunarCalendarRouter,
   lunarEvents: lunarEventsRouter,
   notifications: notificationsRouter,
-  event: eventRouter,
 });
 
 // export type definition of API

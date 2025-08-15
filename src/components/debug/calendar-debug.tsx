@@ -14,7 +14,7 @@ export function CalendarDebug() {
     month,
   });
 
-  const { data: events } = api.event.list.useQuery();
+  const { data: lunarEvents } = api.lunarEvents.getAll.useQuery({ includeInactive: false });
 
   if (isLoading) return <div>Loading debug info...</div>;
 
@@ -27,8 +27,8 @@ export function CalendarDebug() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h4 className="font-semibold">Total Personal Events:</h4>
-          <p>{events?.length || 0} events found</p>
+          <h4 className="font-semibold">Total Lunar Events:</h4>
+          <p>{lunarEvents?.length || 0} events found</p>
         </div>
 
         <div>
@@ -53,13 +53,14 @@ export function CalendarDebug() {
           </div>
         )}
 
-        {events && events.length > 0 && (
+        {lunarEvents && lunarEvents.length > 0 && (
           <div>
-            <h4 className="font-semibold">All Personal Events:</h4>
-            {events.map((event) => (
+            <h4 className="font-semibold">All Lunar Events:</h4>
+            {lunarEvents.map((event: any) => (
               <div key={event.id} className="border p-2 rounded mb-2">
                 <p><strong>Title:</strong> {event.title}</p>
-                <p><strong>Date:</strong> {new Date(event.date).toLocaleString()}</p>
+                <p><strong>Lunar Date:</strong> {event.lunarDay}/{event.lunarMonth}/{event.lunarYear}</p>
+                <p><strong>Recurring:</strong> {event.isRecurring ? 'Yes' : 'No'}</p>
               </div>
             ))}
           </div>

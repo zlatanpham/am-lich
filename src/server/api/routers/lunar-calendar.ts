@@ -355,26 +355,6 @@ export const lunarCalendarRouter = createTRPCRouter({
           999,
         );
 
-        // Fetch regular calendar events
-        const regularEvents = await ctx.db.event.findMany({
-          where: {
-            userId: ctx.session.user.id,
-            isActive: true,
-            date: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
-          },
-          select: {
-            id: true,
-            title: true,
-            date: true,
-          },
-          orderBy: {
-            date: "asc",
-          },
-        });
-
         // Fetch lunar calendar events
         const lunarEvents = await ctx.db.lunarEvent.findMany({
           where: {
@@ -453,10 +433,10 @@ export const lunarCalendarRouter = createTRPCRouter({
           }
         }
 
-        // Combine regular and lunar events
-        userEvents = [...regularEvents, ...lunarEventsForMonth];
+        // Use only lunar events
+        userEvents = lunarEventsForMonth;
 
-        // Sort all events by date
+        // Sort events by date
         userEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
       }
 

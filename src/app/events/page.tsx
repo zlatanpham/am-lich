@@ -10,9 +10,8 @@ import { CalendarGrid } from "@/components/lunar/calendar-grid";
 import { CreateEventDialog } from "@/components/lunar/create-event-dialog";
 import { EditEventDialog } from "@/components/lunar/edit-event-dialog";
 import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
-import { EventsList } from "@/components/calendar/events-list";
 import { api } from "@/trpc/react";
-import { Plus, Search, Calendar, List, Moon, Sun } from "lucide-react";
+import { Plus, Search, Calendar, Moon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function EventsPage() {
@@ -101,19 +100,15 @@ export default function EventsPage() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Quản lý sự kiện</h1>
+          <h1 className="text-3xl font-bold">Quản lý sự kiện âm lịch</h1>
           <p className="text-muted-foreground">
-            Quản lý sự kiện cá nhân và sự kiện âm lịch
+            Quản lý các sự kiện âm lịch và nhắc nhở truyền thống
           </p>
         </div>
       </div>
 
-      <Tabs defaultValue="personal" className="space-y-6">
+      <Tabs defaultValue="lunar" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="personal" className="flex items-center gap-2">
-            <Sun className="h-4 w-4" />
-            Sự kiện cá nhân
-          </TabsTrigger>
           <TabsTrigger value="lunar" className="flex items-center gap-2">
             <Moon className="h-4 w-4" />
             Sự kiện âm lịch
@@ -124,18 +119,8 @@ export default function EventsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="personal" className="space-y-6">
-          <EventsList />
-        </TabsContent>
-
         <TabsContent value="lunar" className="space-y-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">Sự kiện âm lịch</h2>
-              <p className="text-muted-foreground">
-                Quản lý các sự kiện âm lịch và nhắc nhở truyền thống
-              </p>
-            </div>
             <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Tạo sự kiện âm lịch

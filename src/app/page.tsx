@@ -1,11 +1,8 @@
 import { CurrentDateDisplay } from "@/components/lunar/current-date-display";
 import { UpcomingImportantDates } from "@/components/lunar/upcoming-important-dates";
 import { CalendarGrid } from "@/components/lunar/calendar-grid";
-import { auth } from "@/server/auth";
-import { UserCalendarEvents } from "@/components/calendar/user-calendar-events";
 
-export default async function HomePage() {
-  const session = await auth();
+export default function HomePage() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -21,8 +18,6 @@ export default async function HomePage() {
         <div className="space-y-6 lg:col-span-1">
           <CurrentDateDisplay />
           <UpcomingImportantDates />
-          {/* User events section for authenticated users */}
-          {session && <UserCalendarEvents />}
         </div>
 
         {/* Right column - Calendar grid */}

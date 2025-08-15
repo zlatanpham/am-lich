@@ -92,7 +92,7 @@ export const vietnameseText = {
   isRecurring: 'Lặp lại hàng năm',
   
   // Event Types
-  personalEvent: 'Sự kiện cá nhân',
+  lunarEvent: 'Sự kiện âm lịch',
   culturalEvent: 'Sự kiện văn hóa',
   ancestorWorship: 'Giỗ tổ tiên',
   traditionalHoliday: 'Lễ hội truyền thống',

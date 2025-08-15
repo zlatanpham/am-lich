@@ -222,7 +222,7 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
           {showEvents && (
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
-              <span>Sự kiện cá nhân</span>
+              <span>Sự kiện âm lịch</span>
             </div>
           )}
         </div>
