@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,14 +33,23 @@ export function EventsList() {
 
   // Get events for a reasonable date range to include past and future events
   const currentDate = new Date();
-  const pastDate = new Date();
-  pastDate.setMonth(pastDate.getMonth() - 6); // 6 months ago
-  const futureDate = new Date();
-  futureDate.setMonth(futureDate.getMonth() + 12); // 12 months ahead
+
+  // Use useMemo to prevent date objects from changing on every render
+  const dateRange = useMemo(() => {
+    const pastDate = new Date();
+    pastDate.setMonth(pastDate.getMonth() - 6); // 6 months ago
+    const futureDate = new Date();
+    futureDate.setMonth(futureDate.getMonth() + 12); // 12 months ahead
+
+    return {
+      startDate: pastDate,
+      endDate: futureDate,
+    };
+  }, []);
 
   const { data: events, isLoading } = api.lunarEvents.getByDateRange.useQuery({
-    startDate: pastDate,
-    endDate: futureDate,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
     includeRecurring: true,
   });
 
