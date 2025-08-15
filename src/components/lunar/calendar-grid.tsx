@@ -25,6 +25,22 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     month,
   });
 
+  // Prefetch adjacent months for smooth navigation
+  const prevMonth = month === 0 ? 11 : month - 1;
+  const prevYear = month === 0 ? year - 1 : year;
+  const nextMonth = month === 11 ? 0 : month + 1;
+  const nextYear = month === 11 ? year + 1 : year;
+
+  api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
+    year: prevYear,
+    month: prevMonth,
+  });
+
+  api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
+    year: nextYear,
+    month: nextMonth,
+  });
+
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(new Date(year, month + (direction === 'next' ? 1 : -1), 1));
   };
@@ -33,7 +49,8 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     setCurrentDate(new Date());
   };
 
-  if (isLoading) {
+  if (isLoading && !data) {
+    // Only show full skeleton on initial load, not on navigation
     return (
       <Card className={className}>
         <CardHeader>
@@ -79,8 +96,9 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">
+          <CardTitle className="text-xl flex items-center gap-2">
             {vietnameseText.months[month]} năm {year}
+            {isLoading && <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
