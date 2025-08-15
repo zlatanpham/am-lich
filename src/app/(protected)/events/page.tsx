@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EventCard } from "@/components/lunar/event-card";
 import { CalendarGrid } from "@/components/lunar/calendar-grid";
+import { CreateEventDialog } from "@/components/lunar/create-event-dialog";
+import { EditEventDialog } from "@/components/lunar/edit-event-dialog";
+import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
 import { api } from "@/trpc/react";
 import { Plus, Search, Calendar, List } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,11 +17,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<{
+    id: string;
+    title: string;
+    description?: string | null | undefined;
+    lunarYear: number;
+    lunarMonth: number;
+    lunarDay: number;
+    isRecurring: boolean;
+    reminderDays: number;
+    gregorianDate?: Date;
+    lunarDateFormatted?: string;
+  } | null>(null);
 
   const { 
     data: events, 
-    isLoading: eventsLoading, 
-    refetch: refetchEvents 
+    isLoading: eventsLoading
   } = api.lunarEvents.getAll.useQuery({ includeInactive: false });
 
   const { 
@@ -26,20 +42,59 @@ export default function EventsPage() {
     isLoading: upcomingLoading 
   } = api.lunarEvents.getUpcoming.useQuery({ days: 60 });
 
-  const filteredEvents = events?.filter(event =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  ) || [];
+  const filteredEvents = events?.filter((event: any) => {
+    const titleMatch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const descriptionMatch = event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+    return titleMatch || descriptionMatch;
+  }) ?? [];
 
-  const handleEventAction = async (action: 'edit' | 'delete', eventId?: string) => {
-    if (action === 'delete' && eventId) {
-      // Handle delete - would show confirmation dialog in real implementation
-      console.log('Delete event:', eventId);
+  const handleEventAction = useCallback(async (action: 'edit' | 'delete', eventOrId: string | any) => {
+    if (action === 'delete') {
+      // Find the event by ID for delete action
+      const event = typeof eventOrId === 'string' 
+        ? events?.find((e: any) => e.id === eventOrId)
+        : eventOrId;
+      if (event) {
+        setSelectedEvent(event);
+        setShowDeleteDialog(true);
+      }
     } else if (action === 'edit') {
-      // Handle edit - would open edit dialog in real implementation
-      console.log('Edit event');
+      // Use the event object directly for edit action
+      setSelectedEvent(eventOrId);
+      setShowEditDialog(true);
     }
-  };
+  }, [events]);
+
+  const handleCloseCreateDialog = useCallback((open: boolean) => {
+    setShowCreateDialog(open);
+    if (!open) {
+      // Clean up any pending state
+    }
+  }, []);
+
+  const handleCloseEditDialog = useCallback((open: boolean) => {
+    setShowEditDialog(open);
+    if (!open) {
+      setSelectedEvent(null);
+    }
+  }, []);
+
+  const handleCloseDeleteDialog = useCallback((open: boolean) => {
+    setShowDeleteDialog(open);
+    if (!open) {
+      setSelectedEvent(null);
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setSelectedEvent(null);
+      setShowCreateDialog(false);
+      setShowEditDialog(false);
+      setShowDeleteDialog(false);
+    };
+  }, []);
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -102,12 +157,12 @@ Sự kiện sắp tới
                     ))}
                   </div>
                 ) : (
-                  upcomingEvents.slice(0, 5).map((event) => (
+                  upcomingEvents.slice(0, 5).map((event, index) => (
                     <EventCard
-                      key={`${event.id}-${event.gregorianDate?.getTime()}`}
+                      key={`upcoming-${event.id}-${index}`}
                       event={event}
-                      onEdit={(event) => handleEventAction('edit')}
-                      onDelete={(eventId) => handleEventAction('delete', eventId)}
+                      onEdit={(event: any) => handleEventAction('edit', event)}
+                      onDelete={(eventId: string) => handleEventAction('delete', eventId)}
                       compact={true}
                     />
                   ))
@@ -127,8 +182,8 @@ Sự kiện sắp tới
                 <EventCard
                   key={event.id}
                   event={event}
-                  onEdit={(event) => handleEventAction('edit')}
-                  onDelete={(eventId) => handleEventAction('delete', eventId)}
+                  onEdit={(event: any) => handleEventAction('edit', event)}
+                  onDelete={(eventId: string) => handleEventAction('delete', eventId)}
                 />
               ))
             ) : (
@@ -164,7 +219,7 @@ Tạo sự kiện đầu tiên
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Tổng số sự kiện</p>
-                <p className="text-2xl font-bold">{events?.length || 0}</p>
+                <p className="text-2xl font-bold">{events?.length ?? 0}</p>
               </div>
             </div>
           </CardContent>
@@ -177,7 +232,7 @@ Tạo sự kiện đầu tiên
               <div>
                 <p className="text-sm text-muted-foreground">Sự kiện lặp lại hàng năm</p>
                 <p className="text-2xl font-bold">
-                  {events?.filter(e => e.isRecurring).length || 0}
+                  {events?.filter((e: any) => e.isRecurring).length ?? 0}
                 </p>
               </div>
             </div>
@@ -191,13 +246,30 @@ Tạo sự kiện đầu tiên
               <div>
                 <p className="text-sm text-muted-foreground">Sự kiện gần đây</p>
                 <p className="text-2xl font-bold">
-                  {upcomingEvents?.length || 0}
+                  {upcomingEvents?.length ?? 0}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <CreateEventDialog 
+        open={showCreateDialog} 
+        onOpenChange={handleCloseCreateDialog}
+      />
+
+      <EditEventDialog
+        open={showEditDialog}
+        onOpenChange={handleCloseEditDialog}
+        event={selectedEvent}
+      />
+
+      <DeleteEventDialog
+        open={showDeleteDialog}
+        onOpenChange={handleCloseDeleteDialog}
+        event={selectedEvent}
+      />
     </div>
   );
 }

@@ -116,15 +116,55 @@ export function getVietnameseZodiacAnimal(year: number): string {
  * Helper function to get Vietnamese Can Chi combination
  */
 function getVietnameseCanChi(ganZhi: string): string {
-  // Map Chinese Can Chi to Vietnamese equivalents
+  // First try complete Can Chi mappings
   const canChiMap: { [key: string]: string } = {
+    // Complete 60-year cycle of Can Chi combinations in Vietnamese
     '甲子': 'Giáp Tý', '乙丑': 'Ất Sửu', '丙寅': 'Bính Dần', '丁卯': 'Đinh Mão',
     '戊辰': 'Mậu Thìn', '己巳': 'Kỷ Tỵ', '庚午': 'Canh Ngọ', '辛未': 'Tân Mùi',
     '壬申': 'Nhâm Thân', '癸酉': 'Quý Dậu', '甲戌': 'Giáp Tuất', '乙亥': 'Ất Hợi',
-    // Add more mappings as needed
+    '丙子': 'Bính Tý', '丁丑': 'Đinh Sửu', '戊寅': 'Mậu Dần', '己卯': 'Kỷ Mão',
+    '庚辰': 'Canh Thìn', '辛巳': 'Tân Tỵ', '壬午': 'Nhâm Ngọ', '癸未': 'Quý Mùi',
+    '甲申': 'Giáp Thân', '乙酉': 'Ất Dậu', '丙戌': 'Bính Tuất', '丁亥': 'Đinh Hợi',
+    '戊子': 'Mậu Tý', '己丑': 'Kỷ Sửu', '庚寅': 'Canh Dần', '辛卯': 'Tân Mão',
+    '壬辰': 'Nhâm Thìn', '癸巳': 'Quý Tỵ', '甲午': 'Giáp Ngọ', '乙未': 'Ất Mùi',
+    '丙申': 'Bính Thân', '丁酉': 'Đinh Dậu', '戊戌': 'Mậu Tuất', '己亥': 'Kỷ Hợi',
+    '庚子': 'Canh Tý', '辛丑': 'Tân Sửu', '壬寅': 'Nhâm Dần', '癸卯': 'Quý Mão',
+    '甲辰': 'Giáp Thìn', '乙巳': 'Ất Tỵ', '丙午': 'Bính Ngọ', '丁未': 'Đinh Mùi',
+    '戊申': 'Mậu Thân', '己酉': 'Kỷ Dậu', '庚戌': 'Canh Tuất', '辛亥': 'Tân Hợi',
+    '壬子': 'Nhâm Tý', '癸丑': 'Quý Sửu', '甲寅': 'Giáp Dần', '乙卯': 'Ất Mão',
+    '丙辰': 'Bính Thìn', '丁巳': 'Đinh Tỵ', '戊午': 'Mậu Ngọ', '己未': 'Kỷ Mùi',
+    '庚申': 'Canh Thân', '辛酉': 'Tân Dậu', '壬戌': 'Nhâm Tuất', '癸亥': 'Quý Hợi'
   };
   
-  return canChiMap[ganZhi] || ganZhi; // Return original if not found
+  // Return mapped combination if found
+  if (canChiMap[ganZhi]) {
+    return canChiMap[ganZhi];
+  }
+  
+  // If not found, try individual character mapping
+  const canMap: { [key: string]: string } = {
+    '甲': 'Giáp', '乙': 'Ất', '丙': 'Bính', '丁': 'Đinh', '戊': 'Mậu', 
+    '己': 'Kỷ', '庚': 'Canh', '辛': 'Tân', '壬': 'Nhâm', '癸': 'Quý'
+  };
+  
+  const chiMap: { [key: string]: string } = {
+    '子': 'Tý', '丑': 'Sửu', '寅': 'Dần', '卯': 'Mão', '辰': 'Thìn', '巳': 'Tỵ',
+    '午': 'Ngọ', '未': 'Mùi', '申': 'Thân', '酉': 'Dậu', '戌': 'Tuất', '亥': 'Hợi'
+  };
+  
+  // Try to translate character by character
+  let result = '';
+  for (const char of ganZhi) {
+    if (canMap[char]) {
+      result += canMap[char] + ' ';
+    } else if (chiMap[char]) {
+      result += chiMap[char] + ' ';
+    } else {
+      result += char;
+    }
+  }
+  
+  return result.trim() || ganZhi;
 }
 
 /**
