@@ -10,8 +10,9 @@ import { CalendarGrid } from "@/components/lunar/calendar-grid";
 import { CreateEventDialog } from "@/components/lunar/create-event-dialog";
 import { EditEventDialog } from "@/components/lunar/edit-event-dialog";
 import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
+import { EventsList } from "@/components/calendar/events-list";
 import { api } from "@/trpc/react";
-import { Plus, Search, Calendar, List } from "lucide-react";
+import { Plus, Search, Calendar, List, Moon, Sun } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function EventsPage() {
@@ -100,43 +101,60 @@ export default function EventsPage() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Sự kiện âm lịch của tôi</h1>
+          <h1 className="text-3xl font-bold">Quản lý sự kiện</h1>
           <p className="text-muted-foreground">
-            Quản lý các sự kiện âm lịch và nhắc nhở của bạn
+            Quản lý sự kiện cá nhân và sự kiện âm lịch
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-Tạo sự kiện mới
-        </Button>
       </div>
 
-      <Tabs defaultValue="list" className="space-y-6">
+      <Tabs defaultValue="personal" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="list" className="flex items-center gap-2">
-            <List className="h-4 w-4" />
-Hiển thị danh sách
+          <TabsTrigger value="personal" className="flex items-center gap-2">
+            <Sun className="h-4 w-4" />
+            Sự kiện cá nhân
+          </TabsTrigger>
+          <TabsTrigger value="lunar" className="flex items-center gap-2">
+            <Moon className="h-4 w-4" />
+            Sự kiện âm lịch
           </TabsTrigger>
           <TabsTrigger value="calendar" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-Hiển thị lịch
+            Xem lịch
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="list" className="space-y-6">
+        <TabsContent value="personal" className="space-y-6">
+          <EventsList />
+        </TabsContent>
+
+        <TabsContent value="lunar" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Sự kiện âm lịch</h2>
+              <p className="text-muted-foreground">
+                Quản lý các sự kiện âm lịch và nhắc nhở truyền thống
+              </p>
+            </div>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo sự kiện âm lịch
+            </Button>
+          </div>
+
           {/* Search and filters */}
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Tìm kiếm sự kiện..."
+                placeholder="Tìm kiếm sự kiện âm lịch..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Badge variant="outline">
-{filteredEvents.length} sự kiện
+              {filteredEvents.length} sự kiện
             </Badge>
           </div>
 
@@ -197,12 +215,55 @@ Sự kiện sắp tới
                   {!searchTerm && (
                     <Button onClick={() => setShowCreateDialog(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-Tạo sự kiện đầu tiên
+                      Tạo sự kiện âm lịch đầu tiên
                     </Button>
                   )}
                 </CardContent>
               </Card>
             )}
+          </div>
+
+          {/* Statistics cards for lunar events */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tổng số sự kiện âm lịch</p>
+                    <p className="text-2xl font-bold">{events?.length ?? 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Sự kiện lặp lại hàng năm</p>
+                    <p className="text-2xl font-bold">
+                      {events?.filter((e: any) => e.isRecurring).length ?? 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Badge className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Sự kiện sắp tới</p>
+                    <p className="text-2xl font-bold">
+                      {upcomingEvents?.length ?? 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
@@ -210,49 +271,6 @@ Tạo sự kiện đầu tiên
           <CalendarGrid showEvents={true} />
         </TabsContent>
       </Tabs>
-
-      {/* Statistics cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Tổng số sự kiện</p>
-                <p className="text-2xl font-bold">{events?.length ?? 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Sự kiện lặp lại hàng năm</p>
-                <p className="text-2xl font-bold">
-                  {events?.filter((e: any) => e.isRecurring).length ?? 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Badge className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Sự kiện gần đây</p>
-                <p className="text-2xl font-bold">
-                  {upcomingEvents?.length ?? 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <CreateEventDialog 
         open={showCreateDialog} 

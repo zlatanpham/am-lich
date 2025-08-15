@@ -5,7 +5,7 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { api } from "../../../trpc/react";
+import { api } from "@/trpc/react";
 
 interface Organization {
   id: string;
