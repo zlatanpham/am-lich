@@ -3,7 +3,6 @@ import { UpcomingImportantDates } from "@/components/lunar/upcoming-important-da
 import { CalendarGrid } from "@/components/lunar/calendar-grid";
 import { auth } from "@/server/auth";
 import { UserCalendarEvents } from "@/components/calendar/user-calendar-events";
-import { CalendarDebug } from "@/components/debug/calendar-debug";
 
 export default async function HomePage() {
   const session = await auth();
@@ -60,11 +59,6 @@ export default async function HomePage() {
           </p>
         </div>
       </div>
-
-      {/* Debug section - only show for authenticated users */}
-      {session && (
-        <CalendarDebug />
-      )}
     </div>
   );
 }
