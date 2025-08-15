@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import {
   gregorianToLunar,
   lunarToGregorian,
@@ -311,10 +311,52 @@ export const lunarCalendarRouter = createTRPCRouter({
         month: z.number().min(0).max(11), // 0-based month for JavaScript Date
       })
     )
-    .query(({ input }) => {
+    .query(async ({ input, ctx }) => {
       const calendarMonth = generateVietnameseCalendarMonth(input.year, input.month);
+      
+      // If user is authenticated, fetch their events for this month
+      let userEvents: Array<{ id: string; title: string; date: Date }> = [];
+      if (ctx.session?.user?.id) {
+        // Get start and end of the month to filter events
+        const startOfMonth = new Date(input.year, input.month, 1);
+        const endOfMonth = new Date(input.year, input.month + 1, 0, 23, 59, 59, 999);
+        
+        userEvents = await ctx.db.event.findMany({
+          where: {
+            userId: ctx.session.user.id,
+            isActive: true,
+            date: {
+              gte: startOfMonth,
+              lte: endOfMonth,
+            },
+          },
+          select: {
+            id: true,
+            title: true,
+            date: true,
+          },
+          orderBy: {
+            date: "asc",
+          },
+        });
+      }
+      
+      // Add user events to the appropriate days
+      const enhancedDays = calendarMonth.days.map(day => {
+        const dayEvents = userEvents.filter(event => {
+          const eventDate = new Date(event.date);
+          return eventDate.toDateString() === day.gregorianDate.toDateString();
+        });
+        
+        return {
+          ...day,
+          events: dayEvents.length > 0 ? dayEvents : undefined,
+        };
+      });
+      
       return {
         ...calendarMonth,
+        days: enhancedDays,
         vietnameseMonthName: vietnameseText.months[input.month],
         zodiacYear: getVietnameseCanChiYear(input.year),
       };

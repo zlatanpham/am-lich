@@ -27,7 +27,7 @@ export default async function HomePage() {
 
         {/* Right column - Calendar grid */}
         <div className="lg:col-span-2">
-          <CalendarGrid />
+          <CalendarGrid showEvents={true} />
         </div>
       </div>
 
