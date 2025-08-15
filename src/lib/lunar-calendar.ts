@@ -82,7 +82,7 @@ function getVietnameseMonthName(month: number): string {
     'Tháng Giêng', 'Tháng Hai', 'Tháng Ba', 'Tháng Tư', 'Tháng Năm', 'Tháng Sáu',
     'Tháng Bảy', 'Tháng Tám', 'Tháng Chín', 'Tháng Mười', 'Tháng Mười Một', 'Tháng Chạp'
   ];
-  return monthNames[month] || 'Tháng không xác định';
+  return monthNames[month] ?? 'Tháng không xác định';
 }
 
 /**
@@ -95,7 +95,7 @@ function getVietnameseDayName(day: number): string {
     'Ngày 11', 'Ngày 12', 'Ngày 13', 'Ngày 14', 'Rằm', 'Ngày 16', 'Ngày 17', 'Ngày 18', 'Ngày 19', 'Ngày 20',
     'Ngày 21', 'Ngày 22', 'Ngày 23', 'Ngày 24', 'Ngày 25', 'Ngày 26', 'Ngày 27', 'Ngày 28', 'Ngày 29', 'Ngày 30'
   ];
-  return dayNames[day] || 'Ngày không xác định';
+  return dayNames[day] ?? 'Ngày không xác định';
 }
 
 /**
@@ -300,15 +300,18 @@ export function getNextImportantVietnameseLunarDate(): {
     const nextMonth = currentLunar.month === 12 ? 1 : currentLunar.month + 1;
     const nextYear = currentLunar.month === 12 ? currentLunar.year + 1 : currentLunar.year;
     nextMong1 = lunarToGregorian(nextYear, nextMonth, 1);
-  } else {
-    // Next Mồng 1 is in next month, next Rằm is in month after that
+  } else if (currentLunar.day === 15) {
+    // Today is Rằm - next Mồng 1 is next month, next Rằm is also next month
     const nextMonth = currentLunar.month === 12 ? 1 : currentLunar.month + 1;
     const nextYear = currentLunar.month === 12 ? currentLunar.year + 1 : currentLunar.year;
     nextMong1 = lunarToGregorian(nextYear, nextMonth, 1);
-    
-    const ramMonth = nextMonth === 12 ? 1 : nextMonth + 1;
-    const ramYear = nextMonth === 12 ? nextYear + 1 : nextYear;
-    nextRam = lunarToGregorian(ramYear, ramMonth, 15);
+    nextRam = lunarToGregorian(nextYear, nextMonth, 15);
+  } else {
+    // Past Rằm - next Mồng 1 is in next month, next Rằm is also in next month
+    const nextMonth = currentLunar.month === 12 ? 1 : currentLunar.month + 1;
+    const nextYear = currentLunar.month === 12 ? currentLunar.year + 1 : currentLunar.year;
+    nextMong1 = lunarToGregorian(nextYear, nextMonth, 1);
+    nextRam = lunarToGregorian(nextYear, nextMonth, 15);
   }
   
   return { 
