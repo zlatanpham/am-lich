@@ -1,36 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/react";
-import { Bell, Mail, Smartphone, Check, X, Settings, AlertCircle } from "lucide-react";
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  Check,
+  X,
+  Settings,
+  AlertCircle,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { 
-    data: preferences, 
+  const {
+    data: user,
+    isLoading: userLoading,
+    isError: userError,
+  } = api.user.getUser.useQuery();
+
+  const {
+    data: preferences,
     isLoading: preferencesLoading,
-    refetch: refetchPreferences 
+    refetch: refetchPreferences,
   } = api.notifications.getPreferences.useQuery();
 
-  const { 
-    data: settingsSummary,
-    refetch: refetchSummary 
-  } = api.notifications.getSettingsSummary.useQuery();
+  const { data: settingsSummary, refetch: refetchSummary } =
+    api.notifications.getSettingsSummary.useQuery();
 
   const updatePreferences = api.notifications.updatePreferences.useMutation({
     onSuccess: () => {
       toast.success("Cài đặt thông báo đã được lưu");
-      refetchPreferences();
-      refetchSummary();
+      void refetchPreferences();
+      void refetchSummary();
     },
     onError: (error) => {
       toast.error("Lỗi khi lưu cài đặt: " + error.message);
@@ -42,7 +62,7 @@ export default function NotificationsPage() {
       if (result.push || result.email) {
         toast.success("Thông báo thử nghiệm đã được gửi");
       } else {
-        toast.error(result.error || "Gửi thông báo thử nghiệm thất bại");
+        toast.error(result.error ?? "Gửi thông báo thử nghiệm thất bại");
       }
     },
     onError: (error) => {
@@ -50,11 +70,14 @@ export default function NotificationsPage() {
     },
   });
 
-  const handlePreferenceChange = async (field: string, value: boolean | number) => {
+  const handlePreferenceChange = async (
+    field: string,
+    value: boolean | number,
+  ) => {
     setIsLoading(true);
     try {
       await updatePreferences.mutateAsync({ [field]: value });
-    } catch (error) {
+    } catch {
       // Error is handled by mutation onError
     } finally {
       setIsLoading(false);
@@ -64,26 +87,32 @@ export default function NotificationsPage() {
   const handleTestNotification = async (type: "push" | "email" | "both") => {
     await testNotification.mutateAsync({
       type,
-      message: "Đây là thông báo thử nghiệm để xác minh cài đặt thông báo của bạn có hoạt động bình thường không.",
+      message:
+        "Đây là thông báo thử nghiệm để xác minh cài đặt thông báo của bạn có hoạt động bình thường không.",
     });
   };
 
-  if (preferencesLoading) {
+  if (!userLoading && (userError || !user)) {
+    router.push("/login");
+    return null;
+  }
+
+  if (preferencesLoading || userLoading) {
     return (
-      <div className="container mx-auto py-6 space-y-6">
+      <div className="container mx-auto space-y-6 py-6">
         <div className="space-y-2">
-          <div className="h-8 bg-muted animate-pulse rounded w-1/3" />
-          <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
+          <div className="bg-muted h-8 w-1/3 animate-pulse rounded" />
+          <div className="bg-muted h-4 w-1/2 animate-pulse rounded" />
         </div>
         {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+          <div key={i} className="bg-muted h-48 animate-pulse rounded-lg" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       <div>
         <h1 className="text-3xl font-bold">Cài đặt thông báo</h1>
         <p className="text-muted-foreground">
@@ -100,12 +129,14 @@ export default function NotificationsPage() {
                 {settingsSummary.notificationChannels.email ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
-                  <X className="h-5 w-5 text-muted-foreground" />
+                  <X className="text-muted-foreground h-5 w-5" />
                 )}
                 <div>
                   <p className="font-medium">Thông báo email</p>
-                  <p className="text-sm text-muted-foreground">
-                    {settingsSummary.notificationChannels.email ? "Đã bật" : "Đã tắt"}
+                  <p className="text-muted-foreground text-sm">
+                    {settingsSummary.notificationChannels.email
+                      ? "Đã bật"
+                      : "Đã tắt"}
                   </p>
                 </div>
               </div>
@@ -118,13 +149,13 @@ export default function NotificationsPage() {
                 {settingsSummary.notificationChannels.push ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
-                  <X className="h-5 w-5 text-muted-foreground" />
+                  <X className="text-muted-foreground h-5 w-5" />
                 )}
                 <div>
                   <p className="font-medium">Thông báo đẩy</p>
-                  <p className="text-sm text-muted-foreground">
-                    {settingsSummary.hasActivePushSubscriptions 
-                      ? `${settingsSummary.pushSubscriptionsCount} thiết bị` 
+                  <p className="text-muted-foreground text-sm">
+                    {settingsSummary.hasActivePushSubscriptions
+                      ? `${settingsSummary.pushSubscriptionsCount} thiết bị`
                       : "Chưa đăng ký"}
                   </p>
                 </div>
@@ -138,7 +169,7 @@ export default function NotificationsPage() {
                 <AlertCircle className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="font-medium">Nhắc nhở mặc định</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Trước {preferences?.defaultReminderDays} ngày
                   </p>
                 </div>
@@ -160,29 +191,29 @@ export default function NotificationsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="email-notifications">Bật thông báo email</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Nhận nhắc nhở sự kiện âm lịch qua email
               </p>
             </div>
             <Switch
               id="email-notifications"
-              checked={preferences?.enableEmailNotifications || false}
-              onCheckedChange={(checked) => 
-                handlePreferenceChange('enableEmailNotifications', checked)
+              checked={preferences?.enableEmailNotifications ?? false}
+              onCheckedChange={(checked) =>
+                handlePreferenceChange("enableEmailNotifications", checked)
               }
               disabled={isLoading}
             />
           </div>
-          
+
           {preferences?.enableEmailNotifications && (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleTestNotification('email')}
+                onClick={() => handleTestNotification("email")}
                 disabled={testNotification.isPending}
               >
-Gửi email thử nghiệm
+                Gửi email thử nghiệm
               </Button>
               <Badge variant="secondary">Đang phát triển</Badge>
             </div>
@@ -195,22 +226,22 @@ Gửi email thử nghiệm
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5" />
-Thông báo đẩy
+            Thông báo đẩy
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="push-notifications">Bật thông báo đẩy</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Nhận nhắc nhở thời gian thực trên thiết bị
               </p>
             </div>
             <Switch
               id="push-notifications"
-              checked={preferences?.enablePushNotifications || false}
-              onCheckedChange={(checked) => 
-                handlePreferenceChange('enablePushNotifications', checked)
+              checked={preferences?.enablePushNotifications ?? false}
+              onCheckedChange={(checked) =>
+                handlePreferenceChange("enablePushNotifications", checked)
               }
               disabled={isLoading}
             />
@@ -218,12 +249,14 @@ Thông báo đẩy
 
           {preferences?.enablePushNotifications && (
             <>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="bg-muted/50 rounded-lg p-4">
+                <div className="mb-2 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-500" />
-                  <span className="font-medium text-sm">Trạng thái đăng ký</span>
+                  <span className="text-sm font-medium">
+                    Trạng thái đăng ký
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {settingsSummary?.hasActivePushSubscriptions
                     ? `Bạn đã đăng ký thông báo đẩy trên ${settingsSummary.pushSubscriptionsCount} thiết bị`
                     : "Bạn chưa đăng ký thông báo đẩy. Nhấp vào nút bên dưới để bắt đầu đăng ký."}
@@ -234,10 +267,13 @@ Thông báo đẩy
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleTestNotification('push')}
-                  disabled={testNotification.isPending || !settingsSummary?.hasActivePushSubscriptions}
+                  onClick={() => handleTestNotification("push")}
+                  disabled={
+                    testNotification.isPending ||
+                    !settingsSummary?.hasActivePushSubscriptions
+                  }
                 >
-Gửi thông báo đẩy thử nghiệm
+                  Gửi thông báo đẩy thử nghiệm
                 </Button>
                 <Badge variant="secondary">Đang phát triển</Badge>
               </div>
@@ -251,7 +287,7 @@ Gửi thông báo đẩy thử nghiệm
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-Cài đặt nhắc nhở
+            Cài đặt nhắc nhở
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -259,14 +295,14 @@ Cài đặt nhắc nhở
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label>Thời gian nhắc nhở mặc định</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Thời gian nhắc nhở mặc định cho sự kiện mới tạo
                 </p>
               </div>
               <Select
-                value={preferences?.defaultReminderDays?.toString() || "3"}
-                onValueChange={(value) => 
-                  handlePreferenceChange('defaultReminderDays', parseInt(value))
+                value={preferences?.defaultReminderDays?.toString() ?? "3"}
+                onValueChange={(value) =>
+                  handlePreferenceChange("defaultReminderDays", parseInt(value))
                 }
                 disabled={isLoading}
               >
@@ -286,20 +322,22 @@ Cài đặt nhắc nhở
             <Separator />
 
             <div className="space-y-4">
-              <Label className="text-base">Nhắc nhở ngày âm lịch quan trọng</Label>
-              
+              <Label className="text-base">
+                Nhắc nhở ngày âm lịch quan trọng
+              </Label>
+
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="remind-1st">Nhắc nhở mồng 1 âm lịch</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Nhắc nhở mồng 1 âm lịch hàng tháng (ngày sóc)
                   </p>
                 </div>
                 <Switch
                   id="remind-1st"
-                  checked={preferences?.remindFor1stDay || false}
-                  onCheckedChange={(checked) => 
-                    handlePreferenceChange('remindFor1stDay', checked)
+                  checked={preferences?.remindFor1stDay ?? false}
+                  onCheckedChange={(checked) =>
+                    handlePreferenceChange("remindFor1stDay", checked)
                   }
                   disabled={isLoading}
                 />
@@ -308,15 +346,15 @@ Cài đặt nhắc nhở
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="remind-15th">Nhắc nhở rằm âm lịch</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Nhắc nhở rằm âm lịch hàng tháng (ngày vọng)
                   </p>
                 </div>
                 <Switch
                   id="remind-15th"
-                  checked={preferences?.remindFor15thDay || false}
-                  onCheckedChange={(checked) => 
-                    handlePreferenceChange('remindFor15thDay', checked)
+                  checked={preferences?.remindFor15thDay ?? false}
+                  onCheckedChange={(checked) =>
+                    handlePreferenceChange("remindFor15thDay", checked)
                   }
                   disabled={isLoading}
                 />
@@ -331,23 +369,25 @@ Cài đặt nhắc nhở
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-Cài đặt nâng cao
+            Cài đặt nâng cao
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium mb-2">Kiểm soát tần suất thông báo</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Tránh thông báo quá thường xuyên, duy trì trải nghiệm sử dụng tốt.
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h4 className="mb-2 font-medium">Kiểm soát tần suất thông báo</h4>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Tránh thông báo quá thường xuyên, duy trì trải nghiệm sử dụng
+                tốt.
               </p>
               <Badge variant="secondary">Sắp ra mắt</Badge>
             </div>
-            
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium mb-2">Chế độ không làm phiền</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Thiết lập tạm dừng nhắc nhở thông báo trong khoảng thời gian cụ thể.
+
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h4 className="mb-2 font-medium">Chế độ không làm phiền</h4>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Thiết lập tạm dừng nhắc nhở thông báo trong khoảng thời gian cụ
+                thể.
               </p>
               <Badge variant="secondary">Sắp ra mắt</Badge>
             </div>
