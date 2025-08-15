@@ -381,29 +381,42 @@ export const lunarCalendarRouter = createTRPCRouter({
         for (const lunarEvent of lunarEvents) {
           try {
             if (lunarEvent.isRecurring) {
-              // For recurring events, only check the current viewing year
-              try {
-                const gregorianDate = lunarToGregorian(
-                  input.year,
-                  lunarEvent.lunarMonth,
-                  lunarEvent.lunarDay,
-                );
+              // For recurring events, check both current year and previous year
+              // because lunar months can span across Gregorian years
+              const yearsToCheck = [input.year - 1, input.year, input.year + 1];
+              
+              for (const year of yearsToCheck) {
+                try {
+                  const gregorianDate = lunarToGregorian(
+                    year,
+                    lunarEvent.lunarMonth,
+                    lunarEvent.lunarDay,
+                  );
 
-                // Check if the event falls within the current month
-                if (
-                  gregorianDate >= startOfMonth &&
-                  gregorianDate <= endOfMonth
-                ) {
-                  lunarEventsForMonth.push({
-                    id: lunarEvent.id,
-                    title: lunarEvent.title,
-                    date: gregorianDate,
-                  });
+                  // Check if the event falls within the current month
+                  if (
+                    gregorianDate >= startOfMonth &&
+                    gregorianDate <= endOfMonth
+                  ) {
+                    // Avoid duplicates by checking if we already added this event for this date
+                    const existingEvent = lunarEventsForMonth.find(
+                      e => e.id === lunarEvent.id && 
+                      e.date.toDateString() === gregorianDate.toDateString()
+                    );
+                    
+                    if (!existingEvent) {
+                      lunarEventsForMonth.push({
+                        id: lunarEvent.id,
+                        title: lunarEvent.title,
+                        date: gregorianDate,
+                      });
+                    }
+                  }
+                } catch (error) {
+                  // Skip invalid dates for this year - some lunar dates might not exist in certain years
+                  console.warn(`Skipping recurring event ${lunarEvent.title} for year ${year}: ${lunarEvent.lunarMonth}/${lunarEvent.lunarDay} - ${error}`);
+                  continue;
                 }
-              } catch (error) {
-                // Skip invalid dates for this year - some lunar dates might not exist in certain years
-                console.warn(`Skipping recurring event ${lunarEvent.title} for year ${input.year}: ${lunarEvent.lunarMonth}/${lunarEvent.lunarDay} - ${error}`);
-                continue;
               }
             } else {
               // For non-recurring events, only check the specific year
