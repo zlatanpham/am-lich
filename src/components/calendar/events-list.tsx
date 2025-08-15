@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,61 +13,91 @@ import { api } from "@/trpc/react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
+interface LunarEvent {
+  id: string;
+  title: string;
+  description?: string | null;
+  lunarYear: number;
+  lunarMonth: number;
+  lunarDay: number;
+  isRecurring: boolean;
+  gregorianDate?: Date;
+  lunarDateFormatted?: string;
+}
+
 export function EventsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
-  const [deletingEvent, setDeletingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<LunarEvent | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<LunarEvent | null>(null);
 
-  const { data: events, isLoading } = api.event.list.useQuery();
+  // Get events for a reasonable date range to include past and future events
+  const currentDate = new Date();
+  const pastDate = new Date();
+  pastDate.setMonth(pastDate.getMonth() - 6); // 6 months ago
+  const futureDate = new Date();
+  futureDate.setMonth(futureDate.getMonth() + 12); // 12 months ahead
 
-  const filteredEvents = events?.filter(event => 
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  ) || [];
+  const { data: events, isLoading } = api.lunarEvents.getByDateRange.useQuery({
+    startDate: pastDate,
+    endDate: futureDate,
+    includeRecurring: true,
+  });
 
-  const upcomingEvents = filteredEvents.filter(event => 
-    new Date(event.date) >= new Date()
+  const filteredEvents =
+    events?.filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) ?? [];
+
+  const upcomingEvents = filteredEvents.filter(
+    (event) => event.gregorianDate && event.gregorianDate >= currentDate,
   );
 
-  const pastEvents = filteredEvents.filter(event => 
-    new Date(event.date) < new Date()
+  const pastEvents = filteredEvents.filter(
+    (event) => event.gregorianDate && event.gregorianDate < currentDate,
   );
 
-  const handleEdit = (event: any) => {
+  const handleEdit = (event: LunarEvent) => {
     setEditingEvent(event);
   };
 
-  const handleDelete = (event: any) => {
+  const handleDelete = (event: LunarEvent) => {
     setDeletingEvent(event);
   };
 
-  const EventItem = ({ event }: { event: any }) => (
+  const EventItem = ({ event }: { event: LunarEvent }) => (
     <Card key={event.id}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg">{event.title}</h3>
+            <h3 className="text-lg font-semibold">{event.title}</h3>
             {event.description && (
-              <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {event.description}
+              </p>
             )}
-            <div className="flex items-center gap-4 mt-2">
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="mt-2 flex items-center gap-4">
+              <div className="text-muted-foreground flex items-center gap-1 text-sm">
                 <Calendar className="h-4 w-4" />
-                {format(new Date(event.date), "EEEE, dd/MM/yyyy", { locale: vi })}
+                <span className="font-medium">
+                  {event.lunarDateFormatted ??
+                    `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
+                </span>
               </div>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                {format(new Date(event.date), "HH:mm", { locale: vi })}
-              </div>
+              {event.gregorianDate && (
+                <div className="text-muted-foreground flex items-center gap-1 text-sm">
+                  <Clock className="h-4 w-4" />
+                  {format(new Date(event.gregorianDate), "dd/MM/yyyy", {
+                    locale: vi,
+                  })}
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2 ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEdit(event)}
-            >
+          <div className="ml-4 flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => handleEdit(event)}>
               <Edit className="h-4 w-4" />
             </Button>
             <Button
@@ -88,20 +118,18 @@ export function EventsList() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Sự kiện của tôi</h2>
-          <p className="text-muted-foreground">
-            Quản lý các sự kiện cá nhân
-          </p>
+          <p className="text-muted-foreground">Quản lý các sự kiện cá nhân</p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Tạo sự kiện mới
         </Button>
       </div>
 
       {/* Search */}
       <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="relative max-w-md flex-1">
+          <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
           <Input
             placeholder="Tìm kiếm sự kiện..."
             value={searchTerm}
@@ -109,28 +137,31 @@ export function EventsList() {
             className="pl-10"
           />
         </div>
-        <Badge variant="outline">
-          {filteredEvents.length} sự kiện
-        </Badge>
+        <Badge variant="outline">{filteredEvents.length} sự kiện</Badge>
       </div>
 
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="h-24 bg-gray-200 rounded-lg animate-pulse" />
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-lg bg-gray-200"
+            />
           ))}
         </div>
       ) : filteredEvents.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Chưa có sự kiện</h3>
+            <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-lg font-semibold">Chưa có sự kiện</h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm ? "Không tìm thấy sự kiện nào khớp" : "Bạn chưa tạo sự kiện nào"}
+              {searchTerm
+                ? "Không tìm thấy sự kiện nào khớp"
+                : "Bạn chưa tạo sự kiện nào"}
             </p>
             {!searchTerm && (
               <Button onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Tạo sự kiện đầu tiên
               </Button>
             )}
@@ -143,7 +174,7 @@ export function EventsList() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Sự kiện sắp tới</h3>
               <div className="space-y-3">
-                {upcomingEvents.map(event => (
+                {upcomingEvents.map((event) => (
                   <EventItem key={event.id} event={event} />
                 ))}
               </div>
@@ -155,11 +186,11 @@ export function EventsList() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Sự kiện đã qua</h3>
               <div className="space-y-3">
-                {pastEvents.slice(0, 5).map(event => (
+                {pastEvents.slice(0, 5).map((event) => (
                   <EventItem key={event.id} event={event} />
                 ))}
                 {pastEvents.length > 5 && (
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-muted-foreground text-center text-sm">
                     Và {pastEvents.length - 5} sự kiện khác...
                   </p>
                 )}
@@ -174,10 +205,10 @@ export function EventsList() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <Calendar className="text-muted-foreground h-5 w-5" />
               <div>
-                <p className="text-sm text-muted-foreground">Tổng số sự kiện</p>
-                <p className="text-2xl font-bold">{events?.length || 0}</p>
+                <p className="text-muted-foreground text-sm">Tổng số sự kiện</p>
+                <p className="text-2xl font-bold">{events?.length ?? 0}</p>
               </div>
             </div>
           </CardContent>
@@ -186,9 +217,9 @@ export function EventsList() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground" />
+              <Clock className="text-muted-foreground h-5 w-5" />
               <div>
-                <p className="text-sm text-muted-foreground">Sự kiện sắp tới</p>
+                <p className="text-muted-foreground text-sm">Sự kiện sắp tới</p>
                 <p className="text-2xl font-bold">{upcomingEvents.length}</p>
               </div>
             </div>
@@ -198,9 +229,9 @@ export function EventsList() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Badge className="h-5 w-5 text-muted-foreground" />
+              <Badge className="text-muted-foreground h-5 w-5" />
               <div>
-                <p className="text-sm text-muted-foreground">Sự kiện đã qua</p>
+                <p className="text-muted-foreground text-sm">Sự kiện đã qua</p>
                 <p className="text-2xl font-bold">{pastEvents.length}</p>
               </div>
             </div>
@@ -209,18 +240,18 @@ export function EventsList() {
       </div>
 
       {/* Dialogs */}
-      <EventCreateDialog 
+      <EventCreateDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
       />
 
-      <EventEditDialog 
+      <EventEditDialog
         open={!!editingEvent}
         onOpenChange={(open) => !open && setEditingEvent(null)}
         event={editingEvent}
       />
 
-      <EventDeleteDialog 
+      <EventDeleteDialog
         open={!!deletingEvent}
         onOpenChange={(open) => !open && setDeletingEvent(null)}
         event={deletingEvent}

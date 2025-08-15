@@ -14,20 +14,38 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
+interface LunarEvent {
+  id: string;
+  title: string;
+  description?: string | null;
+  lunarYear: number;
+  lunarMonth: number;
+  lunarDay: number;
+  isRecurring: boolean;
+  gregorianDate?: Date;
+  lunarDateFormatted?: string;
+}
+
 interface EventDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  event: any;
+  event: LunarEvent | null;
 }
 
-export function EventDeleteDialog({ open, onOpenChange, event }: EventDeleteDialogProps) {
+export function EventDeleteDialog({
+  open,
+  onOpenChange,
+  event,
+}: EventDeleteDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const utils = api.useUtils();
 
-  const deleteEvent = api.event.delete.useMutation({
+  const deleteEvent = api.lunarEvents.delete.useMutation({
     onSuccess: () => {
       toast.success("Đã xoá sự kiện thành công!");
-      utils.event.list.invalidate();
+      void utils.lunarEvents.getAll.invalidate();
+      void utils.lunarEvents.getUpcoming.invalidate();
+      void utils.lunarEvents.getByDateRange.invalidate();
       onOpenChange(false);
       setIsDeleting(false);
     },
@@ -39,7 +57,7 @@ export function EventDeleteDialog({ open, onOpenChange, event }: EventDeleteDial
 
   const handleDelete = async () => {
     if (!event) return;
-    
+
     setIsDeleting(true);
     deleteEvent.mutate({ id: event.id });
   };
@@ -55,25 +73,35 @@ export function EventDeleteDialog({ open, onOpenChange, event }: EventDeleteDial
             Xoá sự kiện
           </DialogTitle>
           <DialogDescription>
-            Bạn có chắc chắn muốn xoá sự kiện này không? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xoá sự kiện này không? Hành động này không thể
+            hoàn tác.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="rounded-lg bg-gray-50 p-4">
             <h3 className="font-semibold">{event.title}</h3>
             {event.description && (
-              <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {event.description}
+              </p>
             )}
-            <p className="text-sm text-muted-foreground mt-2">
-              {new Date(event.date).toLocaleDateString("vi-VN", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <p className="text-muted-foreground mt-2 text-sm">
+              <span className="font-medium">
+                {event.lunarDateFormatted ??
+                  `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
+              </span>
+              {event.gregorianDate && (
+                <span className="mt-1 block text-xs">
+                  Dương lịch:{" "}
+                  {new Date(event.gregorianDate).toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+              )}
             </p>
           </div>
         </div>
