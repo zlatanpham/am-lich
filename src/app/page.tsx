@@ -54,7 +54,7 @@ export default async function HomePage() {
         <div className="rounded-lg border p-6">
           <h3 className="font-semibold mb-3">Hướng Dẫn Sử Dụng</h3>
           <p className="text-sm text-muted-foreground">
-            Nhấp vào "Hôm nay" để quay lại tháng hiện tại, sử dụng mũi tên trái phải để chuyển tháng.
+            Nhấp vào &quot;Hôm nay&quot; để quay lại tháng hiện tại, sử dụng mũi tên trái phải để chuyển tháng.
             Các ngày quan trọng sẽ được đánh dấu đặc biệt, thuận tiện cho việc lên kế hoạch các hoạt động quan trọng.
           </p>
         </div>

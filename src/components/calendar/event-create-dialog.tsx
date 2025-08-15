@@ -72,7 +72,7 @@ export function EventCreateDialog({ open, onOpenChange }: EventCreateDialogProps
     setIsSubmitting(true);
     
     // Combine date and time if time is provided
-    let dateTime = new Date(data.date);
+    const dateTime = new Date(data.date);
     if (data.time) {
       const timeParts = data.time.split(':');
       const hours = parseInt(timeParts[0] || '0', 10);
