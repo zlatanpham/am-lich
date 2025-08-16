@@ -20,7 +20,6 @@ export default function AccountPage() {
     refetch,
   } = api.user.getUser.useQuery();
 
-
   if (!isLoading && (isError || !user)) {
     router.push("/login");
     return null; // Or a loading spinner/message
@@ -38,9 +37,8 @@ export default function AccountPage() {
       ? user.email[0]?.toUpperCase()
       : "U"; // Default to 'U' for unknown
 
-
   return (
-    <div className="mx-auto w-full max-w-lg space-y-6 p-8 pb-16">
+    <div className="mx-auto w-full max-w-lg space-y-6 py-8">
       <h2 className="text-xl font-medium tracking-tight">My Account</h2>
 
       {isLoading ? (
@@ -104,7 +102,6 @@ export default function AccountPage() {
                 }}
               />
             </div>
-
           </div>
         </>
       )}

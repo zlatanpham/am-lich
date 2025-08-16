@@ -99,7 +99,7 @@ export default function NotificationsPage() {
 
   if (preferencesLoading || userLoading) {
     return (
-      <div className="container mx-auto space-y-6 py-6">
+      <div className="space-y-6 py-6">
         <div className="space-y-2">
           <div className="bg-muted h-8 w-1/3 animate-pulse rounded" />
           <div className="bg-muted h-4 w-1/2 animate-pulse rounded" />
@@ -112,7 +112,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-6 py-6">
+    <div className="space-y-6 py-6">
       <div>
         <h1 className="text-3xl font-bold">Cài đặt thông báo</h1>
         <p className="text-muted-foreground">

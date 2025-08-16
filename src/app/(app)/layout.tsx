@@ -7,7 +7,7 @@ export default function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
@@ -18,21 +18,24 @@ export default function AppLayout({
               </div>
               <span className="text-xl">Lịch âm</span>
             </Link>
-            
+
             <HeaderDropdown />
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main>
+      <main className="container mx-auto px-4">
         <Suspense fallback={null}>{children}</Suspense>
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-16">
-        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Ứng dụng Lịch âm. Dựa trên hệ thống lịch âm truyền thống Việt Nam.</p>
+      <footer className="mt-16 border-t">
+        <div className="text-muted-foreground container mx-auto px-4 py-8 text-center text-sm">
+          <p>
+            &copy; 2025 Ứng dụng Lịch âm. Dựa trên hệ thống lịch âm truyền thống
+            Việt Nam.
+          </p>
         </div>
       </footer>
     </div>
