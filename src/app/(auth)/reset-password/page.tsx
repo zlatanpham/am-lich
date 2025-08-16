@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useTransition, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ const resetPasswordSchema = z
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -71,13 +71,17 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Không tìm thấy mã xác nhận. Vui lòng yêu cầu đặt lại mật khẩu mới.");
+      toast.error(
+        "Không tìm thấy mã xác nhận. Vui lòng yêu cầu đặt lại mật khẩu mới.",
+      );
     }
   }, [token]);
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
     if (!token) {
-      toast.error("Không tìm thấy mã xác nhận. Vui lòng yêu cầu đặt lại mật khẩu mới.");
+      toast.error(
+        "Không tìm thấy mã xác nhận. Vui lòng yêu cầu đặt lại mật khẩu mới.",
+      );
       return;
     }
     await confirmReset.mutateAsync({
@@ -90,8 +94,8 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayout>
       <div className="flex flex-col gap-4">
-        <Card className="shadow-sm border border-slate-200/50 bg-white/60 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/50">
-          <CardHeader className="text-center space-y-1 pb-4">
+        <Card className="border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
+          <CardHeader className="space-y-1 pb-4 text-center">
             <CardTitle className="text-lg font-medium text-slate-800 dark:text-slate-200">
               Đặt lại mật khẩu
             </CardTitle>
@@ -101,13 +105,18 @@ export default function ResetPasswordPage() {
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-3"
+              >
                 <FormField
                   control={form.control}
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Mật khẩu mới</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Mật khẩu mới
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -125,7 +134,9 @@ export default function ResetPasswordPage() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Xác nhận mật khẩu mới</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Xác nhận mật khẩu mới
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -143,18 +154,31 @@ export default function ResetPasswordPage() {
                   className="w-full text-sm"
                   disabled={!token}
                 >
-                  {confirmReset.status === "pending" ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
+                  {confirmReset.status === "pending"
+                    ? "Đang đặt lại..."
+                    : "Đặt lại mật khẩu"}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-        <div className="text-slate-500 text-center text-xs">
-          <Link href="/login" className="text-slate-600 hover:text-slate-800 hover:underline">
+        <div className="text-center text-xs text-slate-500">
+          <Link
+            href="/login"
+            className="text-slate-600 hover:text-slate-800 hover:underline"
+          >
             Quay lại đăng nhập
           </Link>
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

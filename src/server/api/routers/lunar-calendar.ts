@@ -250,12 +250,6 @@ export const lunarCalendarRouter = createTRPCRouter({
       for (let month = 1; month <= 12; month++) {
         try {
           // Get 1st day of each lunar month
-          const firstDayLunar = {
-            year: input.year,
-            month,
-            day: 1,
-            isLeapMonth: false,
-          };
           const firstDayGregorian = lunarToGregorian(input.year, month, 1);
 
           const firstDayLunar = gregorianToLunar(firstDayGregorian);

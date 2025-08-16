@@ -192,11 +192,8 @@ export const lunarEventsRouter = createTRPCRouter({
         userId,
         isActive: true,
         lunarYear: input.lunarYear,
+        ...(input.lunarMonth && { lunarMonth: input.lunarMonth }),
       };
-
-      if (input.lunarMonth) {
-        whereClause.lunarMonth = input.lunarMonth;
-      }
 
       const events = await ctx.db.lunarEvent.findMany({
         where: whereClause,
