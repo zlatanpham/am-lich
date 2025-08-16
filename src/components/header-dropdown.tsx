@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, CalendarPlus, Bell, User, Settings, LogOut, Send } from "lucide-react";
+import { CalendarPlus, Bell, User, LogOut, Send } from "lucide-react";
 import Link from "next/link";
+import { LoginDialog } from "@/components/login-dialog";
 
 export function HeaderDropdown() {
   const { data: session } = useSession();
@@ -20,18 +21,17 @@ export function HeaderDropdown() {
   const user = session?.user as { name?: string; email?: string; image?: string };
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" });
+    void signOut({ callbackUrl: "/" });
   };
 
   if (!session) {
     return (
       <div className="flex items-center gap-2">
-        <Link
-          href="/login"
-          className="text-sm hover:text-primary transition-colors"
-        >
-          Đăng nhập
-        </Link>
+        <LoginDialog>
+          <button className="text-sm hover:text-primary transition-colors">
+            Đăng nhập
+          </button>
+        </LoginDialog>
         <Link
           href="/signup"
           className="text-sm bg-primary text-primary-foreground px-3 py-1 rounded-md hover:bg-primary/90 transition-colors"
@@ -47,9 +47,9 @@ export function HeaderDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
+            <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
             <AvatarFallback>
-              {user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
+              {user?.name?.charAt(0) ?? user?.email?.charAt(0) ?? "U"}
             </AvatarFallback>
           </Avatar>
         </Button>

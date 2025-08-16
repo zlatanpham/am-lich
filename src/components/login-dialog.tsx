@@ -2,15 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { toast } from "sonner";
 import { login } from "@/app/actions/auth";
 import { useForm } from "react-hook-form";
@@ -24,7 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 const loginSchema = z.object({
@@ -34,9 +34,13 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+interface LoginDialogProps {
+  children: React.ReactNode;
+}
+
+export function LoginDialog({ children }: LoginDialogProps) {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  const [open, setOpen] = useState(false);
   const { update } = useSession();
 
   const form = useForm<LoginFormValues>({
@@ -55,23 +59,29 @@ export default function LoginPage() {
         formData.append("password", data.password);
         await login(formData);
         await update();
-        router.replace("/");
+        setOpen(false);
+        form.reset();
+        toast.success("Đăng nhập thành công!");
       } catch (error) {
         console.log(error);
-        toast.error("Login failed. Please check your credentials.");
+        toast.error("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
       }
     });
   };
 
-
   return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your email and password</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Đăng nhập</DialogTitle>
+          <DialogDescription>
+            Đăng nhập bằng email và mật khẩu của bạn
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -97,13 +107,14 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Mật khẩu</FormLabel>
                       <div className="text-right text-[13px]">
                         <Link
                           href="/forgot-password"
                           className="text-muted-foreground hover:underline"
+                          onClick={() => setOpen(false)}
                         >
-                          Forgot password?
+                          Quên mật khẩu?
                         </Link>
                       </div>
                     </div>
@@ -124,18 +135,22 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={isPending}
               >
-                Sign in with Email
+                Đăng nhập
               </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        {"Don't have an account? "}
-        <Link href="/signup" className="text-primary">
-          Sign up
-        </Link>
-      </div>
-    </div>
+          <div className="text-muted-foreground text-center text-sm">
+            {"Chưa có tài khoản? "}
+            <Link 
+              href="/signup" 
+              className="text-primary hover:underline"
+              onClick={() => setOpen(false)}
+            >
+              Đăng ký
+            </Link>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
