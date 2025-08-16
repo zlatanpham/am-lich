@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
-import { Send, SquareTerminal, Calendar, CalendarPlus, Bell, Home } from "lucide-react";
+import { Send, Calendar, CalendarPlus, Bell, Home } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";

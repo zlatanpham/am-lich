@@ -5,10 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 import { Calendar, Clock } from "lucide-react";
-import {
-  vietnameseText,
-  formatVietnameseDate,
-} from "@/lib/vietnamese-localization";
+import { vietnameseText } from "@/lib/vietnamese-localization";
 
 export function UpcomingImportantDates() {
   const { data, isLoading, error } =

@@ -1,6 +1,6 @@
 /**
  * Vietnamese Localization Utilities
- * 
+ *
  * Comprehensive Vietnamese localization support including
  * typography, formatting, timezone, and cultural constants
  */
@@ -8,38 +8,38 @@
 /**
  * Vietnamese timezone configuration
  */
-export const VIETNAM_TIMEZONE = 'Asia/Ho_Chi_Minh';
-export const VIETNAM_UTC_OFFSET = '+07:00';
+export const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
+export const VIETNAM_UTC_OFFSET = "+07:00";
 
 /**
  * Vietnamese language constants
  */
-export const VIETNAMESE_LOCALE = 'vi-VN';
+export const VIETNAMESE_LOCALE = "vi-VN";
 
 /**
  * Vietnamese date formatting options
  */
 export const vietnameseDateFormats = {
   full: {
-    weekday: 'long' as const,
-    year: 'numeric' as const,
-    month: 'long' as const,
-    day: 'numeric' as const,
+    weekday: "long" as const,
+    year: "numeric" as const,
+    month: "long" as const,
+    day: "numeric" as const,
   },
   long: {
-    year: 'numeric' as const,
-    month: 'long' as const,
-    day: 'numeric' as const,
+    year: "numeric" as const,
+    month: "long" as const,
+    day: "numeric" as const,
   },
   medium: {
-    year: 'numeric' as const,
-    month: 'short' as const,
-    day: 'numeric' as const,
+    year: "numeric" as const,
+    month: "short" as const,
+    day: "numeric" as const,
   },
   short: {
-    year: '2-digit' as const,
-    month: 'numeric' as const,
-    day: 'numeric' as const,
+    year: "2-digit" as const,
+    month: "numeric" as const,
+    day: "numeric" as const,
   },
 };
 
@@ -48,105 +48,121 @@ export const vietnameseDateFormats = {
  */
 export const vietnameseText = {
   // Navigation and General
-  appName: 'Âm Lịch Việt Nam',
-  home: 'Trang chủ',
-  calendar: 'Lịch',
-  events: 'Sự kiện',
-  notifications: 'Thông báo',
-  account: 'Tài khoản',
-  settings: 'Cài đặt',
-  logout: 'Đăng xuất',
-  login: 'Đăng nhập',
-  register: 'Đăng ký',
-  
+  appName: "Âm Lịch Việt Nam",
+  home: "Trang chủ",
+  calendar: "Lịch",
+  events: "Sự kiện",
+  notifications: "Thông báo",
+  account: "Tài khoản",
+  settings: "Cài đặt",
+  logout: "Đăng xuất",
+  login: "Đăng nhập",
+  register: "Đăng ký",
+
   // Calendar Terms
-  today: 'Hôm nay',
-  yesterday: 'Hôm qua',
-  tomorrow: 'Ngày mai',
-  thisWeek: 'Tuần này',
-  thisMonth: 'Tháng này',
-  thisYear: 'Năm này',
-  
+  today: "Hôm nay",
+  yesterday: "Hôm qua",
+  tomorrow: "Ngày mai",
+  thisWeek: "Tuần này",
+  thisMonth: "Tháng này",
+  thisYear: "Năm này",
+
   // Lunar Calendar Specific
-  lunarCalendar: 'Âm lịch',
-  solarCalendar: 'Dương lịch',
-  lunarDate: 'Ngày âm lịch',
-  currentLunarDate: 'Ngày âm lịch hôm nay',
-  nextImportantDates: 'Ngày quan trọng sắp tới',
-  
+  lunarCalendar: "Âm lịch",
+  solarCalendar: "Dương lịch",
+  lunarDate: "Ngày âm lịch",
+  currentLunarDate: "Ngày âm lịch hôm nay",
+  nextImportantDates: "Ngày quan trọng sắp tới",
+
   // Important Days
-  mong1: 'Mồng 1',
-  ram: 'Rằm',
-  importantDay: 'Ngày quan trọng',
-  newMoon: 'Trăng non',
-  fullMoon: 'Trăng tròn',
-  
+  mong1: "Mồng 1",
+  ram: "Rằm",
+  importantDay: "Ngày quan trọng",
+  newMoon: "Trăng non",
+  fullMoon: "Trăng tròn",
+
   // Events
-  createEvent: 'Tạo sự kiện',
-  editEvent: 'Sửa sự kiện',
-  deleteEvent: 'Xóa sự kiện',
-  eventTitle: 'Tiêu đề sự kiện',
-  eventDescription: 'Mô tả sự kiện',
-  eventDate: 'Ngày sự kiện',
-  reminderDays: 'Nhắc nhở trước',
-  isRecurring: 'Lặp lại hàng năm',
-  
+  createEvent: "Tạo sự kiện",
+  editEvent: "Sửa sự kiện",
+  deleteEvent: "Xóa sự kiện",
+  eventTitle: "Tiêu đề sự kiện",
+  eventDescription: "Mô tả sự kiện",
+  eventDate: "Ngày sự kiện",
+  reminderDays: "Nhắc nhở trước",
+  isRecurring: "Lặp lại hàng năm",
+
   // Event Types
-  lunarEvent: 'Sự kiện âm lịch',
-  culturalEvent: 'Sự kiện văn hóa',
-  ancestorWorship: 'Giỗ tổ tiên',
-  traditionalHoliday: 'Lễ hội truyền thống',
-  
+  lunarEvent: "Sự kiện âm lịch",
+  culturalEvent: "Sự kiện văn hóa",
+  ancestorWorship: "Giỗ tổ tiên",
+  traditionalHoliday: "Lễ hội truyền thống",
+
   // Ancestor Worship
-  ancestorName: 'Tên tổ tiên',
-  anniversaryDate: 'Ngày giỗ',
-  worshipReminder: 'Nhắc nhở cúng bái',
-  
+  ancestorName: "Tên tổ tiên",
+  anniversaryDate: "Ngày giỗ",
+  worshipReminder: "Nhắc nhở cúng bái",
+
   // Notifications
-  enableNotifications: 'Bật thông báo',
-  pushNotifications: 'Thông báo đẩy',
-  emailNotifications: 'Thông báo email',
-  reminderSettings: 'Cài đặt nhắc nhở',
-  
+  enableNotifications: "Bật thông báo",
+  pushNotifications: "Thông báo đẩy",
+  emailNotifications: "Thông báo email",
+  reminderSettings: "Cài đặt nhắc nhở",
+
   // Cultural Elements
-  culturalSignificance: 'Ý nghĩa văn hóa',
-  zodiacYear: 'Năm can chi',
-  lunarPhase: 'Pha trăng',
-  auspiciousDay: 'Ngày tốt',
-  inauspiciousDay: 'Ngày xấu',
-  
+  culturalSignificance: "Ý nghĩa văn hóa",
+  zodiacYear: "Năm can chi",
+  lunarPhase: "Pha trăng",
+  auspiciousDay: "Ngày tốt",
+  inauspiciousDay: "Ngày xấu",
+
   // Time expressions
-  daysUntil: 'còn {0} ngày',
-  daysPassed: 'đã qua {0} ngày',
-  inDays: 'trong {0} ngày',
-  
+  daysUntil: "còn {0} ngày",
+  daysPassed: "đã qua {0} ngày",
+  inDays: "trong {0} ngày",
+
   // Loading and Error States
-  loading: 'Đang tải...',
-  error: 'Lỗi',
-  noData: 'Không có dữ liệu',
-  tryAgain: 'Thử lại',
-  
+  loading: "Đang tải...",
+  error: "Lỗi",
+  noData: "Không có dữ liệu",
+  tryAgain: "Thử lại",
+
   // Form Elements
-  save: 'Lưu',
-  cancel: 'Hủy',
-  delete: 'Xóa',
-  edit: 'Sửa',
-  add: 'Thêm',
-  confirm: 'Xác nhận',
-  
+  save: "Lưu",
+  cancel: "Hủy",
+  delete: "Xóa",
+  edit: "Sửa",
+  add: "Thêm",
+  confirm: "Xác nhận",
+
   // Vietnamese Months (Gregorian)
   months: [
-    'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-    'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+    "Tháng 1",
+    "Tháng 2",
+    "Tháng 3",
+    "Tháng 4",
+    "Tháng 5",
+    "Tháng 6",
+    "Tháng 7",
+    "Tháng 8",
+    "Tháng 9",
+    "Tháng 10",
+    "Tháng 11",
+    "Tháng 12",
   ],
-  
+
   // Vietnamese Weekdays
   weekdays: [
-    'Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'
+    "Chủ nhật",
+    "Thứ hai",
+    "Thứ ba",
+    "Thứ tư",
+    "Thứ năm",
+    "Thứ sáu",
+    "Thứ bảy",
   ],
-  
+
   // Short weekdays
-  weekdaysShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+  weekdaysShort: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
 };
 
 /**
@@ -155,40 +171,72 @@ export const vietnameseText = {
 export const vietnameseCultural = {
   // Traditional Colors
   colors: {
-    auspicious: '#dc2626', // Red for good luck
-    gold: '#eab308', // Gold for prosperity
-    traditional: '#7c2d12', // Traditional brown
-    warning: '#ea580c', // Orange for caution
-    calm: '#0369a1', // Blue for peace
+    auspicious: "#dc2626", // Red for good luck
+    gold: "#eab308", // Gold for prosperity
+    traditional: "#7c2d12", // Traditional brown
+    warning: "#ea580c", // Orange for caution
+    calm: "#0369a1", // Blue for peace
   },
-  
+
   // Lucky Numbers in Vietnamese Culture
   luckyNumbers: [1, 6, 8, 9],
   unluckyNumbers: [4, 7],
-  
+
   // Traditional Vietnamese Elements (Ngũ hành)
   elements: {
-    kim: 'Kim (Kim loại)', // Metal
-    moc: 'Mộc (Gỗ)', // Wood
-    thuy: 'Thủy (Nước)', // Water
-    hoa: 'Hỏa (Lửa)', // Fire
-    tho: 'Thổ (Đất)', // Earth
+    kim: "Kim (Kim loại)", // Metal
+    moc: "Mộc (Gỗ)", // Wood
+    thuy: "Thủy (Nước)", // Water
+    hoa: "Hỏa (Lửa)", // Fire
+    tho: "Thổ (Đất)", // Earth
   },
-  
+
   // Vietnamese Zodiac Animals with detailed names
   zodiacAnimals: [
-    { name: 'Tý (Chuột)', element: 'Thủy', characteristics: 'Thông minh, lanh lợi' },
-    { name: 'Sửu (Trâu)', element: 'Thổ', characteristics: 'Chăm chỉ, kiên nhẫn' },
-    { name: 'Dần (Hổ)', element: 'Mộc', characteristics: 'Dũng mãnh, quyết đoán' },
-    { name: 'Mão (Mèo)', element: 'Mộc', characteristics: 'Khéo léo, tế nhị' },
-    { name: 'Thìn (Rồng)', element: 'Thổ', characteristics: 'Uy nghiêm, tài năng' },
-    { name: 'Tỵ (Rắn)', element: 'Hỏa', characteristics: 'Thông thái, bí ẩn' },
-    { name: 'Ngọ (Ngựa)', element: 'Hỏa', characteristics: 'Năng động, tự do' },
-    { name: 'Mùi (Dê)', element: 'Thổ', characteristics: 'Hiền lành, sáng tạo' },
-    { name: 'Thân (Khỉ)', element: 'Kim', characteristics: 'Lanh lẹ, hóm hỉnh' },
-    { name: 'Dậu (Gà)', element: 'Kim', characteristics: 'Cần cù, trung thực' },
-    { name: 'Tuất (Chó)', element: 'Thổ', characteristics: 'Trung thành, đáng tin' },
-    { name: 'Hợi (Lợn)', element: 'Thủy', characteristics: 'Thật thà, hào phóng' },
+    {
+      name: "Tý (Chuột)",
+      element: "Thủy",
+      characteristics: "Thông minh, lanh lợi",
+    },
+    {
+      name: "Sửu (Trâu)",
+      element: "Thổ",
+      characteristics: "Chăm chỉ, kiên nhẫn",
+    },
+    {
+      name: "Dần (Hổ)",
+      element: "Mộc",
+      characteristics: "Dũng mãnh, quyết đoán",
+    },
+    { name: "Mão (Mèo)", element: "Mộc", characteristics: "Khéo léo, tế nhị" },
+    {
+      name: "Thìn (Rồng)",
+      element: "Thổ",
+      characteristics: "Uy nghiêm, tài năng",
+    },
+    { name: "Tỵ (Rắn)", element: "Hỏa", characteristics: "Thông thái, bí ẩn" },
+    { name: "Ngọ (Ngựa)", element: "Hỏa", characteristics: "Năng động, tự do" },
+    {
+      name: "Mùi (Dê)",
+      element: "Thổ",
+      characteristics: "Hiền lành, sáng tạo",
+    },
+    {
+      name: "Thân (Khỉ)",
+      element: "Kim",
+      characteristics: "Lanh lẹ, hóm hỉnh",
+    },
+    { name: "Dậu (Gà)", element: "Kim", characteristics: "Cần cù, trung thực" },
+    {
+      name: "Tuất (Chó)",
+      element: "Thổ",
+      characteristics: "Trung thành, đáng tin",
+    },
+    {
+      name: "Hợi (Lợn)",
+      element: "Thủy",
+      characteristics: "Thật thà, hào phóng",
+    },
   ],
 };
 
@@ -197,12 +245,14 @@ export const vietnameseCultural = {
  */
 export function formatVietnameseDate(
   date: Date,
-  format: keyof typeof vietnameseDateFormats = 'long',
-  includeTime = false
+  format: keyof typeof vietnameseDateFormats = "long",
+  includeTime = false,
 ): string {
   const dateOptions = vietnameseDateFormats[format];
-  const timeOptions = includeTime ? { hour: '2-digit' as const, minute: '2-digit' as const } : {};
-  
+  const timeOptions = includeTime
+    ? { hour: "2-digit" as const, minute: "2-digit" as const }
+    : {};
+
   return new Intl.DateTimeFormat(VIETNAMESE_LOCALE, {
     ...dateOptions,
     ...timeOptions,
@@ -215,8 +265,8 @@ export function formatVietnameseDate(
  */
 export function formatVietnameseTime(date: Date): string {
   return new Intl.DateTimeFormat(VIETNAMESE_LOCALE, {
-    hour: '2-digit',
-    minute: '2-digit',
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone: VIETNAM_TIMEZONE,
   }).format(date);
 }
@@ -256,8 +306,8 @@ export function formatVietnameseNumber(num: number): string {
  */
 export function formatVietnameseCurrency(amount: number): string {
   return new Intl.NumberFormat(VIETNAMESE_LOCALE, {
-    style: 'currency',
-    currency: 'VND',
+    style: "currency",
+    currency: "VND",
   }).format(amount);
 }
 
@@ -266,24 +316,27 @@ export function formatVietnameseCurrency(amount: number): string {
  */
 export function getVietnameseWeekday(date: Date, short = false): string {
   const dayIndex = date.getDay();
-  return short 
-    ? vietnameseText.weekdaysShort[dayIndex] ?? 'CN'
-    : vietnameseText.weekdays[dayIndex] ?? 'Chủ nhật';
+  return short
+    ? (vietnameseText.weekdaysShort[dayIndex] ?? "CN")
+    : (vietnameseText.weekdays[dayIndex] ?? "Chủ nhật");
 }
 
 /**
  * Get Vietnamese month name
  */
 export function getVietnameseMonth(monthIndex: number): string {
-  return vietnameseText.months[monthIndex] || 'Tháng không xác định';
+  return vietnameseText.months[monthIndex] ?? "Tháng không xác định";
 }
 
 /**
  * Vietnamese text interpolation helper
  */
-export function interpolateVietnameseText(template: string, ...values: (string | number)[]): string {
-  return template.replace(/\{(\d+)\}/g, (match, index) => {
-    const value = values[parseInt(index)];
+export function interpolateVietnameseText(
+  template: string,
+  ...values: (string | number)[]
+): string {
+  return template.replace(/\{(\d+)\}/g, (match, index: string) => {
+    const value = values[parseInt(index, 10)];
     return value !== undefined ? String(value) : match;
   });
 }
@@ -291,56 +344,63 @@ export function interpolateVietnameseText(template: string, ...values: (string |
 /**
  * Vietnamese pluralization helper (Vietnamese doesn't have complex pluralization)
  */
-export function vietnamesePlural(count: number, singular: string, plural?: string): string {
+export function vietnamesePlural(
+  count: number,
+  singular: string,
+  plural?: string,
+): string {
   // Vietnamese typically uses the same form for singular and plural
   // Sometimes adds "các" or "những" for plural, but this is context-dependent
-  return count === 1 ? singular : (plural || singular);
+  return count === 1 ? singular : (plural ?? singular);
 }
 
 /**
  * Vietnamese cultural day assessment
  */
 export function getVietnameseDayAssessment(lunarDay: number): {
-  type: 'auspicious' | 'neutral' | 'inauspicious';
+  type: "auspicious" | "neutral" | "inauspicious";
   title: string;
   description: string;
 } {
   if (lunarDay === 1) {
     return {
-      type: 'auspicious',
-      title: 'Ngày Mồng 1 - Rất tốt',
-      description: 'Ngày đầu tháng âm lịch, rất thích hợp cho mọi việc quan trọng.',
+      type: "auspicious",
+      title: "Ngày Mồng 1 - Rất tốt",
+      description:
+        "Ngày đầu tháng âm lịch, rất thích hợp cho mọi việc quan trọng.",
     };
   }
-  
+
   if (lunarDay === 15) {
     return {
-      type: 'auspicious',
-      title: 'Ngày Rằm - Rất tốt',
-      description: 'Ngày trăng tròn, rất thích hợp cho việc cúng bái và tâm linh.',
+      type: "auspicious",
+      title: "Ngày Rằm - Rất tốt",
+      description:
+        "Ngày trăng tròn, rất thích hợp cho việc cúng bái và tâm linh.",
     };
   }
-  
+
   if ([3, 5, 13, 23].includes(lunarDay)) {
     return {
-      type: 'inauspicious',
-      title: 'Ngày nên tránh',
-      description: 'Ngày không tốt theo quan niệm dân gian, nên tránh các việc quan trọng.',
+      type: "inauspicious",
+      title: "Ngày nên tránh",
+      description:
+        "Ngày không tốt theo quan niệm dân gian, nên tránh các việc quan trọng.",
     };
   }
-  
+
   if (lunarDay >= 2 && lunarDay <= 7) {
     return {
-      type: 'auspicious',
-      title: 'Ngày tốt',
-      description: 'Đầu tháng âm lịch, thích hợp cho việc khởi sự.',
+      type: "auspicious",
+      title: "Ngày tốt",
+      description: "Đầu tháng âm lịch, thích hợp cho việc khởi sự.",
     };
   }
-  
+
   return {
-    type: 'neutral',
-    title: 'Ngày bình thường',
-    description: 'Ngày thường trong tháng âm lịch.',
+    type: "neutral",
+    title: "Ngày bình thường",
+    description: "Ngày thường trong tháng âm lịch.",
   };
 }
 
@@ -348,11 +408,11 @@ export function getVietnameseDayAssessment(lunarDay: number): {
  * Vietnamese honorific titles for ancestors
  */
 export const vietnameseHonorifics = {
-  grandfather: ['Ông cố', 'Ông tổ', 'Ông nội', 'Ông ngoại'],
-  grandmother: ['Bà cố', 'Bà tổ', 'Bà nội', 'Bà ngoại'],
-  father: ['Thân phụ', 'Cha', 'Ba'],
-  mother: ['Thân mẫu', 'Mẹ', 'Má'],
-  ancestor: ['Tổ tiên', 'Tiên tổ', 'Ông bà tổ tiên'],
+  grandfather: ["Ông cố", "Ông tổ", "Ông nội", "Ông ngoại"],
+  grandmother: ["Bà cố", "Bà tổ", "Bà nội", "Bà ngoại"],
+  father: ["Thân phụ", "Cha", "Ba"],
+  mother: ["Thân mẫu", "Mẹ", "Má"],
+  ancestor: ["Tổ tiên", "Tiên tổ", "Ông bà tổ tiên"],
 };
 
 /**
@@ -360,28 +420,28 @@ export const vietnameseHonorifics = {
  */
 export const vietnameseEventCategories = {
   worship: {
-    name: 'Cúng bái',
-    description: 'Các nghi lễ thờ cúng tổ tiên và thần linh',
-    icon: '🙏',
+    name: "Cúng bái",
+    description: "Các nghi lễ thờ cúng tổ tiên và thần linh",
+    icon: "🙏",
   },
   festival: {
-    name: 'Lễ hội',
-    description: 'Các lễ hội truyền thống của người Việt',
-    icon: '🎊',
+    name: "Lễ hội",
+    description: "Các lễ hội truyền thống của người Việt",
+    icon: "🎊",
   },
   ceremony: {
-    name: 'Nghi lễ',
-    description: 'Các nghi lễ quan trọng trong đời sống',
-    icon: '🎭',
+    name: "Nghi lễ",
+    description: "Các nghi lễ quan trọng trong đời sống",
+    icon: "🎭",
   },
   memorial: {
-    name: 'Giỗ chạp',
-    description: 'Ngày giỗ và các dịp tưởng nhớ',
-    icon: '🕯️',
+    name: "Giỗ chạp",
+    description: "Ngày giỗ và các dịp tưởng nhớ",
+    icon: "🕯️",
   },
   seasonal: {
-    name: 'Theo mùa',
-    description: 'Các hoạt động theo mùa và thời tiết',
-    icon: '🌸',
+    name: "Theo mùa",
+    description: "Các hoạt động theo mùa và thời tiết",
+    icon: "🌸",
   },
 };

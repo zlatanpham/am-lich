@@ -1,14 +1,9 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import {
   gregorianToLunar,
   lunarToGregorian,
   getCurrentLunarDate,
-  getCurrentVietnameseLunarDate,
   getNextImportantLunarDate,
   getNextImportantVietnameseLunarDate,
   generateCalendarMonth,
@@ -18,15 +13,11 @@ import {
   formatLunarDate,
   formatVietnameseLunarDate,
   isValidLunarDate,
-  isValidVietnameseLunarDate,
   getLunarMonthLength,
-  getVietnameseLunarMonthLength,
   getTodayVietnameseLunarInfo,
   getVietnameseCulturalSignificanceText,
   getVietnameseCanChiYear,
   type LunarDate,
-  type VietnameseLunarDate,
-  type VietnameseCalendarMonth,
 } from "@/lib/lunar-calendar";
 import {
   vietnameseText,
@@ -266,13 +257,13 @@ export const lunarCalendarRouter = createTRPCRouter({
             isLeapMonth: false,
           };
           const firstDayGregorian = lunarToGregorian(input.year, month, 1);
-          const firstDayLunarInfo = gregorianToLunar(firstDayGregorian);
 
+          const firstDayLunar = gregorianToLunar(firstDayGregorian);
           importantDates.push({
             date: firstDayGregorian,
-            lunarDate: firstDayLunarInfo,
+            lunarDate: firstDayLunar,
             type: "first",
-            description: `${formatLunarDate(firstDayLunarInfo)} (trăng mới)`,
+            description: `${formatLunarDate(firstDayLunar)} (trăng mới)`,
           });
 
           // Get 15th day of each lunar month
@@ -384,7 +375,7 @@ export const lunarCalendarRouter = createTRPCRouter({
               // For recurring events, check both current year and previous year
               // because lunar months can span across Gregorian years
               const yearsToCheck = [input.year - 1, input.year, input.year + 1];
-              
+
               for (const year of yearsToCheck) {
                 try {
                   const gregorianDate = lunarToGregorian(
@@ -400,10 +391,11 @@ export const lunarCalendarRouter = createTRPCRouter({
                   ) {
                     // Avoid duplicates by checking if we already added this event for this date
                     const existingEvent = lunarEventsForMonth.find(
-                      e => e.id === lunarEvent.id && 
-                      e.date.toDateString() === gregorianDate.toDateString()
+                      (e) =>
+                        e.id === lunarEvent.id &&
+                        e.date.toDateString() === gregorianDate.toDateString(),
                     );
-                    
+
                     if (!existingEvent) {
                       lunarEventsForMonth.push({
                         id: lunarEvent.id,
@@ -412,9 +404,8 @@ export const lunarCalendarRouter = createTRPCRouter({
                       });
                     }
                   }
-                } catch (error) {
+                } catch {
                   // Skip invalid dates for this year - some lunar dates might not exist in certain years
-                  console.warn(`Skipping recurring event ${lunarEvent.title} for year ${year}: ${lunarEvent.lunarMonth}/${lunarEvent.lunarDay} - ${error}`);
                   continue;
                 }
               }
@@ -438,7 +429,7 @@ export const lunarCalendarRouter = createTRPCRouter({
                 });
               }
             }
-          } catch (error) {
+          } catch {
             // Skip invalid lunar dates
             continue;
           }

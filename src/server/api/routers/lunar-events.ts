@@ -1,12 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { 
-  lunarToGregorian, 
-  gregorianToLunar, 
+import {
+  lunarToGregorian,
+  gregorianToLunar,
   isValidLunarDate,
-  calculateRecurringEventDates,
   formatLunarDate,
-  type LunarCalendarEvent 
 } from "@/lib/lunar-calendar";
 
 export const lunarEventsRouter = createTRPCRouter({
@@ -16,23 +14,28 @@ export const lunarEventsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        title: z.string().min(1, "Title is required").max(255, "Title too long"),
+        title: z
+          .string()
+          .min(1, "Title is required")
+          .max(255, "Title too long"),
         description: z.string().optional(),
         lunarYear: z.number().min(1900).max(2100),
         lunarMonth: z.number().min(1).max(12),
         lunarDay: z.number().min(1).max(30),
         isRecurring: z.boolean().default(false),
         reminderDays: z.number().min(1).max(30).default(3),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       // Validate lunar date
-      if (!isValidLunarDate(input.lunarYear, input.lunarMonth, input.lunarDay)) {
+      if (
+        !isValidLunarDate(input.lunarYear, input.lunarMonth, input.lunarDay)
+      ) {
         throw new Error("Invalid lunar date");
       }
-      
+
       const event = await ctx.db.lunarEvent.create({
         data: {
           userId,
@@ -45,7 +48,7 @@ export const lunarEventsRouter = createTRPCRouter({
           reminderDays: input.reminderDays,
         },
       });
-      
+
       return event;
     }),
 
@@ -56,7 +59,11 @@ export const lunarEventsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        title: z.string().min(1, "Title is required").max(255, "Title too long").optional(),
+        title: z
+          .string()
+          .min(1, "Title is required")
+          .max(255, "Title too long")
+          .optional(),
         description: z.string().optional(),
         lunarYear: z.number().min(1900).max(2100).optional(),
         lunarMonth: z.number().min(1).max(12).optional(),
@@ -64,37 +71,41 @@ export const lunarEventsRouter = createTRPCRouter({
         isRecurring: z.boolean().optional(),
         reminderDays: z.number().min(1).max(30).optional(),
         isActive: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { id, ...updateData } = input;
-      
+
       // Check if event exists and belongs to user
       const existingEvent = await ctx.db.lunarEvent.findFirst({
         where: { id, userId },
       });
-      
+
       if (!existingEvent) {
         throw new Error("Event not found or access denied");
       }
-      
+
       // If lunar date is being updated, validate it
       const lunarYear = updateData.lunarYear ?? existingEvent.lunarYear;
       const lunarMonth = updateData.lunarMonth ?? existingEvent.lunarMonth;
       const lunarDay = updateData.lunarDay ?? existingEvent.lunarDay;
-      
-      if (updateData.lunarYear || updateData.lunarMonth || updateData.lunarDay) {
+
+      if (
+        updateData.lunarYear ||
+        updateData.lunarMonth ||
+        updateData.lunarDay
+      ) {
         if (!isValidLunarDate(lunarYear, lunarMonth, lunarDay)) {
           throw new Error("Invalid lunar date");
         }
       }
-      
+
       const updatedEvent = await ctx.db.lunarEvent.update({
         where: { id },
         data: updateData,
       });
-      
+
       return updatedEvent;
     }),
 
@@ -105,20 +116,20 @@ export const lunarEventsRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       // Check if event exists and belongs to user
       const existingEvent = await ctx.db.lunarEvent.findFirst({
         where: { id: input.id, userId },
       });
-      
+
       if (!existingEvent) {
         throw new Error("Event not found or access denied");
       }
-      
+
       await ctx.db.lunarEvent.delete({
         where: { id: input.id },
       });
-      
+
       return { success: true };
     }),
 
@@ -129,37 +140,37 @@ export const lunarEventsRouter = createTRPCRouter({
     .input(
       z.object({
         includeInactive: z.boolean().default(false),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const events = await ctx.db.lunarEvent.findMany({
         where: {
           userId,
           isActive: input.includeInactive ? undefined : true,
         },
         orderBy: [
-          { lunarYear: 'asc' },
-          { lunarMonth: 'asc' },
-          { lunarDay: 'asc' },
+          { lunarYear: "asc" },
+          { lunarMonth: "asc" },
+          { lunarDay: "asc" },
         ],
       });
-      
-      return events.map(event => ({
+
+      return events.map((event) => ({
         ...event,
         lunarDateFormatted: formatLunarDate({
           year: event.lunarYear,
           month: event.lunarMonth,
           day: event.lunarDay,
-          monthName: '', // Will be filled by formatLunarDate
-          dayName: '',   // Will be filled by formatLunarDate
+          monthName: "", // Will be filled by formatLunarDate
+          dayName: "", // Will be filled by formatLunarDate
           isLeapMonth: false, // TODO: Add leap month support to database
-          lunarPhase: '',
-          zodiacYear: '',
-          zodiacMonth: '',
-          zodiacDay: '',
-          vietnameseAnimal: '', // Will be filled by formatLunarDate
+          lunarPhase: "",
+          zodiacYear: "",
+          zodiacMonth: "",
+          zodiacDay: "",
+          vietnameseAnimal: "", // Will be filled by formatLunarDate
         }),
       }));
     }),
@@ -172,29 +183,26 @@ export const lunarEventsRouter = createTRPCRouter({
       z.object({
         lunarYear: z.number().min(1900).max(2100),
         lunarMonth: z.number().min(1).max(12).optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
-      const whereClause: any = {
+
+      const whereClause = {
         userId,
         isActive: true,
         lunarYear: input.lunarYear,
       };
-      
+
       if (input.lunarMonth) {
         whereClause.lunarMonth = input.lunarMonth;
       }
-      
+
       const events = await ctx.db.lunarEvent.findMany({
         where: whereClause,
-        orderBy: [
-          { lunarMonth: 'asc' },
-          { lunarDay: 'asc' },
-        ],
+        orderBy: [{ lunarMonth: "asc" }, { lunarDay: "asc" }],
       });
-      
+
       return events;
     }),
 
@@ -207,18 +215,18 @@ export const lunarEventsRouter = createTRPCRouter({
         startDate: z.date(),
         endDate: z.date(),
         includeRecurring: z.boolean().default(true),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const allUserEvents = await ctx.db.lunarEvent.findMany({
         where: {
           userId,
           isActive: true,
         },
       });
-      
+
       const eventsInRange: Array<{
         id: string;
         title: string;
@@ -232,25 +240,28 @@ export const lunarEventsRouter = createTRPCRouter({
         lunarDateFormatted: string;
         isRecurringInstance?: boolean;
       }> = [];
-      
+
       for (const event of allUserEvents) {
         try {
           if (event.isRecurring && input.includeRecurring) {
             // For recurring events, calculate occurrences in the date range
             const startYear = input.startDate.getFullYear();
             const endYear = input.endDate.getFullYear();
-            
+
             for (let year = startYear; year <= endYear; year++) {
               try {
                 const gregorianDate = lunarToGregorian(
-                  year, 
-                  event.lunarMonth, 
-                  event.lunarDay
+                  year,
+                  event.lunarMonth,
+                  event.lunarDay,
                 );
-                
-                if (gregorianDate >= input.startDate && gregorianDate <= input.endDate) {
+
+                if (
+                  gregorianDate >= input.startDate &&
+                  gregorianDate <= input.endDate
+                ) {
                   const lunarInfo = gregorianToLunar(gregorianDate);
-                  
+
                   eventsInRange.push({
                     ...event,
                     gregorianDate,
@@ -258,7 +269,7 @@ export const lunarEventsRouter = createTRPCRouter({
                     isRecurringInstance: year !== event.lunarYear,
                   });
                 }
-              } catch (error) {
+              } catch {
                 // Skip invalid dates for this year
                 continue;
               }
@@ -269,19 +280,22 @@ export const lunarEventsRouter = createTRPCRouter({
               const gregorianDate = lunarToGregorian(
                 event.lunarYear,
                 event.lunarMonth,
-                event.lunarDay
+                event.lunarDay,
               );
-              
-              if (gregorianDate >= input.startDate && gregorianDate <= input.endDate) {
+
+              if (
+                gregorianDate >= input.startDate &&
+                gregorianDate <= input.endDate
+              ) {
                 const lunarInfo = gregorianToLunar(gregorianDate);
-                
+
                 eventsInRange.push({
                   ...event,
                   gregorianDate,
                   lunarDateFormatted: formatLunarDate(lunarInfo),
                 });
               }
-            } catch (error) {
+            } catch {
               // Skip invalid dates
               continue;
             }
@@ -290,10 +304,12 @@ export const lunarEventsRouter = createTRPCRouter({
           console.warn(`Error processing event ${event.id}:`, error);
         }
       }
-      
+
       // Sort by Gregorian date
-      eventsInRange.sort((a, b) => a.gregorianDate.getTime() - b.gregorianDate.getTime());
-      
+      eventsInRange.sort(
+        (a, b) => a.gregorianDate.getTime() - b.gregorianDate.getTime(),
+      );
+
       return eventsInRange;
     }),
 
@@ -304,14 +320,14 @@ export const lunarEventsRouter = createTRPCRouter({
     .input(
       z.object({
         days: z.number().min(1).max(365).default(30),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const startDate = new Date();
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + input.days);
-      
+
       // Reuse the logic from getByDateRange
       const allUserEvents = await ctx.db.lunarEvent.findMany({
         where: {
@@ -319,7 +335,7 @@ export const lunarEventsRouter = createTRPCRouter({
           isActive: true,
         },
       });
-      
+
       const eventsInRange: Array<{
         id: string;
         title: string;
@@ -333,25 +349,25 @@ export const lunarEventsRouter = createTRPCRouter({
         lunarDateFormatted: string;
         isRecurringInstance?: boolean;
       }> = [];
-      
+
       for (const event of allUserEvents) {
         try {
           if (event.isRecurring) {
             // For recurring events, calculate occurrences in the date range
             const startYear = startDate.getFullYear();
             const endYear = endDate.getFullYear();
-            
+
             for (let year = startYear; year <= endYear; year++) {
               try {
                 const gregorianDate = lunarToGregorian(
-                  year, 
-                  event.lunarMonth, 
-                  event.lunarDay
+                  year,
+                  event.lunarMonth,
+                  event.lunarDay,
                 );
-                
+
                 if (gregorianDate >= startDate && gregorianDate <= endDate) {
                   const lunarInfo = gregorianToLunar(gregorianDate);
-                  
+
                   eventsInRange.push({
                     ...event,
                     gregorianDate,
@@ -359,7 +375,7 @@ export const lunarEventsRouter = createTRPCRouter({
                     isRecurringInstance: year !== event.lunarYear,
                   });
                 }
-              } catch (error) {
+              } catch {
                 // Skip invalid dates for this year
                 continue;
               }
@@ -370,19 +386,19 @@ export const lunarEventsRouter = createTRPCRouter({
               const gregorianDate = lunarToGregorian(
                 event.lunarYear,
                 event.lunarMonth,
-                event.lunarDay
+                event.lunarDay,
               );
-              
+
               if (gregorianDate >= startDate && gregorianDate <= endDate) {
                 const lunarInfo = gregorianToLunar(gregorianDate);
-                
+
                 eventsInRange.push({
                   ...event,
                   gregorianDate,
                   lunarDateFormatted: formatLunarDate(lunarInfo),
                 });
               }
-            } catch (error) {
+            } catch {
               // Skip invalid dates
               continue;
             }
@@ -391,10 +407,12 @@ export const lunarEventsRouter = createTRPCRouter({
           console.warn(`Error processing event ${event.id}:`, error);
         }
       }
-      
+
       // Sort by Gregorian date
-      eventsInRange.sort((a, b) => a.gregorianDate.getTime() - b.gregorianDate.getTime());
-      
+      eventsInRange.sort(
+        (a, b) => a.gregorianDate.getTime() - b.gregorianDate.getTime(),
+      );
+
       return eventsInRange;
     }),
 
@@ -405,31 +423,31 @@ export const lunarEventsRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const event = await ctx.db.lunarEvent.findFirst({
         where: { id: input.id, userId },
       });
-      
+
       if (!event) {
         throw new Error("Event not found or access denied");
       }
-      
+
       // Calculate Gregorian date for this event
       let gregorianDate: Date | null = null;
       let lunarDateFormatted = "";
-      
+
       try {
         gregorianDate = lunarToGregorian(
           event.lunarYear,
           event.lunarMonth,
-          event.lunarDay
+          event.lunarDay,
         );
         const lunarInfo = gregorianToLunar(gregorianDate);
         lunarDateFormatted = formatLunarDate(lunarInfo);
       } catch (error) {
         console.warn(`Error calculating dates for event ${event.id}:`, error);
       }
-      
+
       return {
         ...event,
         gregorianDate,

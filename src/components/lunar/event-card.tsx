@@ -18,51 +18,58 @@ interface EventCardProps {
     gregorianDate?: Date;
     lunarDateFormatted?: string;
   };
-  onEdit?: (event: EventCardProps['event']) => void;
+  onEdit?: (event: EventCardProps["event"]) => void;
   onDelete?: (eventId: string) => void;
   showActions?: boolean;
   compact?: boolean;
 }
 
-export function EventCard({ 
-  event, 
-  onEdit, 
-  onDelete, 
+export function EventCard({
+  event,
+  onEdit,
+  onDelete,
   showActions = true,
-  compact = false 
+  compact = false,
 }: EventCardProps) {
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'short'
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "short",
     });
   };
 
   const getReminderText = (days: number) => {
     switch (days) {
-      case 1: return 'Trước 1 ngày';
-      case 3: return 'Trước 3 ngày';
-      case 7: return 'Trước 1 tuần';
-      default: return `Trước ${days} ngày`;
+      case 1:
+        return "Trước 1 ngày";
+      case 3:
+        return "Trước 3 ngày";
+      case 7:
+        return "Trước 1 tuần";
+      default:
+        return `Trước ${days} ngày`;
     }
   };
 
   if (compact) {
     return (
-      <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
+      <div className="bg-card flex items-center justify-between rounded-lg border p-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {event.isRecurring && (
-              <Repeat className="h-4 w-4 text-muted-foreground" />
+              <Repeat className="text-muted-foreground h-4 w-4" />
             )}
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="text-muted-foreground h-4 w-4" />
           </div>
           <div>
             <h4 className="font-medium">{event.title}</h4>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{event.lunarDateFormatted || `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}</span>
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <span>
+                {event.lunarDateFormatted ??
+                  `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
+              </span>
               {event.gregorianDate && (
                 <>
                   <span>•</span>
@@ -75,11 +82,7 @@ export function EventCard({
         {showActions && (
           <div className="flex items-center gap-1">
             {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(event)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
                 <Edit className="h-4 w-4" />
               </Button>
             )}
@@ -107,19 +110,15 @@ export function EventCard({
             <h3 className="font-semibold">{event.title}</h3>
             {event.isRecurring && (
               <Badge variant="secondary" className="text-xs">
-                <Repeat className="h-3 w-3 mr-1" />
-Lặp lại hàng năm
+                <Repeat className="mr-1 h-3 w-3" />
+                Lặp lại hàng năm
               </Badge>
             )}
           </div>
           {showActions && (
             <div className="flex items-center gap-1">
               {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(event)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
                   <Edit className="h-4 w-4" />
                 </Button>
               )}
@@ -139,26 +138,27 @@ Lặp lại hàng năm
       </CardHeader>
       <CardContent className="space-y-3">
         {event.description && (
-          <p className="text-sm text-muted-foreground">{event.description}</p>
+          <p className="text-muted-foreground text-sm">{event.description}</p>
         )}
-        
+
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="text-muted-foreground h-4 w-4" />
             <span>
-              {event.lunarDateFormatted || `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
+              {event.lunarDateFormatted ??
+                `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
             </span>
           </div>
-          
+
           {event.gregorianDate && (
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="text-muted-foreground h-4 w-4" />
               <span>{formatDate(event.gregorianDate)}</span>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="text-muted-foreground h-4 w-4" />
             <span>Nhắc nhở {getReminderText(event.reminderDays)}</span>
           </div>
         </div>

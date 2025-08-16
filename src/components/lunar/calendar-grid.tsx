@@ -8,22 +8,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { vietnameseText, formatVietnameseDate, getVietnameseMonth, getVietnameseWeekday } from "@/lib/vietnamese-localization";
+import { vietnameseText } from "@/lib/vietnamese-localization";
 
 interface CalendarGridProps {
   className?: string;
   showEvents?: boolean;
 }
 
-export function CalendarGrid({ className, showEvents = false }: CalendarGridProps) {
+export function CalendarGrid({
+  className,
+  showEvents = false,
+}: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const { data, isLoading, error } = api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
-    year,
-    month,
-  });
+  const { data, isLoading, error } =
+    api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
+      year,
+      month,
+    });
 
   // Prefetch adjacent months for smooth navigation
   const prevMonth = month === 0 ? 11 : month - 1;
@@ -41,8 +45,8 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     month: nextMonth,
   });
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(new Date(year, month + (direction === 'next' ? 1 : -1), 1));
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate(new Date(year, month + (direction === "next" ? 1 : -1), 1));
   };
 
   const goToToday = () => {
@@ -96,46 +100,47 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-xl">
             {vietnameseText.months[month]} năm {year}
-            {isLoading && <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
+            {isLoading && (
+              <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+            )}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigateMonth('prev')}
+              onClick={() => navigateMonth("prev")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigateMonth('next')}
+              onClick={() => navigateMonth("next")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={goToToday}
-            >
+            <Button variant="default" size="sm" onClick={goToToday}>
               {vietnameseText.today}
             </Button>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground space-y-1">
-          <p>Âm lịch: {data.lunarMonthInfo?.vietnameseMonthName || 'Đang tải...'} năm {data.lunarMonthInfo?.lunarYear || year}</p>
-          <p>Năm: {zodiacYear || 'Đang tải...'}</p>
+        <div className="text-muted-foreground space-y-1 text-sm">
+          <p>
+            Âm lịch: {data.lunarMonthInfo?.vietnameseMonthName || "Đang tải..."}{" "}
+            năm {data.lunarMonthInfo?.lunarYear || year}
+          </p>
+          <p>Năm: {zodiacYear || "Đang tải..."}</p>
         </div>
       </CardHeader>
       <CardContent>
         {/* Week header */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
+        <div className="mb-2 grid grid-cols-7 gap-2">
           {weekDays.map((day) => (
             <div
               key={day}
-              className="h-8 flex items-center justify-center text-sm font-medium text-muted-foreground"
+              className="text-muted-foreground flex h-8 items-center justify-center text-sm font-medium"
             >
               {day}
             </div>
@@ -148,34 +153,35 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
             <div
               key={`day-${day.gregorianDate.getTime()}-${index}`}
               className={cn(
-                "min-h-20 p-2 rounded-lg border transition-colors",
+                "min-h-20 rounded-lg border p-2 transition-colors",
                 day.isCurrentMonth
                   ? "bg-background border-border"
                   : "bg-muted/30 border-muted text-muted-foreground",
-                day.isToday && "ring-2 ring-primary ring-offset-2",
-                day.isImportant && day.isCurrentMonth && "bg-accent/50 border-accent"
+                day.isToday && "ring-primary ring-2 ring-offset-2",
+                day.isImportant &&
+                  day.isCurrentMonth &&
+                  "bg-accent/50 border-accent",
               )}
             >
               {/* Gregorian date */}
               <div className="flex items-start justify-between">
-                <span className={cn(
-                  "text-sm font-medium",
-                  day.isToday && "text-primary font-bold"
-                )}>
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    day.isToday && "text-primary font-bold",
+                  )}
+                >
                   {day.gregorianDate.getDate()}
                 </span>
                 {day.isImportant && (
-                  <Badge
-                    variant="secondary"
-                    className="text-xs px-1 py-0 h-4"
-                  >
+                  <Badge variant="secondary" className="h-4 px-1 py-0 text-xs">
                     {day.lunarDate.day === 1 ? "M1" : "R"}
                   </Badge>
                 )}
                 {day.vietnameseHoliday && (
                   <Badge
                     variant="default"
-                    className="text-xs px-1 py-0 h-4 bg-red-500"
+                    className="h-4 bg-red-500 px-1 py-0 text-xs"
                     title={day.vietnameseHoliday}
                   >
                     Lễ
@@ -185,17 +191,22 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
 
               {/* Vietnamese Lunar date */}
               <div className="mt-1">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {day.lunarDate.dayName}
                 </div>
                 {day.lunarDate.day === 1 && (
-                  <div className="text-xs font-medium text-primary">
+                  <div className="text-primary text-xs font-medium">
                     {day.lunarDate.monthName}
                   </div>
                 )}
                 {day.vietnameseHoliday && (
-                  <div className="text-xs font-medium text-red-600 truncate" title={day.vietnameseHoliday}>
-                    {day.vietnameseHoliday.length > 8 ? day.vietnameseHoliday.substring(0, 8) + '...' : day.vietnameseHoliday}
+                  <div
+                    className="truncate text-xs font-medium text-red-600"
+                    title={day.vietnameseHoliday}
+                  >
+                    {day.vietnameseHoliday.length > 8
+                      ? day.vietnameseHoliday.substring(0, 8) + "..."
+                      : day.vietnameseHoliday}
                   </div>
                 )}
               </div>
@@ -206,14 +217,14 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
                   {day.events.slice(0, 2).map((event, eventIndex) => (
                     <div
                       key={`${index}-event-${eventIndex}`}
-                      className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md truncate border border-blue-200"
-                      title={event?.title || 'Sự kiện cá nhân'}
+                      className="truncate rounded-md border border-blue-200 bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700"
+                      title={event?.title || "Sự kiện cá nhân"}
                     >
-                      📅 {event?.title || 'Sự kiện'}
+                      📅 {event?.title || "Sự kiện"}
                     </div>
                   ))}
                   {day.events.length > 2 && (
-                    <div className="text-xs text-blue-600 font-medium">
+                    <div className="text-xs font-medium text-blue-600">
                       +{day.events.length - 2} sự kiện khác
                     </div>
                   )}
@@ -224,22 +235,22 @@ export function CalendarGrid({ className, showEvents = false }: CalendarGridProp
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-4 flex items-center gap-4 border-t pt-4 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded border-2 border-primary"></div>
+            <div className="border-primary h-3 w-3 rounded border-2"></div>
             <span>{vietnameseText.today}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-accent/50"></div>
+            <div className="bg-accent/50 h-3 w-3 rounded"></div>
             <span>Ngày quan trọng (Mồng 1/Rằm)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-red-500"></div>
+            <div className="h-3 w-3 rounded bg-red-500"></div>
             <span>Lễ hội truyền thống</span>
           </div>
           {showEvents && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
+              <div className="h-3 w-3 rounded border border-blue-200 bg-blue-100"></div>
               <span>Sự kiện âm lịch</span>
             </div>
           )}

@@ -7,25 +7,23 @@ export const notificationsRouter = createTRPCRouter({
    */
   getPreferences: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
-    
+
     let preferences = await ctx.db.notificationPreference.findUnique({
       where: { userId },
     });
-    
+
     // Create default preferences if they don't exist
-    if (!preferences) {
-      preferences = await ctx.db.notificationPreference.create({
-        data: {
-          userId,
-          enablePushNotifications: false,
-          enableEmailNotifications: true,
-          defaultReminderDays: 3,
-          remindFor15thDay: true,
-          remindFor1stDay: true,
-        },
-      });
-    }
-    
+    preferences ??= await ctx.db.notificationPreference.create({
+      data: {
+        userId,
+        enablePushNotifications: false,
+        enableEmailNotifications: true,
+        defaultReminderDays: 3,
+        remindFor15thDay: true,
+        remindFor1stDay: true,
+      },
+    });
+
     return preferences;
   }),
 
@@ -40,11 +38,11 @@ export const notificationsRouter = createTRPCRouter({
         defaultReminderDays: z.number().min(1).max(30).optional(),
         remindFor15thDay: z.boolean().optional(),
         remindFor1stDay: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const preferences = await ctx.db.notificationPreference.upsert({
         where: { userId },
         update: input,
@@ -57,7 +55,7 @@ export const notificationsRouter = createTRPCRouter({
           remindFor1stDay: input.remindFor1stDay ?? true,
         },
       });
-      
+
       return preferences;
     }),
 
@@ -71,11 +69,11 @@ export const notificationsRouter = createTRPCRouter({
         p256dh: z.string().min(1, "p256dh key is required"),
         auth: z.string().min(1, "auth key is required"),
         userAgent: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       // Create or update push subscription
       const subscription = await ctx.db.pushSubscription.upsert({
         where: {
@@ -97,7 +95,7 @@ export const notificationsRouter = createTRPCRouter({
           userAgent: input.userAgent,
         },
       });
-      
+
       // Enable push notifications in preferences
       await ctx.db.notificationPreference.upsert({
         where: { userId },
@@ -111,7 +109,7 @@ export const notificationsRouter = createTRPCRouter({
           remindFor1stDay: true,
         },
       });
-      
+
       return subscription;
     }),
 
@@ -122,11 +120,11 @@ export const notificationsRouter = createTRPCRouter({
     .input(
       z.object({
         endpoint: z.string().url("Invalid endpoint URL").optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       if (input.endpoint) {
         // Remove specific subscription
         await ctx.db.pushSubscription.deleteMany({
@@ -141,12 +139,12 @@ export const notificationsRouter = createTRPCRouter({
           where: { userId },
         });
       }
-      
+
       // Check if user has any remaining push subscriptions
       const remainingSubscriptions = await ctx.db.pushSubscription.count({
         where: { userId },
       });
-      
+
       // If no subscriptions remain, disable push notifications in preferences
       if (remainingSubscriptions === 0) {
         await ctx.db.notificationPreference.upsert({
@@ -162,7 +160,7 @@ export const notificationsRouter = createTRPCRouter({
           },
         });
       }
-      
+
       return { success: true };
     }),
 
@@ -171,7 +169,7 @@ export const notificationsRouter = createTRPCRouter({
    */
   getPushSubscriptions: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
-    
+
     const subscriptions = await ctx.db.pushSubscription.findMany({
       where: { userId },
       select: {
@@ -181,7 +179,7 @@ export const notificationsRouter = createTRPCRouter({
         createdAt: true,
       },
     });
-    
+
     return subscriptions;
   }),
 
@@ -193,24 +191,27 @@ export const notificationsRouter = createTRPCRouter({
       z.object({
         type: z.enum(["push", "email", "both"]),
         message: z.string().min(1, "Message is required"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       // Get user preferences
       const preferences = await ctx.db.notificationPreference.findUnique({
         where: { userId },
       });
-      
+
       const results: { push?: boolean; email?: boolean; error?: string } = {};
-      
-      if ((input.type === "push" || input.type === "both") && preferences?.enablePushNotifications) {
+
+      if (
+        (input.type === "push" || input.type === "both") &&
+        preferences?.enablePushNotifications
+      ) {
         // Get user's push subscriptions
         const subscriptions = await ctx.db.pushSubscription.findMany({
           where: { userId },
         });
-        
+
         if (subscriptions.length > 0) {
           // TODO: Implement actual push notification sending
           // For now, just mark as success
@@ -219,13 +220,16 @@ export const notificationsRouter = createTRPCRouter({
           results.error = "No push subscriptions found";
         }
       }
-      
-      if ((input.type === "email" || input.type === "both") && preferences?.enableEmailNotifications) {
+
+      if (
+        (input.type === "email" || input.type === "both") &&
+        preferences?.enableEmailNotifications
+      ) {
         // TODO: Implement actual email sending using Resend
         // For now, just mark as success
         results.email = true;
       }
-      
+
       return results;
     }),
 
@@ -234,26 +238,24 @@ export const notificationsRouter = createTRPCRouter({
    */
   getSettingsSummary: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
-    
+
     // Get preferences directly
     let preferences = await ctx.db.notificationPreference.findUnique({
       where: { userId },
     });
-    
+
     // Create default preferences if they don't exist
-    if (!preferences) {
-      preferences = await ctx.db.notificationPreference.create({
-        data: {
-          userId,
-          enablePushNotifications: false,
-          enableEmailNotifications: true,
-          defaultReminderDays: 3,
-          remindFor15thDay: true,
-          remindFor1stDay: true,
-        },
-      });
-    }
-    
+    preferences ??= await ctx.db.notificationPreference.create({
+      data: {
+        userId,
+        enablePushNotifications: false,
+        enableEmailNotifications: true,
+        defaultReminderDays: 3,
+        remindFor15thDay: true,
+        remindFor1stDay: true,
+      },
+    });
+
     // Get push subscriptions directly
     const pushSubscriptions = await ctx.db.pushSubscription.findMany({
       where: { userId },
@@ -264,13 +266,14 @@ export const notificationsRouter = createTRPCRouter({
         createdAt: true,
       },
     });
-    
+
     return {
       preferences,
       pushSubscriptionsCount: pushSubscriptions.length,
       hasActivePushSubscriptions: pushSubscriptions.length > 0,
       notificationChannels: {
-        push: preferences.enablePushNotifications && pushSubscriptions.length > 0,
+        push:
+          preferences.enablePushNotifications && pushSubscriptions.length > 0,
         email: preferences.enableEmailNotifications,
       },
     };

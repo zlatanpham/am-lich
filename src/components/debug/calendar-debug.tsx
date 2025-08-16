@@ -9,16 +9,21 @@ export function CalendarDebug() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const { data, isLoading } = api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
-    year,
-    month,
-  });
+  const { data, isLoading } =
+    api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
+      year,
+      month,
+    });
 
-  const { data: lunarEvents } = api.lunarEvents.getAll.useQuery({ includeInactive: false });
+  const { data: lunarEvents } = api.lunarEvents.getAll.useQuery({
+    includeInactive: false,
+  });
 
   if (isLoading) return <div>Loading debug info...</div>;
 
-  const daysWithEvents = data?.days?.filter(day => day.events && day.events.length > 0);
+  const daysWithEvents = data?.days?.filter(
+    (day) => day.events && day.events.length > 0,
+  );
 
   return (
     <Card className="mt-4">
@@ -28,21 +33,25 @@ export function CalendarDebug() {
       <CardContent className="space-y-4">
         <div>
           <h4 className="font-semibold">Total Lunar Events:</h4>
-          <p>{lunarEvents?.length || 0} events found</p>
+          <p>{lunarEvents?.length ?? 0} events found</p>
         </div>
 
         <div>
           <h4 className="font-semibold">Days with Events in Calendar:</h4>
-          <p>{daysWithEvents?.length || 0} days have events</p>
+          <p>{daysWithEvents?.length ?? 0} days have events</p>
         </div>
 
         {daysWithEvents && daysWithEvents.length > 0 && (
           <div>
             <h4 className="font-semibold">Events on Calendar:</h4>
             {daysWithEvents.map((day, index) => (
-              <div key={index} className="border p-2 rounded mb-2">
-                <p><strong>Date:</strong> {day.gregorianDate.toDateString()}</p>
-                <p><strong>Events:</strong></p>
+              <div key={index} className="mb-2 rounded border p-2">
+                <p>
+                  <strong>Date:</strong> {day.gregorianDate.toDateString()}
+                </p>
+                <p>
+                  <strong>Events:</strong>
+                </p>
                 <ul className="ml-4">
                   {day.events?.map((event, eventIndex) => (
                     <li key={eventIndex}>• {event.title}</li>
@@ -56,11 +65,18 @@ export function CalendarDebug() {
         {lunarEvents && lunarEvents.length > 0 && (
           <div>
             <h4 className="font-semibold">All Lunar Events:</h4>
-            {lunarEvents.map((event: any) => (
-              <div key={event.id} className="border p-2 rounded mb-2">
-                <p><strong>Title:</strong> {event.title}</p>
-                <p><strong>Lunar Date:</strong> {event.lunarDay}/{event.lunarMonth}/{event.lunarYear}</p>
-                <p><strong>Recurring:</strong> {event.isRecurring ? 'Yes' : 'No'}</p>
+            {lunarEvents.map((event) => (
+              <div key={event.id} className="mb-2 rounded border p-2">
+                <p>
+                  <strong>Title:</strong> {event.title}
+                </p>
+                <p>
+                  <strong>Lunar Date:</strong> {event.lunarDay}/
+                  {event.lunarMonth}/{event.lunarYear}
+                </p>
+                <p>
+                  <strong>Recurring:</strong> {event.isRecurring ? "Yes" : "No"}
+                </p>
               </div>
             ))}
           </div>
