@@ -14,56 +14,63 @@ import { api } from "@/trpc/react";
 import { Plus, Search, Calendar, Moon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+type LunarEvent = {
+  id: string;
+  title: string;
+  description?: string | null;
+  lunarYear: number;
+  lunarMonth: number;
+  lunarDay: number;
+  isRecurring: boolean;
+  reminderDays: number;
+  gregorianDate?: Date;
+  lunarDateFormatted?: string;
+};
+
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<{
-    id: string;
-    title: string;
-    description?: string | null | undefined;
-    lunarYear: number;
-    lunarMonth: number;
-    lunarDay: number;
-    isRecurring: boolean;
-    reminderDays: number;
-    gregorianDate?: Date;
-    lunarDateFormatted?: string;
-  } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<LunarEvent | null>(null);
 
-  const { 
-    data: events, 
-    isLoading: eventsLoading
-  } = api.lunarEvents.getAll.useQuery({ includeInactive: false });
+  const { data: events, isLoading: eventsLoading } =
+    api.lunarEvents.getAll.useQuery({ includeInactive: false });
 
-  const { 
-    data: upcomingEvents, 
-    isLoading: upcomingLoading 
-  } = api.lunarEvents.getUpcoming.useQuery({ days: 60 });
+  const { data: upcomingEvents, isLoading: upcomingLoading } =
+    api.lunarEvents.getUpcoming.useQuery({ days: 60 });
 
-  const filteredEvents = events?.filter((event: any) => {
-    const titleMatch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const descriptionMatch = event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
-    return titleMatch || descriptionMatch;
-  }) ?? [];
+  const filteredEvents =
+    events?.filter((event: LunarEvent) => {
+      const titleMatch = event.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const descriptionMatch =
+        event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ??
+        false;
+      return titleMatch || descriptionMatch;
+    }) ?? [];
 
-  const handleEventAction = useCallback(async (action: 'edit' | 'delete', eventOrId: string | any) => {
-    if (action === 'delete') {
-      // Find the event by ID for delete action
-      const event = typeof eventOrId === 'string' 
-        ? events?.find((e: any) => e.id === eventOrId)
-        : eventOrId;
-      if (event) {
-        setSelectedEvent(event);
-        setShowDeleteDialog(true);
+  const handleEventAction = useCallback(
+    async (action: "edit" | "delete", eventOrId: string | LunarEvent) => {
+      if (action === "delete") {
+        // Find the event by ID for delete action
+        const event =
+          typeof eventOrId === "string"
+            ? events?.find((e: LunarEvent) => e.id === eventOrId)
+            : eventOrId;
+        if (event) {
+          setSelectedEvent(event);
+          setShowDeleteDialog(true);
+        }
+      } else if (action === "edit") {
+        // Use the event object directly for edit action
+        setSelectedEvent(eventOrId as LunarEvent);
+        setShowEditDialog(true);
       }
-    } else if (action === 'edit') {
-      // Use the event object directly for edit action
-      setSelectedEvent(eventOrId);
-      setShowEditDialog(true);
-    }
-  }, [events]);
+    },
+    [events],
+  );
 
   const handleCloseCreateDialog = useCallback((open: boolean) => {
     setShowCreateDialog(open);
@@ -97,7 +104,7 @@ export default function EventsPage() {
   }, []);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6 py-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Quản lý sự kiện âm lịch</h1>
@@ -122,15 +129,15 @@ export default function EventsPage() {
         <TabsContent value="lunar" className="space-y-6">
           <div className="flex items-center justify-between">
             <Button onClick={() => setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Tạo sự kiện âm lịch
             </Button>
           </div>
 
           {/* Search and filters */}
           <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="relative max-w-md flex-1">
+              <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
               <Input
                 placeholder="Tìm kiếm sự kiện âm lịch..."
                 value={searchTerm}
@@ -138,9 +145,7 @@ export default function EventsPage() {
                 className="pl-10"
               />
             </div>
-            <Badge variant="outline">
-              {filteredEvents.length} sự kiện
-            </Badge>
+            <Badge variant="outline">{filteredEvents.length} sự kiện</Badge>
           </div>
 
           {/* Upcoming events section */}
@@ -149,26 +154,35 @@ export default function EventsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-Sự kiện sắp tới
+                  Sự kiện sắp tới
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {upcomingLoading ? (
                   <div className="space-y-2">
                     {Array.from({ length: 3 }, (_, i) => (
-                      <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+                      <div
+                        key={i}
+                        className="bg-muted h-16 animate-pulse rounded"
+                      />
                     ))}
                   </div>
                 ) : (
-                  upcomingEvents.slice(0, 5).map((event, index) => (
-                    <EventCard
-                      key={`upcoming-${event.id}-${index}`}
-                      event={event}
-                      onEdit={(event: any) => handleEventAction('edit', event)}
-                      onDelete={(eventId: string) => handleEventAction('delete', eventId)}
-                      compact={true}
-                    />
-                  ))
+                  upcomingEvents
+                    .slice(0, 5)
+                    .map((event, index) => (
+                      <EventCard
+                        key={`upcoming-${event.id}-${index}`}
+                        event={event}
+                        onEdit={(event: LunarEvent) =>
+                          handleEventAction("edit", event)
+                        }
+                        onDelete={(eventId: string) =>
+                          handleEventAction("delete", eventId)
+                        }
+                        compact={true}
+                      />
+                    ))
                 )}
               </CardContent>
             </Card>
@@ -178,28 +192,39 @@ Sự kiện sắp tới
           <div className="space-y-4">
             {eventsLoading ? (
               Array.from({ length: 5 }, (_, i) => (
-                <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+                <div
+                  key={i}
+                  className="bg-muted h-32 animate-pulse rounded-lg"
+                />
               ))
             ) : filteredEvents.length > 0 ? (
               filteredEvents.map((event) => (
                 <EventCard
                   key={event.id}
                   event={event}
-                  onEdit={(event: any) => handleEventAction('edit', event)}
-                  onDelete={(eventId: string) => handleEventAction('delete', eventId)}
+                  onEdit={(event: LunarEvent) =>
+                    handleEventAction("edit", event)
+                  }
+                  onDelete={(eventId: string) =>
+                    handleEventAction("delete", eventId)
+                  }
                 />
               ))
             ) : (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Chưa có sự kiện</h3>
+                  <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                  <h3 className="mb-2 text-lg font-semibold">
+                    Chưa có sự kiện
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm ? "Không tìm thấy sự kiện nào khớp" : "Bạn chưa tạo sự kiện âm lịch nào"}
+                    {searchTerm
+                      ? "Không tìm thấy sự kiện nào khớp"
+                      : "Bạn chưa tạo sự kiện âm lịch nào"}
                   </p>
                   {!searchTerm && (
                     <Button onClick={() => setShowCreateDialog(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Tạo sự kiện âm lịch đầu tiên
                     </Button>
                   )}
@@ -213,9 +238,11 @@ Sự kiện sắp tới
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-5 w-5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Tổng số sự kiện âm lịch</p>
+                    <p className="text-muted-foreground text-sm">
+                      Tổng số sự kiện âm lịch
+                    </p>
                     <p className="text-2xl font-bold">{events?.length ?? 0}</p>
                   </div>
                 </div>
@@ -225,11 +252,14 @@ Sự kiện sắp tới
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-muted-foreground" />
+                  <Plus className="text-muted-foreground h-5 w-5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Sự kiện lặp lại hàng năm</p>
+                    <p className="text-muted-foreground text-sm">
+                      Sự kiện lặp lại hàng năm
+                    </p>
                     <p className="text-2xl font-bold">
-                      {events?.filter((e: any) => e.isRecurring).length ?? 0}
+                      {events?.filter((e: LunarEvent) => e.isRecurring)
+                        .length ?? 0}
                     </p>
                   </div>
                 </div>
@@ -239,9 +269,11 @@ Sự kiện sắp tới
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
-                  <Badge className="h-5 w-5 text-muted-foreground" />
+                  <Badge className="text-muted-foreground h-5 w-5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Sự kiện sắp tới</p>
+                    <p className="text-muted-foreground text-sm">
+                      Sự kiện sắp tới
+                    </p>
                     <p className="text-2xl font-bold">
                       {upcomingEvents?.length ?? 0}
                     </p>
@@ -257,8 +289,8 @@ Sự kiện sắp tới
         </TabsContent>
       </Tabs>
 
-      <CreateEventDialog 
-        open={showCreateDialog} 
+      <CreateEventDialog
+        open={showCreateDialog}
         onOpenChange={handleCloseCreateDialog}
       />
 
