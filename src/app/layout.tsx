@@ -11,8 +11,16 @@ import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Âm Lịch Việt Nam",
-  description: "Xem ngày âm lịch, quản lý sự kiện âm lịch, nhận thông báo ngày quan trọng",
-  keywords: ["âm lịch", "lịch việt nam", "truyền thống việt nam", "lễ hội", "nhắc nhở", "pha trăng"],
+  description:
+    "Xem ngày âm lịch, quản lý sự kiện âm lịch, nhận thông báo ngày quan trọng",
+  keywords: [
+    "âm lịch",
+    "lịch việt nam",
+    "truyền thống việt nam",
+    "lễ hội",
+    "nhắc nhở",
+    "pha trăng",
+  ],
   authors: [{ name: "Âm Lịch Việt Nam" }],
   creator: "Âm Lịch Việt Nam",
   publisher: "Âm Lịch Việt Nam",
@@ -23,7 +31,11 @@ export const metadata: Metadata = {
   },
   icons: [
     { rel: "icon", url: "/favicon.png", type: "image/png", sizes: "64x64" },
-    { rel: "apple-touch-icon", url: "/icons/icon-192x192.png", sizes: "192x192" },
+    {
+      rel: "apple-touch-icon",
+      url: "/icons/icon-192x192.png",
+      sizes: "192x192",
+    },
   ],
   manifest: "/manifest.json",
   appleWebApp: {
@@ -54,13 +66,49 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1d4ed8" />
+
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/android-chrome-192x192.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="512x512"
+          href="/android-chrome-512x512.png"
+        />
+
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#111111" />
+
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Âm Lịch VN" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-title" content="Âm Lịch VN" />
-        <script 
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
@@ -81,9 +129,7 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <TRPCReactProvider>
-            <HydrateClient>
-              {children}
-            </HydrateClient>
+            <HydrateClient>{children}</HydrateClient>
           </TRPCReactProvider>
         </SessionProvider>
         <Toaster />

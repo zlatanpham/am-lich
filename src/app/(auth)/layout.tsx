@@ -24,24 +24,12 @@ export default function AuthLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="vi" className={`${geist.variable}`}>
-      <head>
-        <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1d4ed8" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Âm Lịch VN" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="mobile-web-app-title" content="Âm Lịch VN" />
-      </head>
       <body>
         <SessionProvider>
           <TRPCReactProvider>
             <HydrateClient>
               {/* Fullscreen layout without header/footer */}
-              <div className="min-h-screen">
-                {children}
-              </div>
+              <div className="min-h-screen">{children}</div>
             </HydrateClient>
           </TRPCReactProvider>
         </SessionProvider>

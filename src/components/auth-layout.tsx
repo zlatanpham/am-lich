@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar } from "lucide-react";
+import { MoonStarIcon } from "lucide-react";
 import Link from "next/link";
 
 interface AuthLayoutProps {
@@ -14,12 +14,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="w-full max-w-sm">
           {/* Minimal Logo */}
           <div className="mb-6 text-center">
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 text-lg font-medium text-slate-700 dark:text-slate-300 hover:opacity-70 transition-opacity"
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-lg font-medium text-slate-700 transition-opacity hover:opacity-70 dark:text-slate-300"
             >
-              <div className="bg-primary/80 text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                <Calendar className="size-3" />
+              <div className="bg-primary/80 text-primary-foreground flex size-10 items-center justify-center rounded-md">
+                <MoonStarIcon className="size-5" />
               </div>
               <span>Lịch âm</span>
             </Link>
@@ -29,15 +29,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           </div>
 
           {/* Auth Form */}
-          <div className="relative">
-            {children}
-          </div>
+          <div className="relative">{children}</div>
         </div>
-        
+
         {/* Subtle background decoration */}
-        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/3 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-primary/3 rounded-full blur-3xl"></div>
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="bg-primary/3 absolute -top-32 -right-32 h-64 w-64 rounded-full blur-3xl"></div>
+          <div className="bg-primary/3 absolute -bottom-32 -left-32 h-64 w-64 rounded-full blur-3xl"></div>
         </div>
       </div>
     </div>
