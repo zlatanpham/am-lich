@@ -71,8 +71,8 @@ export default function SignUpPage() {
   return (
     <AuthLayout>
       <div className="flex flex-col gap-4">
-        <Card className="w-full shadow-sm border border-slate-200/50 bg-white/60 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/50">
-          <CardHeader className="text-center space-y-1 pb-4">
+        <Card className="w-full border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
+          <CardHeader className="space-y-1 pb-4 text-center">
             <CardTitle className="text-lg font-medium text-slate-800 dark:text-slate-200">
               Tạo tài khoản mới
             </CardTitle>
@@ -82,15 +82,24 @@ export default function SignUpPage() {
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-3"
+              >
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Tên</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Tên
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Tên của bạn" className="text-sm" {...field} />
+                        <Input
+                          placeholder="Tên của bạn"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -101,9 +110,15 @@ export default function SignUpPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Email</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Email
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="email@example.com" className="text-sm" {...field} />
+                        <Input
+                          placeholder="email@example.com"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -114,7 +129,9 @@ export default function SignUpPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Mật khẩu</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Mật khẩu
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -132,7 +149,9 @@ export default function SignUpPage() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Xác nhận mật khẩu</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Xác nhận mật khẩu
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -145,16 +164,25 @@ export default function SignUpPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full text-sm" disabled={registerUser.status === "pending"}>
-                  {registerUser.status === "pending" ? "Đang tạo tài khoản..." : "Đăng ký"}
+                <Button
+                  type="submit"
+                  className="w-full text-sm"
+                  disabled={registerUser.status === "pending"}
+                >
+                  {registerUser.status === "pending"
+                    ? "Đang tạo tài khoản..."
+                    : "Đăng ký"}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-        <div className="text-slate-500 text-center text-xs">
+        <div className="text-center text-xs text-slate-500">
           Đã có tài khoản?{" "}
-          <Link href="/login" className="text-slate-600 hover:text-slate-800 hover:underline">
+          <Link
+            href="/login"
+            className="text-slate-600 hover:text-slate-800 hover:underline"
+          >
             Đăng nhập
           </Link>
         </div>

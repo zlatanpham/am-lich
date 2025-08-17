@@ -22,7 +22,10 @@ interface CreateEventDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps) {
+export function CreateEventDialog({
+  open,
+  onOpenChange,
+}: CreateEventDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [lunarYear, setLunarYear] = useState("");
@@ -68,7 +71,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !lunarYear || !lunarMonth || !lunarDay) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
@@ -78,13 +81,20 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     const month = parseInt(lunarMonth);
     const day = parseInt(lunarDay);
 
-    if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 30) {
+    if (
+      year < 1900 ||
+      year > 2100 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 30
+    ) {
       toast.error("Năm, tháng và ngày âm lịch không hợp lệ");
       return;
     }
 
     if (!isMountedRef.current) return;
-    
+
     setIsLoading(true);
     try {
       await createEventMutation.mutateAsync({
@@ -95,7 +105,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
         lunarDay: day,
         isRecurring,
       });
-      
+
       // Refetch events to update the list
       if (isMountedRef.current) {
         await utils.lunarEvents.getAll.invalidate();
@@ -128,7 +138,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="description">Mô tả</Label>
             <Textarea
@@ -189,9 +199,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
               checked={isRecurring}
               onCheckedChange={setIsRecurring}
             />
-            <Label htmlFor="recurring">
-              Lặp lại hàng năm
-            </Label>
+            <Label htmlFor="recurring">Lặp lại hàng năm</Label>
           </div>
 
           <DialogFooter>

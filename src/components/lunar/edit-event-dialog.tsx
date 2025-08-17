@@ -32,7 +32,11 @@ interface EditEventDialogProps {
   } | null;
 }
 
-export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogProps) {
+export function EditEventDialog({
+  open,
+  onOpenChange,
+  event,
+}: EditEventDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [lunarYear, setLunarYear] = useState("");
@@ -97,7 +101,7 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!event || !title.trim() || !lunarYear || !lunarMonth || !lunarDay) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
@@ -108,7 +112,14 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
     const day = parseInt(lunarDay);
     const reminder = parseInt(reminderDays) || 3;
 
-    if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 30) {
+    if (
+      year < 1900 ||
+      year > 2100 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 30
+    ) {
       toast.error("Năm, tháng và ngày âm lịch không hợp lệ");
       return;
     }
@@ -119,7 +130,7 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
     }
 
     if (!isMountedRef.current) return;
-    
+
     setIsLoading(true);
     try {
       await updateEventMutation.mutateAsync({
@@ -132,7 +143,7 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
         isRecurring,
         reminderDays: reminder,
       });
-      
+
       // Refetch events to update the list
       if (isMountedRef.current) {
         await utils.lunarEvents.getAll.invalidate();
@@ -165,7 +176,7 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="edit-description">Mô tả</Label>
             <Textarea
@@ -239,9 +250,7 @@ export function EditEventDialog({ open, onOpenChange, event }: EditEventDialogPr
               checked={isRecurring}
               onCheckedChange={setIsRecurring}
             />
-            <Label htmlFor="edit-recurring">
-              Lặp lại hàng năm
-            </Label>
+            <Label htmlFor="edit-recurring">Lặp lại hàng năm</Label>
           </div>
 
           <DialogFooter>

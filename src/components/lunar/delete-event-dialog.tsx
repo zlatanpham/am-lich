@@ -23,7 +23,11 @@ interface DeleteEventDialogProps {
   } | null;
 }
 
-export function DeleteEventDialog({ open, onOpenChange, event }: DeleteEventDialogProps) {
+export function DeleteEventDialog({
+  open,
+  onOpenChange,
+  event,
+}: DeleteEventDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isMountedRef = useRef(true);
 
@@ -57,7 +61,7 @@ export function DeleteEventDialog({ open, onOpenChange, event }: DeleteEventDial
       await deleteEventMutation.mutateAsync({
         id: event.id,
       });
-      
+
       // Refetch events to update the list
       if (isMountedRef.current) {
         await utils.lunarEvents.getAll.invalidate();
@@ -75,19 +79,22 @@ export function DeleteEventDialog({ open, onOpenChange, event }: DeleteEventDial
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Trash2 className="h-5 w-5 text-destructive" />
+            <Trash2 className="text-destructive h-5 w-5" />
             Xóa sự kiện
           </DialogTitle>
           <DialogDescription>
-            Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể
+            hoàn tác.
           </DialogDescription>
         </DialogHeader>
-        
+
         {event && (
           <div className="py-4">
-            <div className="rounded-lg bg-muted p-4">
-              <p className="font-medium text-sm text-muted-foreground">Sự kiện sẽ bị xóa:</p>
-              <p className="font-semibold mt-1">{event.title}</p>
+            <div className="bg-muted rounded-lg p-4">
+              <p className="text-muted-foreground text-sm font-medium">
+                Sự kiện sẽ bị xóa:
+              </p>
+              <p className="mt-1 font-semibold">{event.title}</p>
             </div>
           </div>
         )}

@@ -59,17 +59,18 @@ export default function LoginPage() {
         router.replace("/");
       } catch (error) {
         console.log(error);
-        toast.error("Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.");
+        toast.error(
+          "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.",
+        );
       }
     });
   };
 
-
   return (
     <AuthLayout>
       <div className="flex flex-col gap-4">
-        <Card className="shadow-sm border border-slate-200/50 bg-white/60 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/50">
-          <CardHeader className="text-center space-y-1 pb-4">
+        <Card className="border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
+          <CardHeader className="space-y-1 pb-4 text-center">
             <CardTitle className="text-lg font-medium text-slate-800 dark:text-slate-200">
               Chào mừng trở lại
             </CardTitle>
@@ -79,13 +80,18 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-3"
+              >
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Email</FormLabel>
+                      <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                        Email
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -104,7 +110,9 @@ export default function LoginPage() {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center justify-between">
-                        <FormLabel className="text-sm text-slate-600 dark:text-slate-400">Mật khẩu</FormLabel>
+                        <FormLabel className="text-sm text-slate-600 dark:text-slate-400">
+                          Mật khẩu
+                        </FormLabel>
                         <div className="text-right text-xs">
                           <Link
                             href="/forgot-password"
@@ -137,9 +145,12 @@ export default function LoginPage() {
             </Form>
           </CardContent>
         </Card>
-        <div className="text-slate-500 text-center text-xs">
+        <div className="text-center text-xs text-slate-500">
           Chưa có tài khoản?{" "}
-          <Link href="/signup" className="text-slate-600 hover:text-slate-800 hover:underline">
+          <Link
+            href="/signup"
+            className="text-slate-600 hover:text-slate-800 hover:underline"
+          >
             Đăng ký ngay
           </Link>
         </div>

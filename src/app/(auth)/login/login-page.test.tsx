@@ -25,12 +25,12 @@ vi.mock("@/app/actions/auth", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: function MockLink({ 
-    children, 
-    href, 
-    ...props 
-  }: { 
-    children: React.ReactNode; 
+  default: function MockLink({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
     href: string;
     [key: string]: unknown;
   }) {
@@ -58,14 +58,18 @@ describe("LoginPage", () => {
 
     // Check Vietnamese title and description
     expect(screen.getByText("Chào mừng trở lại")).toBeInTheDocument();
-    expect(screen.getByText("Đăng nhập bằng email và mật khẩu của bạn")).toBeInTheDocument();
+    expect(
+      screen.getByText("Đăng nhập bằng email và mật khẩu của bạn"),
+    ).toBeInTheDocument();
 
     // Check Vietnamese form labels
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Mật khẩu")).toBeInTheDocument();
 
     // Check Vietnamese button text
-    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Đăng nhập" }),
+    ).toBeInTheDocument();
 
     // Check Vietnamese link text
     expect(screen.getByText("Quên mật khẩu?")).toBeInTheDocument();
@@ -94,7 +98,7 @@ describe("LoginPage", () => {
 
   it("renders within auth layout", () => {
     render(<LoginPage />);
-    
+
     // Check that the auth layout wrapper is present
     expect(screen.getByTestId("auth-layout")).toBeInTheDocument();
   });
@@ -103,7 +107,9 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     // Check forgot password link
-    const forgotPasswordLink = screen.getByRole("link", { name: "Quên mật khẩu?" });
+    const forgotPasswordLink = screen.getByRole("link", {
+      name: "Quên mật khẩu?",
+    });
     expect(forgotPasswordLink).toHaveAttribute("href", "/forgot-password");
 
     // Check signup link

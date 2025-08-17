@@ -71,9 +71,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Đăng nhập</DialogTitle>
@@ -141,8 +139,8 @@ export function LoginDialog({ children }: LoginDialogProps) {
           </Form>
           <div className="text-muted-foreground text-center text-sm">
             {"Chưa có tài khoản? "}
-            <Link 
-              href="/signup" 
+            <Link
+              href="/signup"
               className="text-primary hover:underline"
               onClick={() => setOpen(false)}
             >

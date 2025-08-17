@@ -18,7 +18,11 @@ import { LoginDialog } from "@/components/login-dialog";
 export function HeaderDropdown() {
   const { data: session } = useSession();
 
-  const user = session?.user as { name?: string; email?: string; image?: string };
+  const user = session?.user as {
+    name?: string;
+    email?: string;
+    image?: string;
+  };
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
@@ -28,13 +32,13 @@ export function HeaderDropdown() {
     return (
       <div className="flex items-center gap-2">
         <LoginDialog>
-          <button className="text-sm hover:text-primary transition-colors">
+          <button className="hover:text-primary text-sm transition-colors">
             Đăng nhập
           </button>
         </LoginDialog>
         <Link
           href="/signup"
-          className="text-sm bg-primary text-primary-foreground px-3 py-1 rounded-md hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm transition-colors"
         >
           Đăng ký
         </Link>
@@ -47,7 +51,10 @@ export function HeaderDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
+            <AvatarImage
+              src={user?.image ?? undefined}
+              alt={user?.name ?? "User"}
+            />
             <AvatarFallback>
               {user?.name?.charAt(0) ?? user?.email?.charAt(0) ?? "U"}
             </AvatarFallback>
@@ -57,41 +64,41 @@ export function HeaderDropdown() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-sm leading-none font-medium">{user?.name}</p>
+            <p className="text-muted-foreground text-xs leading-none">
               {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem asChild>
           <Link href="/events" className="flex items-center">
             <CalendarPlus className="mr-2 h-4 w-4" />
             <span>Sự kiện của tôi</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem asChild>
           <Link href="/notifications" className="flex items-center">
             <Bell className="mr-2 h-4 w-4" />
             <span>Cài đặt thông báo</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem asChild>
           <Link href="/account" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             <span>Tài khoản</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem asChild>
-          <a 
-            href="https://github.com/your-username/am-lich/issues" 
-            target="_blank" 
+          <a
+            href="https://github.com/your-username/am-lich/issues"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center"
           >
@@ -99,9 +106,9 @@ export function HeaderDropdown() {
             <span>Góp ý phản hồi</span>
           </a>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Đăng xuất</span>

@@ -19,4 +19,3 @@ export async function login(formData: FormData) {
     throw new Error(errorMessage);
   }
 }
-
