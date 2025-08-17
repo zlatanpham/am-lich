@@ -13,6 +13,7 @@ import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
 import { api } from "@/trpc/react";
 import { Plus, Search, Calendar, Moon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSession } from "next-auth/react";
 
 type LunarEvent = {
   id: string;
@@ -28,6 +29,7 @@ type LunarEvent = {
 };
 
 export default function EventsPage() {
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -35,10 +37,20 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<LunarEvent | null>(null);
 
   const { data: events, isLoading: eventsLoading } =
-    api.lunarEvents.getAll.useQuery({ includeInactive: false });
+    api.lunarEvents.getAll.useQuery(
+      { includeInactive: false },
+      {
+        enabled: !!session?.user,
+      },
+    );
 
   const { data: upcomingEvents, isLoading: upcomingLoading } =
-    api.lunarEvents.getUpcoming.useQuery({ days: 60 });
+    api.lunarEvents.getUpcoming.useQuery(
+      { days: 60 },
+      {
+        enabled: !!session?.user,
+      },
+    );
 
   const filteredEvents =
     events?.filter((event: LunarEvent) => {

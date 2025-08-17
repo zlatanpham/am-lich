@@ -6,13 +6,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 import { Calendar, Clock } from "lucide-react";
 import { vietnameseText } from "@/lib/vietnamese-localization";
+import { useSession } from "next-auth/react";
 
 export function UpcomingImportantDates() {
+  const { data: session } = useSession();
   const { data, isLoading, error } =
     api.lunarCalendar.getNextImportantVietnameseDates.useQuery();
-  const { data: upcomingEvents } = api.lunarEvents.getUpcoming.useQuery({
-    days: 30,
-  });
+  const { data: upcomingEvents } = api.lunarEvents.getUpcoming.useQuery(
+    {
+      days: 30,
+    },
+    {
+      enabled: !!session?.user,
+    },
+  );
 
   if (isLoading) {
     return (
