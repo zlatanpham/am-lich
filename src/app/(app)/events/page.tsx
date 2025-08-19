@@ -10,8 +10,9 @@ import { CalendarGrid } from "@/components/lunar/calendar-grid";
 import { CreateEventDialog } from "@/components/lunar/create-event-dialog";
 import { EditEventDialog } from "@/components/lunar/edit-event-dialog";
 import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
+import { ExportCalendarDialog } from "@/components/lunar/export-calendar-dialog";
 import { api } from "@/trpc/react";
-import { Plus, Search, Calendar, Moon } from "lucide-react";
+import { Plus, Search, Calendar, Moon, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "next-auth/react";
 
@@ -34,6 +35,7 @@ export default function EventsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<LunarEvent | null>(null);
 
   const { data: events, isLoading: eventsLoading } =
@@ -112,6 +114,7 @@ export default function EventsPage() {
       setShowCreateDialog(false);
       setShowEditDialog(false);
       setShowDeleteDialog(false);
+      setShowExportDialog(false);
     };
   }, []);
 
@@ -143,6 +146,14 @@ export default function EventsPage() {
             <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Tạo sự kiện âm lịch
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportDialog(true)}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Xuất lịch
             </Button>
           </div>
 
@@ -316,6 +327,11 @@ export default function EventsPage() {
         open={showDeleteDialog}
         onOpenChange={handleCloseDeleteDialog}
         event={selectedEvent}
+      />
+
+      <ExportCalendarDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
       />
     </div>
   );
