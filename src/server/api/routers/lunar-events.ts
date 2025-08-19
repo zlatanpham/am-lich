@@ -157,22 +157,30 @@ export const lunarEventsRouter = createTRPCRouter({
         ],
       });
 
-      return events.map((event) => ({
-        ...event,
-        lunarDateFormatted: formatLunarDate({
-          year: event.lunarYear,
-          month: event.lunarMonth,
-          day: event.lunarDay,
-          monthName: "", // Will be filled by formatLunarDate
-          dayName: "", // Will be filled by formatLunarDate
-          isLeapMonth: false, // TODO: Add leap month support to database
-          lunarPhase: "",
-          zodiacYear: "",
-          zodiacMonth: "",
-          zodiacDay: "",
-          vietnameseAnimal: "", // Will be filled by formatLunarDate
-        }),
-      }));
+      return events.map((event) => {
+        let gregorianDate: Date | null = null;
+        let lunarDateFormatted = "";
+
+        try {
+          gregorianDate = lunarToGregorian(
+            event.lunarYear,
+            event.lunarMonth,
+            event.lunarDay,
+          );
+          const lunarInfo = gregorianToLunar(gregorianDate);
+          lunarDateFormatted = formatLunarDate(lunarInfo);
+        } catch (error) {
+          console.warn(`Error calculating dates for event ${event.id}:`, error);
+          // Fallback to simple format if conversion fails
+          lunarDateFormatted = `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`;
+        }
+
+        return {
+          ...event,
+          gregorianDate,
+          lunarDateFormatted,
+        };
+      });
     }),
 
   /**

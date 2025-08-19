@@ -24,7 +24,7 @@ type LunarEvent = {
   lunarDay: number;
   isRecurring: boolean;
   reminderDays: number;
-  gregorianDate?: Date;
+  gregorianDate?: Date | null;
   lunarDateFormatted?: string;
 };
 

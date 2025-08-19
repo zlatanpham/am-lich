@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Edit, Trash2, Repeat } from "lucide-react";
+import {
+  daysUntilVietnam,
+  formatVietnameseLunarDate,
+  gregorianToLunar,
+  lunarToGregorian,
+} from "@/lib/lunar-calendar";
 
 interface EventCardProps {
   event: {
@@ -15,7 +21,7 @@ interface EventCardProps {
     lunarDay: number;
     isRecurring: boolean;
     reminderDays: number;
-    gregorianDate?: Date;
+    gregorianDate?: Date | null;
     lunarDateFormatted?: string;
   };
   onEdit?: (event: EventCardProps["event"]) => void;
@@ -53,47 +59,120 @@ export function EventCard({
     }
   };
 
+  const getDaysUntilEvent = () => {
+    let targetDate = event.gregorianDate;
+
+    // For recurring events, find the next occurrence if the original date is in the past
+    if (event.isRecurring && targetDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (targetDate < today) {
+        // Find next occurrence by checking current year and next year
+        const currentYear = today.getFullYear();
+        try {
+          // Try current year first
+          const thisYearDate = lunarToGregorian(
+            currentYear,
+            event.lunarMonth,
+            event.lunarDay,
+          );
+          if (thisYearDate >= today) {
+            targetDate = thisYearDate;
+          } else {
+            // Try next year
+            const nextYearDate = lunarToGregorian(
+              currentYear + 1,
+              event.lunarMonth,
+              event.lunarDay,
+            );
+            targetDate = nextYearDate;
+          }
+        } catch {
+          // If date doesn't exist this year or next year, try the year after
+          try {
+            targetDate = lunarToGregorian(
+              currentYear + 2,
+              event.lunarMonth,
+              event.lunarDay,
+            );
+          } catch {
+            return null; // Give up if we can't find a valid date
+          }
+        }
+      }
+    }
+
+    if (!targetDate) return null;
+
+    const days = daysUntilVietnam(targetDate);
+    if (days === 0) return "Hôm nay";
+    if (days === 1) return "Ngày mai";
+    if (days < 0) return `${Math.abs(days)} ngày trước`;
+    return `${days} ngày nữa`;
+  };
+
+  const getLunarDateFormatted = () => {
+    if (event.lunarDateFormatted) return event.lunarDateFormatted;
+    if (event.gregorianDate) {
+      const lunarDate = gregorianToLunar(event.gregorianDate);
+      return formatVietnameseLunarDate(lunarDate);
+    }
+    return `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`;
+  };
+
   if (compact) {
     return (
-      <div className="bg-card flex items-center justify-between rounded-lg border p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+      <div className="bg-card flex items-center justify-between rounded-lg border p-2">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {event.isRecurring && (
-              <Repeat className="text-muted-foreground h-4 w-4" />
+              <Repeat className="text-muted-foreground h-3 w-3" />
             )}
-            <Calendar className="text-muted-foreground h-4 w-4" />
+            <Calendar className="text-muted-foreground h-3 w-3" />
           </div>
-          <div>
-            <h4 className="font-medium">{event.title}</h4>
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <span>
-                {event.lunarDateFormatted ??
-                  `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
-              </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h4 className="truncate text-sm font-medium">{event.title}</h4>
+              {getDaysUntilEvent() && (
+                <Badge variant="outline" className="h-5 px-1 py-0 text-xs">
+                  {getDaysUntilEvent()}
+                </Badge>
+              )}
+            </div>
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
+              <span className="truncate">{getLunarDateFormatted()}</span>
               {event.gregorianDate && (
                 <>
                   <span>•</span>
-                  <span>{formatDate(event.gregorianDate)}</span>
+                  <span className="truncate">
+                    {formatDate(event.gregorianDate)}
+                  </span>
                 </>
               )}
             </div>
           </div>
         </div>
         {showActions && (
-          <div className="flex items-center gap-1">
+          <div className="flex flex-shrink-0 items-center gap-1">
             {onEdit && (
-              <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
-                <Edit className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => onEdit(event)}
+              >
+                <Edit className="h-3 w-3" />
               </Button>
             )}
             {onDelete && (
               <Button
                 variant="ghost"
                 size="sm"
+                className="text-destructive hover:text-destructive h-6 w-6 p-0"
                 onClick={() => onDelete(event.id)}
-                className="text-destructive hover:text-destructive"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </Button>
             )}
           </div>
@@ -104,7 +183,7 @@ export function EventCard({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">{event.title}</h3>
@@ -112,6 +191,11 @@ export function EventCard({
               <Badge variant="secondary" className="text-xs">
                 <Repeat className="mr-1 h-3 w-3" />
                 Lặp lại hàng năm
+              </Badge>
+            )}
+            {getDaysUntilEvent() && (
+              <Badge variant="outline" className="text-xs">
+                {getDaysUntilEvent()}
               </Badge>
             )}
           </div>
@@ -136,18 +220,15 @@ export function EventCard({
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 pt-0">
         {event.description && (
           <p className="text-muted-foreground text-sm">{event.description}</p>
         )}
 
-        <div className="space-y-2 text-sm">
+        <div className="space-y-1 text-sm">
           <div className="flex items-center gap-2">
             <Calendar className="text-muted-foreground h-4 w-4" />
-            <span>
-              {event.lunarDateFormatted ??
-                `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`}
-            </span>
+            <span>{getLunarDateFormatted()}</span>
           </div>
 
           {event.gregorianDate && (
