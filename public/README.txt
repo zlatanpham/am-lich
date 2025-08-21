@@ -16,5 +16,6 @@ This package contains all the icons needed for your Progressive Web Application.
 - Android Chrome: 192x192, 512x512
 - MVP Icons: 48x48 to 1024x1024
 - Maskable Icons: 192x192, 512x512
+- iOS Safari Splash Screens: iPhone X to iPhone 14 Pro Max, iPad variants
 
 Generated with MVP Icon Generator

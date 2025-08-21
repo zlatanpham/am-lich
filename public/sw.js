@@ -272,8 +272,8 @@ self.addEventListener("push", (event) => {
   const options = {
     title: data.title || "Nhắc nhở lịch âm",
     body: data.body || "Bạn có nhắc nhở sự kiện âm lịch mới",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-96x96.png",
+    icon: "/icon-192x192.png",
+    badge: "/icon-96x96.png",
     data: {
       url: data.url || "/calendar",
       eventId: data.eventId,
