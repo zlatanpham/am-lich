@@ -26,8 +26,11 @@ function generateICalendarContent(
   ];
 
   events.forEach((event) => {
-    const startDate =
-      event.date.toISOString().split("T")[0]?.replace(/-/g, "") ?? "";
+    // Use local date to avoid timezone conversion issues
+    const year = event.date.getFullYear();
+    const month = String(event.date.getMonth() + 1).padStart(2, "0");
+    const day = String(event.date.getDate()).padStart(2, "0");
+    const startDate = `${year}${month}${day}`;
     const eventId = `${event.id}@vietnamese-lunar-calendar.local`;
 
     ics.push(
