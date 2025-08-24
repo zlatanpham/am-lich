@@ -56,7 +56,8 @@ export default function LoginPage() {
         formData.append("password", data.password);
         await login(formData);
         await update();
-        router.replace("/");
+        // Use window.location.href to do a full page reload to ensure session state is properly synced
+        window.location.href = "/";
       } catch (error) {
         console.log(error);
         toast.error(
