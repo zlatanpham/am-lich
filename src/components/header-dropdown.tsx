@@ -97,7 +97,7 @@ export function HeaderDropdown() {
 
         <DropdownMenuItem asChild>
           <a
-            href="https://github.com/your-username/am-lich/issues"
+            href="https://github.com/zlatanpham/am-lich/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center"
