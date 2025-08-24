@@ -30,12 +30,12 @@ export default function AppLayout({
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 border-t">
-        <div className="text-muted-foreground container mx-auto px-4 py-8 text-center text-sm">
-          <p>
-            &copy; 2025 Ứng dụng Lịch âm. Dựa trên hệ thống lịch âm truyền thống
-            Việt Nam.
-          </p>
+      <footer className="mt-0 border-t">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+            Made with ❤️ by{" "}
+            <a href="https://github.com/zlatanpham">Zlatan Pham</a>
+          </div>
         </div>
       </footer>
     </div>
