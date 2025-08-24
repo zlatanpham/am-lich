@@ -123,60 +123,122 @@ export function EventCard({
 
   if (compact) {
     return (
-      <div className="bg-card flex items-center justify-between rounded-lg border p-2">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            {event.isRecurring && (
-              <Repeat className="text-muted-foreground h-3 w-3" />
-            )}
-            <Calendar className="text-muted-foreground h-3 w-3" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h4 className="truncate text-sm font-medium">{event.title}</h4>
+      <div className="bg-card rounded-lg border p-2 sm:p-4 md:p-2">
+        {/* Mobile layout */}
+        <div className="flex flex-col gap-3 sm:hidden">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex items-center gap-2">
+                {event.isRecurring && (
+                  <Repeat className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                )}
+                <h4 className="text-base leading-relaxed font-semibold">
+                  {event.title}
+                </h4>
+              </div>
               {getDaysUntilEvent() && (
-                <Badge variant="outline" className="h-5 px-1 py-0 text-xs">
+                <Badge variant="outline" className="px-3 py-1 text-sm">
                   {getDaysUntilEvent()}
                 </Badge>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center gap-2 text-xs">
-              <span className="truncate">{getLunarDateFormatted()}</span>
-              {event.gregorianDate && (
-                <>
-                  <span>•</span>
-                  <span className="truncate">
-                    {formatDate(event.gregorianDate)}
-                  </span>
-                </>
-              )}
+            {showActions && (
+              <div className="flex flex-shrink-0 items-start gap-1">
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => onEdit(event)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                    onClick={() => onDelete(event.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span className="min-w-0 flex-1">{getLunarDateFormatted()}</span>
             </div>
+            {event.gregorianDate && (
+              <div className="text-muted-foreground flex items-center gap-2 pl-6 text-sm">
+                <span className="min-w-0 flex-1">
+                  {formatDate(event.gregorianDate)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
-        {showActions && (
-          <div className="flex flex-shrink-0 items-center gap-1">
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => onEdit(event)}
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive h-6 w-6 p-0"
-                onClick={() => onDelete(event.id)}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            )}
+
+        {/* Desktop layout (original) */}
+        <div className="hidden items-center justify-between sm:flex">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {event.isRecurring && (
+                <Repeat className="text-muted-foreground h-3 w-3" />
+              )}
+              <Calendar className="text-muted-foreground h-3 w-3" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="truncate text-sm font-medium">{event.title}</h4>
+                {getDaysUntilEvent() && (
+                  <Badge variant="outline" className="h-5 px-1 py-0 text-xs">
+                    {getDaysUntilEvent()}
+                  </Badge>
+                )}
+              </div>
+              <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                <span className="truncate">{getLunarDateFormatted()}</span>
+                {event.gregorianDate && (
+                  <>
+                    <span>•</span>
+                    <span className="truncate">
+                      {formatDate(event.gregorianDate)}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+          {showActions && (
+            <div className="flex flex-shrink-0 items-center gap-1">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={() => onEdit(event)}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive h-6 w-6 p-0"
+                  onClick={() => onDelete(event.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -184,7 +246,59 @@ export function EventCard({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+        {/* Mobile layout */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex items-center gap-2">
+                {event.isRecurring && (
+                  <Repeat className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                )}
+                <h3 className="text-lg leading-relaxed font-semibold">
+                  {event.title}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {event.isRecurring && (
+                  <Badge variant="secondary" className="text-xs">
+                    Lặp lại hàng năm
+                  </Badge>
+                )}
+                {getDaysUntilEvent() && (
+                  <Badge variant="outline" className="px-3 py-1 text-sm">
+                    {getDaysUntilEvent()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            {showActions && (
+              <div className="ml-2 flex items-start gap-1">
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(event)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(event.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop layout (original) */}
+        <div className="hidden items-start justify-between sm:flex">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">{event.title}</h3>
             {event.isRecurring && (
