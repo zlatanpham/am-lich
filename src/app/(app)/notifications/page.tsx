@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,10 +27,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import {
+  pushNotificationService,
+  subscriptionToData,
+} from "@/lib/push-notifications";
 
 export default function NotificationsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>("default");
+
+  // Check notification permission on mount
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
 
   const {
     data: user,
@@ -45,6 +59,28 @@ export default function NotificationsPage() {
 
   const { data: settingsSummary, refetch: refetchSummary } =
     api.notifications.getSettingsSummary.useQuery();
+
+  const subscribeToPush = api.notifications.subscribeToPush.useMutation({
+    onSuccess: () => {
+      toast.success("Đã đăng ký thông báo đẩy thành công");
+      void refetchSummary();
+    },
+    onError: (error) => {
+      toast.error("Lỗi khi đăng ký thông báo đẩy: " + error.message);
+    },
+  });
+
+  const unsubscribeFromPush = api.notifications.unsubscribeFromPush.useMutation(
+    {
+      onSuccess: () => {
+        toast.success("Đã hủy đăng ký thông báo đẩy");
+        void refetchSummary();
+      },
+      onError: (error) => {
+        toast.error("Lỗi khi hủy đăng ký: " + error.message);
+      },
+    },
+  );
 
   const updatePreferences = api.notifications.updatePreferences.useMutation({
     onSuccess: () => {
@@ -76,11 +112,58 @@ export default function NotificationsPage() {
   ) => {
     setIsLoading(true);
     try {
-      await updatePreferences.mutateAsync({ [field]: value });
+      // Special handling for push notifications
+      if (field === "enablePushNotifications") {
+        if (value) {
+          await handleSubscribeToPush();
+        } else {
+          await handleUnsubscribeFromPush();
+        }
+      } else {
+        await updatePreferences.mutateAsync({ [field]: value });
+      }
     } catch {
       // Error is handled by mutation onError
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSubscribeToPush = async () => {
+    if (!pushNotificationService.isSupported()) {
+      toast.error("Trình duyệt không hỗ trợ thông báo đẩy");
+      return;
+    }
+
+    try {
+      const subscription = await pushNotificationService.subscribe();
+      const subscriptionData = subscriptionToData(subscription);
+
+      await subscribeToPush.mutateAsync(subscriptionData);
+      await updatePreferences.mutateAsync({ enablePushNotifications: true });
+    } catch (error) {
+      console.error("Push subscription error:", error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Không thể đăng ký thông báo đẩy");
+      }
+    }
+  };
+
+  const handleUnsubscribeFromPush = async () => {
+    try {
+      const subscription = await pushNotificationService.getSubscription();
+      if (subscription) {
+        await pushNotificationService.unsubscribe();
+        await unsubscribeFromPush.mutateAsync({
+          endpoint: subscription.endpoint,
+        });
+      }
+      await updatePreferences.mutateAsync({ enablePushNotifications: false });
+    } catch (error) {
+      console.error("Push unsubscribe error:", error);
+      toast.error("Không thể hủy đăng ký thông báo đẩy");
     }
   };
 
@@ -119,6 +202,31 @@ export default function NotificationsPage() {
           Quản lý nhắc nhở sự kiện âm lịch và tùy chọn thông báo của bạn
         </p>
       </div>
+
+      {/* Notification Permission Status */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3">
+            {notificationPermission === "granted" ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : notificationPermission === "denied" ? (
+              <X className="h-5 w-5 text-red-500" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+            )}
+            <div>
+              <p className="font-medium">Browser Permission</p>
+              <p className="text-muted-foreground text-sm">
+                {notificationPermission === "granted"
+                  ? "Notifications allowed"
+                  : notificationPermission === "denied"
+                    ? "Notifications blocked - please enable in browser settings"
+                    : "Permission not requested yet"}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Settings Summary */}
       {settingsSummary && (
@@ -263,19 +371,40 @@ export default function NotificationsPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleTestNotification("push")}
-                  disabled={
-                    testNotification.isPending ||
-                    !settingsSummary?.hasActivePushSubscriptions
-                  }
-                >
-                  Gửi thông báo đẩy thử nghiệm
-                </Button>
-                <Badge variant="secondary">Đang phát triển</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                {!settingsSummary?.hasActivePushSubscriptions && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleSubscribeToPush}
+                    disabled={isLoading || subscribeToPush.isPending}
+                  >
+                    {subscribeToPush.isPending
+                      ? "Đang đăng ký..."
+                      : "Đăng ký ngay"}
+                  </Button>
+                )}
+
+                {settingsSummary?.hasActivePushSubscriptions && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTestNotification("push")}
+                      disabled={testNotification.isPending}
+                    >
+                      Gửi thông báo thử nghiệm
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUnsubscribeFromPush}
+                      disabled={isLoading || unsubscribeFromPush.isPending}
+                    >
+                      Hủy đăng ký
+                    </Button>
+                  </>
+                )}
               </div>
             </>
           )}

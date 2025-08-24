@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  sendPushNotification,
+  NotificationTemplates,
+  isSubscriptionExpired,
+} from "@/lib/push-notification-sender";
 
 export const notificationsRouter = createTRPCRouter({
   /**
@@ -213,9 +218,43 @@ export const notificationsRouter = createTRPCRouter({
         });
 
         if (subscriptions.length > 0) {
-          // TODO: Implement actual push notification sending
-          // For now, just mark as success
-          results.push = true;
+          try {
+            // Send test notification to all user's subscriptions
+            const payload = NotificationTemplates.testNotification(
+              input.message,
+            );
+            let successCount = 0;
+            const failedSubscriptions: string[] = [];
+
+            for (const subscription of subscriptions) {
+              const result = await sendPushNotification(subscription, payload);
+              if (result.success) {
+                successCount++;
+              } else {
+                failedSubscriptions.push(subscription.id);
+
+                // Check if subscription is expired and clean it up
+                if (
+                  result.error &&
+                  isSubscriptionExpired(new Error(result.error))
+                ) {
+                  await ctx.db.pushSubscription.delete({
+                    where: { id: subscription.id },
+                  });
+                }
+              }
+            }
+
+            if (successCount > 0) {
+              results.push = true;
+            } else {
+              results.error = `Failed to send push notifications to all ${subscriptions.length} subscriptions`;
+            }
+          } catch (error) {
+            console.error("Error sending test push notification:", error);
+            results.error =
+              error instanceof Error ? error.message : "Unknown error";
+          }
         } else {
           results.error = "No push subscriptions found";
         }
@@ -232,6 +271,94 @@ export const notificationsRouter = createTRPCRouter({
 
       return results;
     }),
+
+  /**
+   * Force delete all push subscriptions (nuclear option)
+   */
+  deleteAllSubscriptions: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const deletedCount = await ctx.db.pushSubscription.deleteMany({
+      where: { userId },
+    });
+
+    return {
+      deletedCount: deletedCount.count,
+      message: `Deleted all ${deletedCount.count} subscriptions. You can now subscribe fresh.`,
+    };
+  }),
+
+  /**
+   * Clean up expired push subscriptions
+   */
+  cleanupExpiredSubscriptions: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    // Get all subscriptions for this user
+    const subscriptions = await ctx.db.pushSubscription.findMany({
+      where: { userId },
+    });
+
+    let cleanedCount = 0;
+    const results: Array<{
+      id: string;
+      endpoint: string;
+      status: "valid" | "expired" | "error";
+    }> = [];
+
+    for (const subscription of subscriptions) {
+      try {
+        // Try to send a test payload to check if subscription is valid
+        const testResult = await sendPushNotification(subscription, {
+          title: "Connection Test",
+          body: "Testing subscription validity",
+          requireInteraction: false,
+        });
+
+        if (testResult.success) {
+          results.push({
+            id: subscription.id,
+            endpoint: subscription.endpoint,
+            status: "valid",
+          });
+        } else {
+          if (
+            testResult.error &&
+            isSubscriptionExpired(new Error(testResult.error))
+          ) {
+            await ctx.db.pushSubscription.delete({
+              where: { id: subscription.id },
+            });
+            cleanedCount++;
+            results.push({
+              id: subscription.id,
+              endpoint: subscription.endpoint,
+              status: "expired",
+            });
+          } else {
+            results.push({
+              id: subscription.id,
+              endpoint: subscription.endpoint,
+              status: "error",
+            });
+          }
+        }
+      } catch (error) {
+        console.error(`Error checking subscription ${subscription.id}:`, error);
+        results.push({
+          id: subscription.id,
+          endpoint: subscription.endpoint,
+          status: "error",
+        });
+      }
+    }
+
+    return {
+      totalChecked: subscriptions.length,
+      cleanedCount,
+      results,
+    };
+  }),
 
   /**
    * Get notification settings summary
