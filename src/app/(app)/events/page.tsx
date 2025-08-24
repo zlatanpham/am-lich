@@ -142,6 +142,50 @@ export default function EventsPage() {
         </TabsList>
 
         <TabsContent value="lunar" className="space-y-6">
+          {/* Statistics cards for lunar events */}
+          <div className="grid grid-cols-3 gap-2">
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <Calendar className="text-muted-foreground h-4 w-4" />
+                  <p className="text-muted-foreground text-xs leading-tight">
+                    Tổng số sự kiện âm lịch
+                  </p>
+                  <p className="text-lg font-bold">{events?.length ?? 0}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <Plus className="text-muted-foreground h-4 w-4" />
+                  <p className="text-muted-foreground text-xs leading-tight">
+                    Sự kiện lặp lại hàng năm
+                  </p>
+                  <p className="text-lg font-bold">
+                    {events?.filter((e: LunarEvent) => e.isRecurring).length ??
+                      0}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <Badge className="text-muted-foreground h-4 w-4" />
+                  <p className="text-muted-foreground text-xs leading-tight">
+                    Sự kiện sắp tới
+                  </p>
+                  <p className="text-lg font-bold">
+                    {upcomingEvents?.length ?? 0}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex items-center justify-between">
             <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -231,6 +275,7 @@ export default function EventsPage() {
                   onDelete={(eventId: string) =>
                     handleEventAction("delete", eventId)
                   }
+                  compact={true}
                 />
               ))
             ) : (
@@ -254,56 +299,6 @@ export default function EventsPage() {
                 </CardContent>
               </Card>
             )}
-          </div>
-
-          {/* Statistics cards for lunar events */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="text-muted-foreground h-5 w-5" />
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Tổng số sự kiện âm lịch
-                    </p>
-                    <p className="text-2xl font-bold">{events?.length ?? 0}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Plus className="text-muted-foreground h-5 w-5" />
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Sự kiện lặp lại hàng năm
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {events?.filter((e: LunarEvent) => e.isRecurring)
-                        .length ?? 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Badge className="text-muted-foreground h-5 w-5" />
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Sự kiện sắp tới
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {upcomingEvents?.length ?? 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
 
