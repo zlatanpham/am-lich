@@ -92,6 +92,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
                       <Input
                         type="email"
                         placeholder="your@email.com"
+                        tabIndex={1}
                         {...field}
                       />
                     </FormControl>
@@ -111,6 +112,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
                           href="/forgot-password"
                           className="text-muted-foreground hover:underline"
                           onClick={() => setOpen(false)}
+                          tabIndex={3}
                         >
                           Quên mật khẩu?
                         </Link>
@@ -120,6 +122,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
                       <Input
                         type="password"
                         placeholder="********"
+                        tabIndex={2}
                         {...field}
                       />
                     </FormControl>
@@ -132,6 +135,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
                 type="submit"
                 className="w-full"
                 disabled={isPending}
+                tabIndex={4}
               >
                 Đăng nhập
               </Button>
@@ -143,6 +147,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
               href="/signup"
               className="text-primary hover:underline"
               onClick={() => setOpen(false)}
+              tabIndex={5}
             >
               Đăng ký
             </Link>
