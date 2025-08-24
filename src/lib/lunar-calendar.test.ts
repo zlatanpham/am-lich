@@ -148,6 +148,7 @@ describe("Lunar Calendar Utilities", () => {
         zodiacYear: "甲辰",
         zodiacMonth: "丁丑",
         zodiacDay: "甲子",
+        vietnameseAnimal: "Tỵ (Rắn)",
       };
 
       const formatted = formatLunarDate(lunarDate);
@@ -168,6 +169,7 @@ describe("Lunar Calendar Utilities", () => {
         zodiacYear: "甲辰",
         zodiacMonth: "丁丑",
         zodiacDay: "甲子",
+        vietnameseAnimal: "Tỵ (Rắn)",
       };
 
       const formatted = formatLunarDate(lunarDate);
@@ -185,6 +187,7 @@ describe("Lunar Calendar Utilities", () => {
           lunarDate: {} as LunarDate,
           isRecurring: false,
           reminderDays: 3,
+          eventType: "personal",
         },
         {
           id: "2",
@@ -193,6 +196,7 @@ describe("Lunar Calendar Utilities", () => {
           lunarDate: {} as LunarDate,
           isRecurring: false,
           reminderDays: 3,
+          eventType: "personal",
         },
       ];
 
@@ -218,6 +222,7 @@ describe("Lunar Calendar Utilities", () => {
         zodiacYear: "甲辰",
         zodiacMonth: "丁丑",
         zodiacDay: "甲子",
+        vietnameseAnimal: "Tỵ (Rắn)",
       };
 
       const date2: LunarDate = { ...date1 };

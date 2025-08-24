@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AuthLayout } from "@/components/auth-layout";
 
@@ -37,7 +36,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
   const { update } = useSession();
 
   const form = useForm<LoginFormValues>({
