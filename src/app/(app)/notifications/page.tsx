@@ -195,7 +195,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-6 py-6">
+    <div className="space-y-4 py-4 md:space-y-6 md:py-6">
       <div>
         <h1 className="text-3xl font-bold">Cài đặt thông báo</h1>
         <p className="text-muted-foreground">
@@ -203,141 +203,74 @@ export default function NotificationsPage() {
         </p>
       </div>
 
-      {/* Notification Permission Status */}
+      {/* Status Summary */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3">
-            {notificationPermission === "granted" ? (
-              <Check className="h-5 w-5 text-green-500" />
-            ) : notificationPermission === "denied" ? (
-              <X className="h-5 w-5 text-red-500" />
-            ) : (
-              <AlertCircle className="h-5 w-5 text-amber-500" />
-            )}
-            <div>
-              <p className="font-medium">Browser Permission</p>
-              <p className="text-muted-foreground text-sm">
-                {notificationPermission === "granted"
-                  ? "Notifications allowed"
-                  : notificationPermission === "denied"
-                    ? "Notifications blocked - please enable in browser settings"
-                    : "Permission not requested yet"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Settings Summary */}
-      {settingsSummary && (
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                {settingsSummary.notificationChannels.email ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <X className="text-muted-foreground h-5 w-5" />
-                )}
-                <div>
-                  <p className="font-medium">Thông báo email</p>
-                  <p className="text-muted-foreground text-sm">
-                    {settingsSummary.notificationChannels.email
-                      ? "Đã bật"
-                      : "Đã tắt"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                {settingsSummary.notificationChannels.push ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <X className="text-muted-foreground h-5 w-5" />
-                )}
-                <div>
-                  <p className="font-medium">Thông báo đẩy</p>
-                  <p className="text-muted-foreground text-sm">
-                    {settingsSummary.hasActivePushSubscriptions
-                      ? `${settingsSummary.pushSubscriptionsCount} thiết bị`
-                      : "Chưa đăng ký"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="font-medium">Nhắc nhở mặc định</p>
-                  <p className="text-muted-foreground text-sm">
-                    Trước {preferences?.defaultReminderDays} ngày
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Email Notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            Thông báo email
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="email-notifications">Bật thông báo email</Label>
-              <p className="text-muted-foreground text-sm">
-                Nhận nhắc nhở sự kiện âm lịch qua email
-              </p>
-            </div>
-            <Switch
-              id="email-notifications"
-              checked={preferences?.enableEmailNotifications ?? false}
-              onCheckedChange={(checked) =>
-                handlePreferenceChange("enableEmailNotifications", checked)
-              }
-              disabled={isLoading}
-            />
-          </div>
-
-          {preferences?.enableEmailNotifications && (
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-wrap items-center gap-4 md:gap-6">
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleTestNotification("email")}
-                disabled={testNotification.isPending}
-              >
-                Gửi email thử nghiệm
-              </Button>
-              <Badge variant="secondary">Đang phát triển</Badge>
+              {notificationPermission === "granted" ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : notificationPermission === "denied" ? (
+                <X className="h-4 w-4 text-red-500" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+              )}
+              <div>
+                <span className="text-sm font-medium">Browser Permission:</span>
+                <span className="text-muted-foreground ml-1 text-sm">
+                  {notificationPermission === "granted"
+                    ? "Notifications allowed"
+                    : notificationPermission === "denied"
+                      ? "Blocked"
+                      : "Not requested"}
+                </span>
+              </div>
             </div>
-          )}
+
+            {settingsSummary && (
+              <>
+                <div className="flex items-center gap-2">
+                  {settingsSummary.notificationChannels.push ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <X className="text-muted-foreground h-4 w-4" />
+                  )}
+                  <div>
+                    <span className="text-sm font-medium">Thông báo đẩy:</span>
+                    <span className="text-muted-foreground ml-1 text-sm">
+                      {settingsSummary.hasActivePushSubscriptions
+                        ? `${settingsSummary.pushSubscriptionsCount} thiết bị`
+                        : "Chưa đăng ký"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-blue-500" />
+                  <div>
+                    <span className="text-sm font-medium">
+                      Nhắc nhở mặc định:
+                    </span>
+                    <span className="text-muted-foreground ml-1 text-sm">
+                      Trước {preferences?.defaultReminderDays} ngày
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Push Notifications */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3 md:pb-6">
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5" />
             Thông báo đẩy
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 p-4 md:space-y-6 md:p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="push-notifications">Bật thông báo đẩy</Label>
@@ -357,7 +290,7 @@ export default function NotificationsPage() {
 
           {preferences?.enablePushNotifications && (
             <>
-              <div className="bg-muted/50 rounded-lg p-4">
+              <div className="bg-muted/50 rounded-lg p-3 md:p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-500" />
                   <span className="text-sm font-medium">
@@ -413,13 +346,13 @@ export default function NotificationsPage() {
 
       {/* Reminder Settings */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3 md:pb-6">
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
             Cài đặt nhắc nhở
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 p-4 md:space-y-6 md:p-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
@@ -435,7 +368,7 @@ export default function NotificationsPage() {
                 }
                 disabled={isLoading}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-40 sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -488,37 +421,6 @@ export default function NotificationsPage() {
                   disabled={isLoading}
                 />
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Advanced Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Cài đặt nâng cao
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="mb-2 font-medium">Kiểm soát tần suất thông báo</h4>
-              <p className="text-muted-foreground mb-3 text-sm">
-                Tránh thông báo quá thường xuyên, duy trì trải nghiệm sử dụng
-                tốt.
-              </p>
-              <Badge variant="secondary">Sắp ra mắt</Badge>
-            </div>
-
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="mb-2 font-medium">Chế độ không làm phiền</h4>
-              <p className="text-muted-foreground mb-3 text-sm">
-                Thiết lập tạm dừng nhắc nhở thông báo trong khoảng thời gian cụ
-                thể.
-              </p>
-              <Badge variant="secondary">Sắp ra mắt</Badge>
             </div>
           </div>
         </CardContent>
