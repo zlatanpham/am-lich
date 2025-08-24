@@ -1,25 +1,26 @@
-# Next Starter
+# Âm Lịch - Vietnamese Lunar Calendar
 
-A full-stack Next.js 15 starter template with authentication, database setup, and modern tooling.
+A comprehensive Vietnamese lunar calendar web application with event management, cultural context, and push notifications.
 
 ## Features
 
-- **Authentication**: GitHub OAuth + Email/Password with NextAuth.js
-- **Database**: PostgreSQL with Prisma ORM
-- **UI**: shadcn/ui components with Tailwind CSS
-- **API**: tRPC for type-safe API routes
-- **Email**: Resend integration for password reset
-- **Type Safety**: End-to-end TypeScript
-- **Modern Stack**: Next.js 15, React 19, App Router
+- **Vietnamese Lunar Calendar**: Complete lunar calendar with Vietnamese terminology and cultural context
+- **Event Management**: Create and manage Vietnamese cultural events, ancestor worship dates, and personal reminders
+- **Smart Notifications**: Push notifications and email reminders for cultural events and important dates
+- **Cultural Context**: Built-in Vietnamese holidays, zodiac information, and traditional observances
+- **Progressive Web App**: Install as native app with offline functionality
+- **Authentication**: Secure user accounts with Email/Password
+- **Export Functionality**: Export calendars to various formats
+- **Modern UI**: Responsive design optimized for Vietnamese users
 
 ## Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Backend**: tRPC, NextAuth.js, Prisma
-- **Database**: PostgreSQL
+- **Backend**: tRPC, NextAuth.js, Prisma ORM
+- **Database**: PostgreSQL with Vietnamese cultural data
 - **UI Components**: shadcn/ui, Radix UI
-- **Email**: Resend
-- **Dev Tools**: ESLint, Prettier, TypeScript
+- **Notifications**: Web Push API, Email via Resend
+- **Lunar Calculations**: Chinese Lunar Calendar libraries with Vietnamese adaptations
 
 ## Quick Start
 
@@ -33,7 +34,7 @@ A full-stack Next.js 15 starter template with authentication, database setup, an
 
 ```bash
 git clone <your-repo-url>
-cd next-starter
+cd am-lich
 pnpm install
 ```
 
@@ -49,19 +50,19 @@ Fill in your environment variables:
 
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/myapp"
+DATABASE_URL="postgresql://user:password@localhost:5432/amlich"
 
 # NextAuth
-NEXTAUTH_SECRET="your-secret-key"
+AUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 
-# GitHub OAuth (optional)
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
-
-# Email (Resend)
+# Email (Resend) - for notifications
 RESEND_API_KEY="your-resend-api-key"
-FROM_EMAIL="noreply@yourdomain.com"
+EMAIL_FROM="noreply@yourdomain.com"
+
+# Push Notifications (optional)
+VAPID_PUBLIC_KEY="your-vapid-public-key"
+VAPID_PRIVATE_KEY="your-vapid-private-key"
 ```
 
 ### 3. Database Setup
@@ -89,6 +90,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Development Commands
 
 ### Database
+
 - `./start-database.sh` - Start PostgreSQL with Docker
 - `pnpm run db:generate` - Run Prisma migrations in development
 - `pnpm run db:migrate` - Deploy Prisma migrations to production
@@ -96,12 +98,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `pnpm run db:studio` - Open Prisma Studio
 
 ### Development
+
 - `pnpm run dev` - Start development server
 - `pnpm run build` - Build for production
 - `pnpm run start` - Start production server
 - `pnpm run preview` - Build and start production server
 
 ### Code Quality
+
 - `pnpm run lint` - Run ESLint
 - `pnpm run lint:fix` - Run ESLint with auto-fix
 - `pnpm run typecheck` - Run TypeScript type checking
@@ -109,7 +113,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `pnpm run format:check` - Check code formatting
 - `pnpm run format:write` - Format code with Prettier
 
+### Testing
+
+- `pnpm run test` - Run tests in watch mode
+- `pnpm run test:run` - Run tests once
+- `pnpm run test:coverage` - Run tests with coverage
+
 ### UI Components
+
 - `pnpm run ui:add` - Add new shadcn/ui components
 
 ## Project Structure
@@ -117,16 +128,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── (public)/          # Public routes (login, signup)
-│   ├── (protected)/       # Protected routes (dashboard, account)
+│   ├── (app)/             # Protected app routes (dashboard, events, notifications)
+│   ├── (auth)/            # Authentication routes (login, signup)
 │   ├── api/               # API routes
 │   └── layout.tsx         # Root layout
 ├── components/            # React components
 │   ├── ui/               # shadcn/ui components
+│   ├── lunar/            # Vietnamese lunar calendar components
 │   └── ...               # Custom components
 ├── lib/                  # Utility functions
+│   ├── lunar-calendar.ts # Vietnamese lunar calendar logic
+│   ├── push-notifications.ts # Push notification handling
+│   └── vietnamese-localization.ts # Vietnamese language support
 ├── server/               # Server-side code
-│   ├── api/              # tRPC routers
+│   ├── api/routers/      # tRPC API routers
 │   ├── auth/             # NextAuth configuration
 │   └── db.ts             # Database client
 └── styles/               # Global styles
@@ -134,70 +149,100 @@ src/
 
 ## Database Schema
 
-The starter template includes a minimal schema for authentication:
+The application includes comprehensive models for Vietnamese lunar calendar functionality:
 
-- **User**: User accounts with email/password and OAuth support
-- **Account**: OAuth account connections
+### Core Authentication
+
+- **User**: User accounts with email/password authentication
+- **Account**: Account connections for authentication providers
 - **Session**: User sessions
 - **VerificationToken**: Email verification tokens
-- **Organization**: Multi-tenant organization support
-- **OrganizationMember**: Organization membership
 
-## Authentication Flow
+### Vietnamese Lunar Calendar
 
-### Email/Password
-1. Sign up with email and password
-2. Password reset via email (using Resend)
-3. Account management
+- **VietnameseLunarEvent**: Vietnamese cultural events with lunar dates, zodiac years, and ancestor worship support
+- **VietnameseNotificationPreference**: User notification preferences for Vietnamese cultural events
+- **PushSubscription**: Web push notification subscriptions
+- **VietnameseHoliday**: Traditional Vietnamese holidays and their cultural significance
+- **VietnameseZodiacInfo**: Vietnamese zodiac system with Can Chi combinations
 
-### GitHub OAuth
-1. Configure GitHub OAuth app
-2. Add credentials to `.env`
-3. One-click sign-in/sign-up
+## Key Features
 
-## Customization
+### Vietnamese Lunar Calendar
 
-### Adding New Pages
-1. Create files in `src/app/(protected)/` for authenticated pages
-2. Create files in `src/app/(public)/` for public pages
+- View current Vietnamese lunar date with proper terminology (Mồng 1, Rằm, etc.)
+- Browse lunar months with Vietnamese zodiac information
+- See upcoming important dates and cultural significance
+- Traditional Vietnamese holiday integration
 
-### Extending Database Schema
+### Event Management
+
+- Create Vietnamese cultural events with lunar dates
+- Ancestor worship scheduling (giỗ tổ tiên)
+- Annual recurring events for traditional celebrations
+- Event export to various calendar formats
+
+### Notifications
+
+- Push notifications for cultural events in Vietnamese
+- Email reminders with cultural context
+- Customizable reminder timing (1, 3, 7 days)
+- Automatic reminders for Mồng 1 and Rằm days
+
+## Development
+
+### Adding New Features
+
+1. Create new pages in `src/app/(app)/` for authenticated features
+2. Add tRPC routers in `src/server/api/routers/`
+3. Create UI components in `src/components/`
+
+### Database Changes
+
 1. Modify `prisma/schema.prisma`
-2. Run `pnpm run db:generate` to apply changes
-3. Create corresponding tRPC routers in `src/server/api/routers/`
+2. Run `pnpm run db:generate` to create migrations
+3. Update tRPC routers and API endpoints
 
-### Adding UI Components
-```bash
-pnpm run ui:add button
-pnpm run ui:add form
-# etc.
-```
+### Vietnamese Localization
 
-### Customizing Authentication
-- Modify `src/server/auth/config.ts` for auth providers
-- Update `src/components/nav-user.tsx` for user menu
-- Extend user schema in Prisma as needed
+- Update `src/lib/vietnamese-localization.ts` for new text
+- Add cultural context to calendar components
+- Follow Vietnamese design patterns
 
 ## Deployment
 
 ### Environment Variables
+
 Ensure all production environment variables are set:
+
 - `DATABASE_URL` - Production PostgreSQL connection
-- `NEXTAUTH_SECRET` - Strong random secret
+- `AUTH_SECRET` - Strong random secret (use `openssl rand -base64 32`)
 - `NEXTAUTH_URL` - Your production domain
-- OAuth credentials (if using)
-- `RESEND_API_KEY` and `FROM_EMAIL` (for emails)
+- `RESEND_API_KEY` and `EMAIL_FROM` (for email notifications)
+- VAPID keys for push notifications (generate with `pnpm run generate-vapid`)
 
 ### Database Migration
+
 ```bash
 pnpm run db:migrate
 ```
 
 ### Build and Deploy
+
 ```bash
 pnpm run build
 pnpm run start
 ```
+
+## Cultural Context
+
+This application is designed specifically for the Vietnamese community and incorporates:
+
+- Traditional Vietnamese lunar calendar terminology
+- Vietnamese zodiac system (Can Chi)
+- Cultural significance of dates like Mồng 1 (new moon) and Rằm (full moon)
+- Ancestor worship scheduling (giỗ tổ tiên)
+- Vietnamese traditional holidays and observances
 
 ## Contributing
 
@@ -205,7 +250,8 @@ pnpm run start
 2. Create a feature branch
 3. Make your changes
 4. Run `pnpm run check` to ensure code quality
-5. Submit a pull request
+5. Test with Vietnamese cultural context
+6. Submit a pull request
 
 ## License
 
