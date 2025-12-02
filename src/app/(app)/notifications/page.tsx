@@ -6,18 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/react";
-import {
-  Bell,
-  Mail,
-  Smartphone,
-  Check,
-  X,
-  Settings,
-  AlertCircle,
-} from "lucide-react";
+import { Smartphone, Check, X, Settings, AlertCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
