@@ -1,15 +1,9 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
 import tseslint from "typescript-eslint";
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
-
-export default tseslint.config(
-  {
-    ignores: [".next"],
-  },
-  ...compat.extends("next/core-web-vitals"),
+const eslintConfig = defineConfig([
+  ...nextVitals,
   {
     files: ["**/*.ts", "**/*.tsx"],
     extends: [
@@ -17,6 +11,12 @@ export default tseslint.config(
       ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylisticTypeChecked,
     ],
+    languageOptions: {
+      parserOptions: {
+        project: ["./tsconfig.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
@@ -44,11 +44,8 @@ export default tseslint.config(
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.json"], // Explicitly tell ESLint where to find the tsconfig
-        tsconfigRootDir: import.meta.dirname, // Ensure correct root directory for tsconfig
-      },
-    },
   },
-);
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+]);
+
+export default eslintConfig;

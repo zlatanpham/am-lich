@@ -142,7 +142,8 @@ describe("EditNameDialog", () => {
     const mutationOptions = mockUseMutation.mock.calls[0]?.[0];
 
     if (mutationOptions?.onSuccess) {
-      await mutationOptions.onSuccess(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (mutationOptions.onSuccess as any)(
         {
           name: "Updated Name",
           id: "test-id",
@@ -154,6 +155,7 @@ describe("EditNameDialog", () => {
           reset_password_expires: null,
         },
         { name: "Updated Name" },
+        {},
         undefined,
       );
     }
