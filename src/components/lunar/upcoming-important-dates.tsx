@@ -107,66 +107,66 @@ export function UpcomingImportantDates() {
         )}
 
         {/* Next Mồng 1 */}
-        <div className="bg-muted/50 flex items-center justify-between rounded-lg p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
+        <div className="bg-muted/50 rounded-lg p-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-3">
               <Badge
                 variant="outline"
-                className="border-blue-200 bg-blue-50 text-blue-700"
+                className="mt-0.5 shrink-0 border-blue-200 bg-blue-50 text-blue-700"
               >
                 {vietnameseText.mong1}
               </Badge>
+              <div className="min-w-0">
+                <p className="leading-tight font-medium">
+                  {nextMong1.lunarInfo.monthName}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {nextMong1.formattedDate}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">
-                {nextMong1.lunarInfo.monthName} {nextMong1.lunarInfo.dayName}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {nextMong1.formattedDate}
-              </p>
+            <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-sm">
+              <Clock className="h-4 w-4" />
+              <span>
+                {nextMong1.daysUntil === 0
+                  ? vietnameseText.today
+                  : nextMong1.daysUntil === 1
+                    ? vietnameseText.tomorrow
+                    : `${nextMong1.daysUntil} ngày`}
+              </span>
             </div>
-          </div>
-          <div className="text-muted-foreground flex items-center gap-1 text-sm">
-            <Clock className="h-4 w-4" />
-            <span>
-              {nextMong1.daysUntil === 0
-                ? vietnameseText.today
-                : nextMong1.daysUntil === 1
-                  ? vietnameseText.tomorrow
-                  : `còn ${nextMong1.daysUntil} ngày`}
-            </span>
           </div>
         </div>
 
         {/* Next Rằm */}
-        <div className="bg-muted/50 flex items-center justify-between rounded-lg p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
+        <div className="bg-muted/50 rounded-lg p-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-3">
               <Badge
                 variant="outline"
-                className="border-orange-200 bg-orange-50 text-orange-700"
+                className="mt-0.5 shrink-0 border-orange-200 bg-orange-50 text-orange-700"
               >
                 {vietnameseText.ram}
               </Badge>
+              <div className="min-w-0">
+                <p className="leading-tight font-medium">
+                  {nextRam.lunarInfo.monthName}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {nextRam.formattedDate}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">
-                {nextRam.lunarInfo.monthName} {nextRam.lunarInfo.dayName}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {nextRam.formattedDate}
-              </p>
+            <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-sm">
+              <Clock className="h-4 w-4" />
+              <span>
+                {nextRam.daysUntil === 0
+                  ? vietnameseText.today
+                  : nextRam.daysUntil === 1
+                    ? vietnameseText.tomorrow
+                    : `${nextRam.daysUntil} ngày`}
+              </span>
             </div>
-          </div>
-          <div className="text-muted-foreground flex items-center gap-1 text-sm">
-            <Clock className="h-4 w-4" />
-            <span>
-              {nextRam.daysUntil === 0
-                ? vietnameseText.today
-                : nextRam.daysUntil === 1
-                  ? vietnameseText.tomorrow
-                  : `còn ${nextRam.daysUntil} ngày`}
-            </span>
           </div>
         </div>
 

@@ -24,37 +24,6 @@ export default function HomePage() {
           <CalendarGrid showEvents={true} />
         </div>
       </div>
-
-      {/* Information section */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border p-6">
-          <h3 className="mb-3 font-semibold">Về Âm Lịch</h3>
-          <p className="text-muted-foreground text-sm">
-            Âm lịch là lịch pháp truyền thống Việt Nam, dựa trên chu kỳ tròn
-            khuyết của mặt trăng, kết hợp với quy luật vận hành của mặt trời,
-            được sử dụng rộng rãi trong các lễ hội truyền thống, hoạt động thờ
-            cúng và những dịp quan trọng khác.
-          </p>
-        </div>
-
-        <div className="rounded-lg border p-6">
-          <h3 className="mb-3 font-semibold">Ngày Quan Trọng</h3>
-          <ul className="text-muted-foreground space-y-1 text-sm">
-            <li>• Mồng 1 (Sóc) - Trăng mới, mặt trăng không thể nhìn thấy</li>
-            <li>• Rằm (Vọng) - Trăng tròn, mặt trăng tròn nhất</li>
-            <li>• Lễ hội truyền thống thường tính theo âm lịch</li>
-          </ul>
-        </div>
-
-        <div className="rounded-lg border p-6">
-          <h3 className="mb-3 font-semibold">Hướng Dẫn Sử Dụng</h3>
-          <p className="text-muted-foreground text-sm">
-            Nhấp vào &quot;Hôm nay&quot; để quay lại tháng hiện tại, sử dụng mũi
-            tên trái phải để chuyển tháng. Các ngày quan trọng sẽ được đánh dấu
-            đặc biệt, thuận tiện cho việc lên kế hoạch các hoạt động quan trọng.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
