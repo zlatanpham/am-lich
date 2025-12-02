@@ -9,6 +9,10 @@ import { api } from "@/trpc/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { vietnameseText } from "@/lib/vietnamese-localization";
+import {
+  DateDetailDialog,
+  type CalendarDayFromAPI,
+} from "./date-detail-dialog";
 
 interface CalendarGridProps {
   className?: string;
@@ -20,6 +24,10 @@ export function CalendarGrid({
   showEvents = false,
 }: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<CalendarDayFromAPI | null>(
+    null,
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -51,6 +59,21 @@ export function CalendarGrid({
 
   const goToToday = () => {
     setCurrentDate(new Date());
+  };
+
+  const handleDayClick = (day: CalendarDayFromAPI) => {
+    setSelectedDay(day);
+    setIsDialogOpen(true);
+  };
+
+  const handleDayKeyDown = (
+    e: React.KeyboardEvent,
+    day: CalendarDayFromAPI,
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleDayClick(day);
+    }
   };
 
   if (isLoading && !data) {
@@ -172,8 +195,14 @@ export function CalendarGrid({
           {data.days.map((day, index) => (
             <div
               key={`day-${day.gregorianDate.getTime()}-${index}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleDayClick(day)}
+              onKeyDown={(e) => handleDayKeyDown(e, day)}
               className={cn(
-                "min-h-12 rounded-md border p-1 transition-colors sm:min-h-20 sm:rounded-lg sm:p-2",
+                "min-h-12 cursor-pointer rounded-md border p-1 transition-colors sm:min-h-20 sm:rounded-lg sm:p-2",
+                "hover:bg-muted/50 hover:ring-primary/20 hover:ring-1",
+                "focus:ring-primary focus:ring-2 focus:ring-offset-1 focus:outline-none",
                 day.isCurrentMonth
                   ? "bg-background border-border"
                   : "bg-muted/30 border-muted text-muted-foreground",
@@ -291,6 +320,13 @@ export function CalendarGrid({
           </div>
         </div>
       </CardContent>
+
+      {/* Date Detail Dialog */}
+      <DateDetailDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        day={selectedDay}
+      />
     </Card>
   );
 }
