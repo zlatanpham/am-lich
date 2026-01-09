@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 
@@ -33,6 +34,11 @@ export function CreateEventDialog({
   const [lunarDay, setLunarDay] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [eventType, setEventType] = useState<"general" | "ancestor_worship">(
+    "general",
+  );
+  const [ancestorName, setAncestorName] = useState("");
+  const [ancestorPrecall, setAncestorPrecall] = useState("");
   const isMountedRef = useRef(true);
 
   const createEventMutation = api.lunarEvents.create.useMutation({
@@ -66,6 +72,9 @@ export function CreateEventDialog({
       setLunarMonth("");
       setLunarDay("");
       setIsRecurring(false);
+      setEventType("general");
+      setAncestorName("");
+      setAncestorPrecall("");
     }
   };
 
@@ -74,6 +83,15 @@ export function CreateEventDialog({
 
     if (!title.trim() || !lunarYear || !lunarMonth || !lunarDay) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+
+    // Validate ancestor worship fields
+    if (
+      eventType === "ancestor_worship" &&
+      (!ancestorName.trim() || !ancestorPrecall.trim())
+    ) {
+      toast.error("Vui lòng điền tên và cách gọi người được giỗ");
       return;
     }
 
@@ -104,6 +122,11 @@ export function CreateEventDialog({
         lunarMonth: month,
         lunarDay: day,
         isRecurring,
+        eventType,
+        ancestorName:
+          eventType === "ancestor_worship" ? ancestorName.trim() : undefined,
+        ancestorPrecall:
+          eventType === "ancestor_worship" ? ancestorPrecall.trim() : undefined,
       });
 
       // Refetch events to update the list
@@ -149,6 +172,59 @@ export function CreateEventDialog({
               rows={3}
             />
           </div>
+
+          <div className="space-y-2">
+            <Label>Loại sự kiện</Label>
+            <RadioGroup
+              value={eventType}
+              onValueChange={(value) =>
+                setEventType(value as "general" | "ancestor_worship")
+              }
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="general" id="general" />
+                <Label htmlFor="general" className="cursor-pointer font-normal">
+                  Sự kiện chung
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value="ancestor_worship"
+                  id="ancestor_worship"
+                />
+                <Label
+                  htmlFor="ancestor_worship"
+                  className="cursor-pointer font-normal"
+                >
+                  Cúng giỗ
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {eventType === "ancestor_worship" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="ancestorPrecall">Cách gọi *</Label>
+                <Input
+                  id="ancestorPrecall"
+                  placeholder="Ví dụ: ông nội, bố, cụ..."
+                  value={ancestorPrecall}
+                  onChange={(e) => setAncestorPrecall(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ancestorName">Tên người được giỗ *</Label>
+                <Input
+                  id="ancestorName"
+                  placeholder="Ví dụ: Nguyễn Văn A"
+                  value={ancestorName}
+                  onChange={(e) => setAncestorName(e.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="lunarYear">Năm âm lịch *</Label>

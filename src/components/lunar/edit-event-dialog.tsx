@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 
@@ -29,6 +30,9 @@ interface EditEventDialogProps {
     lunarDay: number;
     isRecurring: boolean;
     reminderDays: number;
+    eventType?: string;
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
   } | null;
 }
 
@@ -45,6 +49,11 @@ export function EditEventDialog({
   const [isRecurring, setIsRecurring] = useState(false);
   const [reminderDays, setReminderDays] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [eventType, setEventType] = useState<"general" | "ancestor_worship">(
+    "general",
+  );
+  const [ancestorName, setAncestorName] = useState("");
+  const [ancestorPrecall, setAncestorPrecall] = useState("");
   const isMountedRef = useRef(true);
 
   const updateEventMutation = api.lunarEvents.update.useMutation({
@@ -81,6 +90,11 @@ export function EditEventDialog({
         setLunarDay(event.lunarDay.toString());
         setIsRecurring(event.isRecurring);
         setReminderDays(event.reminderDays.toString());
+        setEventType(
+          (event.eventType as "general" | "ancestor_worship") ?? "general",
+        );
+        setAncestorName(event.ancestorName ?? "");
+        setAncestorPrecall(event.ancestorPrecall ?? "");
       } else {
         resetForm();
       }
@@ -96,6 +110,9 @@ export function EditEventDialog({
       setLunarDay("");
       setIsRecurring(false);
       setReminderDays("");
+      setEventType("general");
+      setAncestorName("");
+      setAncestorPrecall("");
     }
   };
 
@@ -104,6 +121,15 @@ export function EditEventDialog({
 
     if (!event || !title.trim() || !lunarYear || !lunarMonth || !lunarDay) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+
+    // Validate ancestor worship fields
+    if (
+      eventType === "ancestor_worship" &&
+      (!ancestorName.trim() || !ancestorPrecall.trim())
+    ) {
+      toast.error("Vui lòng điền tên và cách gọi người được giỗ");
       return;
     }
 
@@ -142,6 +168,11 @@ export function EditEventDialog({
         lunarDay: day,
         isRecurring,
         reminderDays: reminder,
+        eventType,
+        ancestorName:
+          eventType === "ancestor_worship" ? ancestorName.trim() : null,
+        ancestorPrecall:
+          eventType === "ancestor_worship" ? ancestorPrecall.trim() : null,
       });
 
       // Refetch events to update the list
@@ -187,6 +218,62 @@ export function EditEventDialog({
               rows={3}
             />
           </div>
+
+          <div className="space-y-2">
+            <Label>Loại sự kiện</Label>
+            <RadioGroup
+              value={eventType}
+              onValueChange={(value) =>
+                setEventType(value as "general" | "ancestor_worship")
+              }
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="general" id="edit-general" />
+                <Label
+                  htmlFor="edit-general"
+                  className="cursor-pointer font-normal"
+                >
+                  Sự kiện chung
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value="ancestor_worship"
+                  id="edit-ancestor_worship"
+                />
+                <Label
+                  htmlFor="edit-ancestor_worship"
+                  className="cursor-pointer font-normal"
+                >
+                  Cúng giỗ
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {eventType === "ancestor_worship" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="edit-ancestorPrecall">Cách gọi *</Label>
+                <Input
+                  id="edit-ancestorPrecall"
+                  placeholder="Ví dụ: ông nội, bố, cụ..."
+                  value={ancestorPrecall}
+                  onChange={(e) => setAncestorPrecall(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-ancestorName">Tên người được giỗ *</Label>
+                <Input
+                  id="edit-ancestorName"
+                  placeholder="Ví dụ: Nguyễn Văn A"
+                  value={ancestorName}
+                  onChange={(e) => setAncestorName(e.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="edit-lunarYear">Năm âm lịch *</Label>
