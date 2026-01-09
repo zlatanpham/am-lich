@@ -18,10 +18,13 @@ import {
   Sparkles,
   CalendarDays,
   Flower2,
+  ScrollText,
 } from "lucide-react";
 import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 import { LoginDialog } from "@/components/login-dialog";
 import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
+import { useState } from "react";
+import { PrayerPreviewDialog } from "@/components/prayers/prayer-preview-dialog";
 
 // Type for the calendar day from API (events can be undefined or simplified array)
 export interface CalendarDayFromAPI {
@@ -53,10 +56,24 @@ export function DateDetailDialog({
   day,
 }: DateDetailDialogProps) {
   const { data: session } = useSession();
+  const [showPrayerDialog, setShowPrayerDialog] = useState(false);
 
   if (!day) {
     return null;
   }
+
+  const isImportantDate = day.lunarDate.day === 1 || day.lunarDate.day === 15;
+  const ancestorEvent = day.events?.find(
+    (e) => e.eventType === "ancestor_worship",
+  );
+  const showPrayerButton =
+    session?.user && (isImportantDate || !!ancestorEvent);
+
+  const prayerType = ancestorEvent
+    ? "ancestor"
+    : day.lunarDate.day === 1
+      ? "mong1"
+      : "ram15";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -180,10 +197,23 @@ export function DateDetailDialog({
 
           {/* Events Section */}
           <div className="space-y-3">
-            <h4 className="flex items-center gap-2 font-medium">
-              <CalendarDays className="h-4 w-4" />
-              Sự kiện của bạn
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="flex items-center gap-2 font-medium">
+                <CalendarDays className="h-4 w-4" />
+                Sự kiện của bạn
+              </h4>
+              {showPrayerButton && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1 px-2 text-xs"
+                  onClick={() => setShowPrayerDialog(true)}
+                >
+                  <ScrollText className="h-3.5 w-3.5" />
+                  Xem sớ khấn
+                </Button>
+              )}
+            </div>
 
             {session?.user ? (
               day.events && day.events.length > 0 ? (
@@ -234,6 +264,23 @@ export function DateDetailDialog({
             )}
           </div>
         </div>
+
+        <PrayerPreviewDialog
+          open={showPrayerDialog}
+          onOpenChange={setShowPrayerDialog}
+          type={prayerType}
+          lunarDate={{
+            day: day.lunarDate.day,
+            month: day.lunarDate.month,
+            year: day.lunarDate.year,
+            dayName: day.lunarDate.dayName,
+            monthName: day.lunarDate.monthName,
+            yearName: day.lunarDate.zodiacYear,
+            solarDate: day.gregorianDate,
+          }}
+          ancestorName={ancestorEvent?.ancestorName || undefined}
+          ancestorPrecall={ancestorEvent?.ancestorPrecall || undefined}
+        />
       </DialogContent>
     </Dialog>
   );
