@@ -67,41 +67,47 @@ export function EventCard({
 
     // For recurring events, find the next occurrence if the original date is in the past
     if (event.isRecurring && targetDate) {
-      const today = new Date();
+      const now = new Date();
+      // Use Vietnam timezone for "today" to be consistent with daysUntilVietnam
+      const today = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }),
+      );
       today.setHours(0, 0, 0, 0);
 
-      if (targetDate < today) {
-        // Find next occurrence by checking current year and next year
+      // Ensure targetDate is a Date object for comparison
+      const targetDateObj = new Date(targetDate);
+      targetDateObj.setHours(0, 0, 0, 0);
+
+      if (targetDateObj < today) {
+        // Find next occurrence by checking previous year, current year, and next year
+        // We start from currentYear - 1 because lunar year X can fall into Gregorian year X or X+1
         const currentYear = today.getFullYear();
-        try {
-          // Try current year first
-          const thisYearDate = lunarToGregorian(
-            currentYear,
-            event.lunarMonth,
-            event.lunarDay,
-          );
-          if (thisYearDate >= today) {
-            targetDate = thisYearDate;
-          } else {
-            // Try next year
-            const nextYearDate = lunarToGregorian(
-              currentYear + 1,
-              event.lunarMonth,
-              event.lunarDay,
-            );
-            targetDate = nextYearDate;
-          }
-        } catch {
-          // If date doesn't exist this year or next year, try the year after
+        let foundDate: Date | null = null;
+
+        // Try years sequentially and pick the first one that is >= today
+        for (let y = currentYear - 1; y <= currentYear + 2; y++) {
           try {
-            targetDate = lunarToGregorian(
-              currentYear + 2,
+            const solarDate = lunarToGregorian(
+              y,
               event.lunarMonth,
               event.lunarDay,
             );
+            // Normalize solarDate to midnight for comparison
+            const solarDateNormalized = new Date(solarDate);
+            solarDateNormalized.setHours(0, 0, 0, 0);
+
+            if (solarDateNormalized >= today) {
+              foundDate = solarDate;
+              break; // Found the nearest upcoming occurrence
+            }
           } catch {
-            return null; // Give up if we can't find a valid date
+            // Date doesn't exist this year (e.g. 30th of month)
+            continue;
           }
+        }
+
+        if (foundDate) {
+          targetDate = foundDate;
         }
       }
     }

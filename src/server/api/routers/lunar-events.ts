@@ -294,7 +294,7 @@ export const lunarEventsRouter = createTRPCRouter({
             const startYear = input.startDate.getFullYear();
             const endYear = input.endDate.getFullYear();
 
-            for (let year = startYear; year <= endYear; year++) {
+            for (let year = startYear - 1; year <= endYear; year++) {
               try {
                 const gregorianDate = lunarToGregorian(
                   year,
@@ -403,7 +403,7 @@ export const lunarEventsRouter = createTRPCRouter({
             const startYear = startDate.getFullYear();
             const endYear = endDate.getFullYear();
 
-            for (let year = startYear; year <= endYear; year++) {
+            for (let year = startYear - 1; year <= endYear; year++) {
               try {
                 const gregorianDate = lunarToGregorian(
                   year,
