@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Edit, Trash2, Repeat } from "lucide-react";
+import { Calendar, Clock, Edit, Trash2, Repeat, Flower2 } from "lucide-react";
 import {
   daysUntilVietnam,
   formatVietnameseLunarDate,
@@ -23,6 +23,9 @@ interface EventCardProps {
     reminderDays: number;
     gregorianDate?: Date | null;
     lunarDateFormatted?: string;
+    eventType?: string;
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
   };
   onEdit?: (event: EventCardProps["event"]) => void;
   onDelete?: (eventId: string) => void;
@@ -121,6 +124,19 @@ export function EventCard({
     return `Âm lịch năm ${event.lunarYear} tháng ${event.lunarMonth} ngày ${event.lunarDay}`;
   };
 
+  const getDisplayTitle = () => {
+    if (
+      event.eventType === "ancestor_worship" &&
+      event.ancestorPrecall &&
+      event.ancestorName
+    ) {
+      return `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`;
+    }
+    return event.title;
+  };
+
+  const isAncestorWorship = event.eventType === "ancestor_worship";
+
   if (compact) {
     return (
       <div className="bg-card rounded-lg border p-2 sm:p-4 md:p-2">
@@ -132,15 +148,25 @@ export function EventCard({
                 {event.isRecurring && (
                   <Repeat className="text-muted-foreground h-4 w-4 flex-shrink-0" />
                 )}
+                {isAncestorWorship && (
+                  <Flower2 className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                )}
                 <h4 className="text-base leading-relaxed font-semibold">
-                  {event.title}
+                  {getDisplayTitle()}
                 </h4>
               </div>
-              {getDaysUntilEvent() && (
-                <Badge variant="outline" className="px-3 py-1 text-sm">
-                  {getDaysUntilEvent()}
-                </Badge>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {isAncestorWorship && (
+                  <Badge variant="secondary" className="text-xs">
+                    Cúng giỗ
+                  </Badge>
+                )}
+                {getDaysUntilEvent() && (
+                  <Badge variant="outline" className="px-3 py-1 text-sm">
+                    {getDaysUntilEvent()}
+                  </Badge>
+                )}
+              </div>
             </div>
             {showActions && (
               <div className="flex flex-shrink-0 items-start gap-1">
@@ -190,11 +216,21 @@ export function EventCard({
               {event.isRecurring && (
                 <Repeat className="text-muted-foreground h-3 w-3" />
               )}
+              {isAncestorWorship && (
+                <Flower2 className="text-muted-foreground h-3 w-3" />
+              )}
               <Calendar className="text-muted-foreground h-3 w-3" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="truncate text-sm font-medium">{event.title}</h4>
+                <h4 className="truncate text-sm font-medium">
+                  {getDisplayTitle()}
+                </h4>
+                {isAncestorWorship && (
+                  <Badge variant="secondary" className="h-5 px-1 py-0 text-xs">
+                    Cúng giỗ
+                  </Badge>
+                )}
                 {getDaysUntilEvent() && (
                   <Badge variant="outline" className="h-5 px-1 py-0 text-xs">
                     {getDaysUntilEvent()}
@@ -254,11 +290,20 @@ export function EventCard({
                 {event.isRecurring && (
                   <Repeat className="text-muted-foreground h-4 w-4 flex-shrink-0" />
                 )}
+                {isAncestorWorship && (
+                  <Flower2 className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                )}
                 <h3 className="text-lg leading-relaxed font-semibold">
-                  {event.title}
+                  {getDisplayTitle()}
                 </h3>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {isAncestorWorship && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Flower2 className="mr-1 h-3 w-3" />
+                    Cúng giỗ
+                  </Badge>
+                )}
                 {event.isRecurring && (
                   <Badge variant="secondary" className="text-xs">
                     Lặp lại hàng năm
@@ -300,7 +345,13 @@ export function EventCard({
         {/* Desktop layout (original) */}
         <div className="hidden items-start justify-between sm:flex">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold">{event.title}</h3>
+            <h3 className="font-semibold">{getDisplayTitle()}</h3>
+            {isAncestorWorship && (
+              <Badge variant="secondary" className="text-xs">
+                <Flower2 className="mr-1 h-3 w-3" />
+                Cúng giỗ
+              </Badge>
+            )}
             {event.isRecurring && (
               <Badge variant="secondary" className="text-xs">
                 <Repeat className="mr-1 h-3 w-3" />

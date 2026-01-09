@@ -11,7 +11,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Moon, Star, Sparkles, CalendarDays } from "lucide-react";
+import {
+  Calendar,
+  Moon,
+  Star,
+  Sparkles,
+  CalendarDays,
+  Flower2,
+} from "lucide-react";
 import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 import { LoginDialog } from "@/components/login-dialog";
 import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
@@ -23,7 +30,14 @@ export interface CalendarDayFromAPI {
   isToday: boolean;
   isCurrentMonth: boolean;
   isImportant: boolean;
-  events?: Array<{ id: string; title: string; date: Date }>;
+  events?: Array<{
+    id: string;
+    title: string;
+    date: Date;
+    eventType?: string;
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
+  }>;
   vietnameseHoliday?: string;
 }
 
@@ -174,17 +188,32 @@ export function DateDetailDialog({
             {session?.user ? (
               day.events && day.events.length > 0 ? (
                 <div className="space-y-2">
-                  {day.events.map((event) => (
-                    <div
-                      key={event.id}
-                      className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950"
-                    >
-                      <div className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
-                      <span className="text-sm text-blue-700 dark:text-blue-400">
-                        {event.title}
-                      </span>
-                    </div>
-                  ))}
+                  {day.events.map((event) => {
+                    const isAncestorWorship =
+                      event.eventType === "ancestor_worship";
+                    const displayTitle =
+                      isAncestorWorship &&
+                      event.ancestorPrecall &&
+                      event.ancestorName
+                        ? `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`
+                        : event.title;
+
+                    return (
+                      <div
+                        key={event.id}
+                        className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950"
+                      >
+                        {isAncestorWorship ? (
+                          <Flower2 className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                        ) : (
+                          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                        )}
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                          {displayTitle}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-muted-foreground text-sm">

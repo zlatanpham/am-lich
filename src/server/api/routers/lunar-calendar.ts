@@ -353,6 +353,9 @@ export const lunarCalendarRouter = createTRPCRouter({
             lunarMonth: true,
             lunarDay: true,
             isRecurring: true,
+            eventType: true,
+            ancestorName: true,
+            ancestorPrecall: true,
           },
         });
 
@@ -361,6 +364,9 @@ export const lunarCalendarRouter = createTRPCRouter({
           id: string;
           title: string;
           date: Date;
+          eventType?: string;
+          ancestorName?: string | null;
+          ancestorPrecall?: string | null;
         }> = [];
 
         for (const lunarEvent of lunarEvents) {
@@ -395,6 +401,9 @@ export const lunarCalendarRouter = createTRPCRouter({
                         id: lunarEvent.id,
                         title: lunarEvent.title,
                         date: gregorianDate,
+                        eventType: lunarEvent.eventType,
+                        ancestorName: lunarEvent.ancestorName,
+                        ancestorPrecall: lunarEvent.ancestorPrecall,
                       });
                     }
                   }
@@ -420,6 +429,9 @@ export const lunarCalendarRouter = createTRPCRouter({
                   id: lunarEvent.id,
                   title: lunarEvent.title,
                   date: gregorianDate,
+                  eventType: lunarEvent.eventType,
+                  ancestorName: lunarEvent.ancestorName,
+                  ancestorPrecall: lunarEvent.ancestorPrecall,
                 });
               }
             }

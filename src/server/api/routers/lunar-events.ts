@@ -24,6 +24,9 @@ export const lunarEventsRouter = createTRPCRouter({
         lunarDay: z.number().min(1).max(30),
         isRecurring: z.boolean().default(false),
         reminderDays: z.number().min(1).max(30).default(3),
+        eventType: z.enum(["general", "ancestor_worship"]).default("general"),
+        ancestorName: z.string().max(255).optional(),
+        ancestorPrecall: z.string().max(100).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -36,6 +39,13 @@ export const lunarEventsRouter = createTRPCRouter({
         throw new Error("Invalid lunar date");
       }
 
+      // Validate ancestor worship fields
+      if (input.eventType === "ancestor_worship") {
+        if (!input.ancestorName?.trim() || !input.ancestorPrecall?.trim()) {
+          throw new Error("Cúng giỗ events require ancestor name and precall");
+        }
+      }
+
       const event = await ctx.db.lunarEvent.create({
         data: {
           userId,
@@ -46,6 +56,13 @@ export const lunarEventsRouter = createTRPCRouter({
           lunarDay: input.lunarDay,
           isRecurring: input.isRecurring,
           reminderDays: input.reminderDays,
+          eventType: input.eventType,
+          ancestorName:
+            input.eventType === "ancestor_worship" ? input.ancestorName : null,
+          ancestorPrecall:
+            input.eventType === "ancestor_worship"
+              ? input.ancestorPrecall
+              : null,
         },
       });
 
@@ -71,6 +88,9 @@ export const lunarEventsRouter = createTRPCRouter({
         isRecurring: z.boolean().optional(),
         reminderDays: z.number().min(1).max(30).optional(),
         isActive: z.boolean().optional(),
+        eventType: z.enum(["general", "ancestor_worship"]).optional(),
+        ancestorName: z.string().max(255).optional().nullable(),
+        ancestorPrecall: z.string().max(100).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -101,9 +121,30 @@ export const lunarEventsRouter = createTRPCRouter({
         }
       }
 
+      // Validate ancestor worship fields
+      const eventType = updateData.eventType ?? existingEvent.eventType;
+      if (eventType === "ancestor_worship") {
+        const ancestorName =
+          updateData.ancestorName ?? existingEvent.ancestorName;
+        const ancestorPrecall =
+          updateData.ancestorPrecall ?? existingEvent.ancestorPrecall;
+        if (!ancestorName?.trim() || !ancestorPrecall?.trim()) {
+          throw new Error("Cúng giỗ events require ancestor name and precall");
+        }
+      }
+
+      // Clear ancestor fields if switching to general
+      const finalUpdateData = {
+        ...updateData,
+        ...(updateData.eventType === "general" && {
+          ancestorName: null,
+          ancestorPrecall: null,
+        }),
+      };
+
       const updatedEvent = await ctx.db.lunarEvent.update({
         where: { id },
-        data: updateData,
+        data: finalUpdateData,
       });
 
       return updatedEvent;
