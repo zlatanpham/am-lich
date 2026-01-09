@@ -3,13 +3,23 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Edit, Trash2, Repeat, Flower2 } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Edit,
+  Trash2,
+  Repeat,
+  Flower2,
+  ScrollText,
+} from "lucide-react";
 import {
   daysUntilVietnam,
   formatVietnameseLunarDate,
   gregorianToLunar,
   lunarToGregorian,
 } from "@/lib/lunar-calendar";
+import { useState } from "react";
+import { PrayerPreviewDialog } from "@/components/prayers/prayer-preview-dialog";
 
 interface EventCardProps {
   event: {
@@ -40,6 +50,8 @@ export function EventCard({
   showActions = true,
   compact = false,
 }: EventCardProps) {
+  const [showPrayerDialog, setShowPrayerDialog] = useState(false);
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("vi-VN", {
       year: "numeric",
@@ -65,26 +77,20 @@ export function EventCard({
   const getDaysUntilEvent = () => {
     let targetDate = event.gregorianDate;
 
-    // For recurring events, find the next occurrence if the original date is in the past
     if (event.isRecurring && targetDate) {
       const now = new Date();
-      // Use Vietnam timezone for "today" to be consistent with daysUntilVietnam
       const today = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }),
       );
       today.setHours(0, 0, 0, 0);
 
-      // Ensure targetDate is a Date object for comparison
       const targetDateObj = new Date(targetDate);
       targetDateObj.setHours(0, 0, 0, 0);
 
       if (targetDateObj < today) {
-        // Find next occurrence by checking previous year, current year, and next year
-        // We start from currentYear - 1 because lunar year X can fall into Gregorian year X or X+1
         const currentYear = today.getFullYear();
         let foundDate: Date | null = null;
 
-        // Try years sequentially and pick the first one that is >= today
         for (let y = currentYear - 1; y <= currentYear + 2; y++) {
           try {
             const solarDate = lunarToGregorian(
@@ -92,16 +98,14 @@ export function EventCard({
               event.lunarMonth,
               event.lunarDay,
             );
-            // Normalize solarDate to midnight for comparison
             const solarDateNormalized = new Date(solarDate);
             solarDateNormalized.setHours(0, 0, 0, 0);
 
             if (solarDateNormalized >= today) {
               foundDate = solarDate;
-              break; // Found the nearest upcoming occurrence
+              break;
             }
           } catch {
-            // Date doesn't exist this year (e.g. 30th of month)
             continue;
           }
         }
@@ -142,11 +146,58 @@ export function EventCard({
   };
 
   const isAncestorWorship = event.eventType === "ancestor_worship";
+  const isImportantDate = event.lunarDay === 1 || event.lunarDay === 15;
+  const showPrayerButton = isAncestorWorship || isImportantDate;
+
+  const handleShowPrayer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowPrayerDialog(true);
+  };
+
+  const getLunarInfo = () => {
+    let targetSolarDate = event.gregorianDate || new Date();
+
+    if (event.isRecurring) {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      for (let y = currentYear - 1; y <= currentYear + 1; y++) {
+        try {
+          const solar = lunarToGregorian(y, event.lunarMonth, event.lunarDay);
+          const solarNorm = new Date(solar);
+          solarNorm.setHours(0, 0, 0, 0);
+          const todayNorm = new Date(today);
+          todayNorm.setHours(0, 0, 0, 0);
+          if (solarNorm >= todayNorm) {
+            targetSolarDate = solar;
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+
+    const lunar = gregorianToLunar(targetSolarDate);
+    return {
+      day: event.lunarDay,
+      month: event.lunarMonth,
+      year: lunar.year,
+      dayName: lunar.dayName,
+      monthName: lunar.monthName,
+      yearName: lunar.zodiacYear,
+      solarDate: targetSolarDate,
+    };
+  };
+
+  const prayerType = isAncestorWorship
+    ? "ancestor"
+    : event.lunarDay === 1
+      ? "mong1"
+      : "ram15";
 
   if (compact) {
     return (
       <div className="bg-card rounded-lg border p-2 sm:p-4 md:p-2">
-        {/* Mobile layout */}
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -171,6 +222,17 @@ export function EventCard({
                   <Badge variant="outline" className="px-3 py-1 text-sm">
                     {getDaysUntilEvent()}
                   </Badge>
+                )}
+                {showPrayerButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    onClick={handleShowPrayer}
+                  >
+                    <ScrollText className="h-3 w-3" />
+                    Xem sớ
+                  </Button>
                 )}
               </div>
             </div>
@@ -199,7 +261,6 @@ export function EventCard({
               </div>
             )}
           </div>
-
           <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 flex-shrink-0" />
@@ -215,7 +276,6 @@ export function EventCard({
           </div>
         </div>
 
-        {/* Desktop layout (original) */}
         <div className="hidden items-center justify-between sm:flex">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
@@ -241,6 +301,17 @@ export function EventCard({
                   <Badge variant="outline" className="h-5 px-1 py-0 text-xs">
                     {getDaysUntilEvent()}
                   </Badge>
+                )}
+                {showPrayerButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 gap-1 px-1.5 text-[10px]"
+                    onClick={handleShowPrayer}
+                  >
+                    <ScrollText className="h-3 w-3" />
+                    Xem sớ
+                  </Button>
                 )}
               </div>
               <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -281,6 +352,15 @@ export function EventCard({
             </div>
           )}
         </div>
+
+        <PrayerPreviewDialog
+          open={showPrayerDialog}
+          onOpenChange={setShowPrayerDialog}
+          type={prayerType}
+          lunarDate={getLunarInfo()}
+          ancestorName={event.ancestorName || undefined}
+          ancestorPrecall={event.ancestorPrecall || undefined}
+        />
       </div>
     );
   }
@@ -288,7 +368,6 @@ export function EventCard({
   return (
     <Card>
       <CardHeader className="pb-2">
-        {/* Mobile layout */}
         <div className="flex flex-col gap-2 sm:hidden">
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
@@ -320,6 +399,17 @@ export function EventCard({
                     {getDaysUntilEvent()}
                   </Badge>
                 )}
+                {showPrayerButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    onClick={handleShowPrayer}
+                  >
+                    <ScrollText className="h-3 w-3" />
+                    Xem sớ
+                  </Button>
+                )}
               </div>
             </div>
             {showActions && (
@@ -348,7 +438,6 @@ export function EventCard({
           </div>
         </div>
 
-        {/* Desktop layout (original) */}
         <div className="hidden items-start justify-between sm:flex">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">{getDisplayTitle()}</h3>
@@ -368,6 +457,17 @@ export function EventCard({
               <Badge variant="outline" className="text-xs">
                 {getDaysUntilEvent()}
               </Badge>
+            )}
+            {showPrayerButton && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs"
+                onClick={handleShowPrayer}
+              >
+                <ScrollText className="h-3 w-3" />
+                Xem sớ
+              </Button>
             )}
           </div>
           {showActions && (
@@ -395,26 +495,32 @@ export function EventCard({
         {event.description && (
           <p className="text-muted-foreground text-sm">{event.description}</p>
         )}
-
         <div className="space-y-1 text-sm">
           <div className="flex items-center gap-2">
             <Calendar className="text-muted-foreground h-4 w-4" />
             <span>{getLunarDateFormatted()}</span>
           </div>
-
           {event.gregorianDate && (
             <div className="flex items-center gap-2">
               <Calendar className="text-muted-foreground h-4 w-4" />
               <span>{formatDate(event.gregorianDate)}</span>
             </div>
           )}
-
           <div className="flex items-center gap-2">
             <Clock className="text-muted-foreground h-4 w-4" />
             <span>Nhắc nhở {getReminderText(event.reminderDays)}</span>
           </div>
         </div>
       </CardContent>
+
+      <PrayerPreviewDialog
+        open={showPrayerDialog}
+        onOpenChange={setShowPrayerDialog}
+        type={prayerType}
+        lunarDate={getLunarInfo()}
+        ancestorName={event.ancestorName || undefined}
+        ancestorPrecall={event.ancestorPrecall || undefined}
+      />
     </Card>
   );
 }

@@ -72,8 +72,48 @@ model User {
   OrganizationMember               OrganizationMember[]
   PushSubscription                 PushSubscription[]
   Session                          Session[]
+  Petitioner                       Petitioner[]
+  PrayerTemplate                   PrayerTemplate[]
+  PrayerSettings                   PrayerSettings?
   VietnameseLunarEvent             VietnameseLunarEvent[]
   VietnameseNotificationPreference VietnameseNotificationPreference?
+}
+
+model Petitioner {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String   @db.VarChar(255)
+  birthYear    Int
+  buddhistName String?  @db.VarChar(255)
+  isHead       Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PrayerTemplate {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @db.VarChar(50)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+}
+
+model PrayerSettings {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  familySurname String?  @db.VarChar(255)
+  address       String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

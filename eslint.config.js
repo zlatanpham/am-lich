@@ -37,6 +37,7 @@ const eslintConfig = defineConfig([
         "error",
         { checksVoidReturn: { attributes: false } },
       ],
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
       "@next/next/no-img-element": "off",
     },
   },
