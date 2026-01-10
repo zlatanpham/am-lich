@@ -11,14 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  CalendarPlus,
-  Bell,
-  User,
-  LogOut,
-  Send,
-  ScrollText,
-} from "lucide-react";
+import { CalendarPlus, User, LogOut, Send, ScrollText } from "lucide-react";
 import Link from "next/link";
 import { LoginDialog } from "@/components/login-dialog";
 
@@ -90,13 +83,6 @@ export function HeaderDropdown() {
           <Link href="/prayers" className="flex items-center">
             <ScrollText className="mr-2 h-4 w-4" />
             <span>Cài đặt Sớ khấn</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link href="/notifications" className="flex items-center">
-            <Bell className="mr-2 h-4 w-4" />
-            <span>Cài đặt thông báo</span>
           </Link>
         </DropdownMenuItem>
 

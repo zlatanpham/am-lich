@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
-import { Send, Calendar, CalendarPlus, Bell, Home } from "lucide-react";
+import { Send, Calendar, CalendarPlus, Home } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -35,11 +35,6 @@ const data = {
       title: "Sự kiện của tôi",
       url: "/events",
       icon: CalendarPlus,
-    },
-    {
-      title: "Cài đặt thông báo",
-      url: "/notifications",
-      icon: Bell,
     },
   ],
   navSecondary: [

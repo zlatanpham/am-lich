@@ -1,12 +1,11 @@
 # Âm Lịch - Vietnamese Lunar Calendar
 
-A comprehensive Vietnamese lunar calendar web application with event management, cultural context, and push notifications.
+A comprehensive Vietnamese lunar calendar web application with event management and cultural context.
 
 ## Features
 
 - **Vietnamese Lunar Calendar**: Complete lunar calendar with Vietnamese terminology and cultural context
 - **Event Management**: Create and manage Vietnamese cultural events, ancestor worship dates, and personal reminders
-- **Smart Notifications**: Push notifications and email reminders for cultural events and important dates
 - **Cultural Context**: Built-in Vietnamese holidays, zodiac information, and traditional observances
 - **Progressive Web App**: Install as native app with offline functionality
 - **Authentication**: Secure user accounts with Email/Password
@@ -19,7 +18,6 @@ A comprehensive Vietnamese lunar calendar web application with event management,
 - **Backend**: tRPC, NextAuth.js, Prisma ORM
 - **Database**: PostgreSQL with Vietnamese cultural data
 - **UI Components**: shadcn/ui, Radix UI
-- **Notifications**: Web Push API, Email via Resend
 - **Lunar Calculations**: Chinese Lunar Calendar libraries with Vietnamese adaptations
 
 ## Quick Start
@@ -56,13 +54,9 @@ DATABASE_URL="postgresql://user:password@localhost:5432/amlich"
 AUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 
-# Email (Resend) - for notifications
+# Email (Resend)
 RESEND_API_KEY="your-resend-api-key"
 EMAIL_FROM="noreply@yourdomain.com"
-
-# Push Notifications (optional)
-VAPID_PUBLIC_KEY="your-vapid-public-key"
-VAPID_PRIVATE_KEY="your-vapid-private-key"
 ```
 
 ### 3. Database Setup
@@ -128,7 +122,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── (app)/             # Protected app routes (dashboard, events, notifications)
+│   ├── (app)/             # Protected app routes (dashboard, events)
 │   ├── (auth)/            # Authentication routes (login, signup)
 │   ├── api/               # API routes
 │   └── layout.tsx         # Root layout
@@ -138,7 +132,6 @@ src/
 │   └── ...               # Custom components
 ├── lib/                  # Utility functions
 │   ├── lunar-calendar.ts # Vietnamese lunar calendar logic
-│   ├── push-notifications.ts # Push notification handling
 │   └── vietnamese-localization.ts # Vietnamese language support
 ├── server/               # Server-side code
 │   ├── api/routers/      # tRPC API routers
@@ -161,8 +154,6 @@ The application includes comprehensive models for Vietnamese lunar calendar func
 ### Vietnamese Lunar Calendar
 
 - **VietnameseLunarEvent**: Vietnamese cultural events with lunar dates, zodiac years, and ancestor worship support
-- **VietnameseNotificationPreference**: User notification preferences for Vietnamese cultural events
-- **PushSubscription**: Web push notification subscriptions
 - **VietnameseHoliday**: Traditional Vietnamese holidays and their cultural significance
 - **VietnameseZodiacInfo**: Vietnamese zodiac system with Can Chi combinations
 
@@ -181,13 +172,6 @@ The application includes comprehensive models for Vietnamese lunar calendar func
 - Ancestor worship scheduling (giỗ tổ tiên)
 - Annual recurring events for traditional celebrations
 - Event export to various calendar formats
-
-### Notifications
-
-- Push notifications for cultural events in Vietnamese
-- Email reminders with cultural context
-- Customizable reminder timing (1, 3, 7 days)
-- Automatic reminders for Mồng 1 and Rằm days
 
 ## Development
 
@@ -218,8 +202,7 @@ Ensure all production environment variables are set:
 - `DATABASE_URL` - Production PostgreSQL connection
 - `AUTH_SECRET` - Strong random secret (use `openssl rand -base64 32`)
 - `NEXTAUTH_URL` - Your production domain
-- `RESEND_API_KEY` and `EMAIL_FROM` (for email notifications)
-- VAPID keys for push notifications (generate with `pnpm run generate-vapid`)
+- `RESEND_API_KEY` and `EMAIL_FROM`
 
 ### Database Migration
 

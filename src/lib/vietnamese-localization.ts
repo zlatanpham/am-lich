@@ -52,7 +52,6 @@ export const vietnameseText = {
   home: "Trang chủ",
   calendar: "Lịch",
   events: "Sự kiện",
-  notifications: "Thông báo",
   account: "Tài khoản",
   settings: "Cài đặt",
   logout: "Đăng xuất",
@@ -101,12 +100,6 @@ export const vietnameseText = {
   ancestorName: "Tên tổ tiên",
   anniversaryDate: "Ngày giỗ",
   worshipReminder: "Nhắc nhở cúng bái",
-
-  // Notifications
-  enableNotifications: "Bật thông báo",
-  pushNotifications: "Thông báo đẩy",
-  emailNotifications: "Thông báo email",
-  reminderSettings: "Cài đặt nhắc nhở",
 
   // Cultural Elements
   culturalSignificance: "Ý nghĩa văn hóa",
