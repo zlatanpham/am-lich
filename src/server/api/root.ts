@@ -9,7 +9,6 @@ import { organizationRouter } from "./routers/organization";
 import { userRouter } from "./routers/user";
 import { lunarCalendarRouter } from "./routers/lunar-calendar";
 import { lunarEventsRouter } from "./routers/lunar-events";
-import { notificationsRouter } from "./routers/notifications";
 import { calendarExportRouter } from "./routers/calendar-export";
 import { prayersRouter } from "./routers/prayers";
 
@@ -18,7 +17,6 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   lunarCalendar: lunarCalendarRouter,
   lunarEvents: lunarEventsRouter,
-  notifications: notificationsRouter,
   calendarExport: calendarExportRouter,
   prayers: prayersRouter,
 });

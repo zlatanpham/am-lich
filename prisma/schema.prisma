@@ -67,16 +67,13 @@ model User {
   reset_password_expires           DateTime?                         @map("resetPasswordExpires")
   Account                          Account[]
   LunarEvent                       LunarEvent[]
-  NotificationPreference           NotificationPreference?
   Organization                     Organization[]
   OrganizationMember               OrganizationMember[]
-  PushSubscription                 PushSubscription[]
   Session                          Session[]
   Petitioner                       Petitioner[]
   PrayerTemplate                   PrayerTemplate[]
   PrayerSettings                   PrayerSettings?
   VietnameseLunarEvent             VietnameseLunarEvent[]
-  VietnameseNotificationPreference VietnameseNotificationPreference?
 }
 
 model Petitioner {
@@ -170,50 +167,6 @@ model LunarEvent {
 
   @@index([userId, lunarYear, lunarMonth])
   @@index([lunarYear, lunarMonth, lunarDay])
-}
-
-model VietnameseNotificationPreference {
-  id                           String   @id @default(cuid())
-  userId                       String   @unique
-  enablePushNotifications      Boolean  @default(false)
-  enableEmailNotifications     Boolean  @default(true)
-  defaultReminderDays          Int      @default(3) @db.SmallInt
-  remindForMong1               Boolean  @default(true)
-  remindForRam                 Boolean  @default(true)
-  remindForAncestorWorship     Boolean  @default(true)
-  remindForTraditionalHolidays Boolean  @default(true)
-  preferredLanguage            String   @default("vi") @db.VarChar(10)
-  timezone                     String   @default("Asia/Ho_Chi_Minh") @db.VarChar(50)
-  culturalReminderLevel        String   @default("moderate") @db.VarChar(20)
-  createdAt                    DateTime @default(now())
-  updatedAt                    DateTime @updatedAt
-  user                         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model NotificationPreference {
-  id                       String   @id @default(cuid())
-  userId                   String   @unique
-  enablePushNotifications  Boolean  @default(false)
-  enableEmailNotifications Boolean  @default(true)
-  defaultReminderDays      Int      @default(3) @db.SmallInt
-  remindFor15thDay         Boolean  @default(true)
-  remindFor1stDay          Boolean  @default(true)
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model PushSubscription {
-  id        String   @id @default(cuid())
-  userId    String
-  endpoint  String   @db.VarChar(500)
-  p256dh    String   @db.VarChar(255)
-  auth      String   @db.VarChar(255)
-  userAgent String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, endpoint])
 }
 
 model VietnameseHoliday {
