@@ -12,7 +12,7 @@ export async function sendPasswordResetEmail(
 ) {
   try {
     const { data, error } = await resend.emails.send({
-      from: env.EMAIL_FROM ?? "noreply@example.com",
+      from: `Âm Lịch <${env.EMAIL_FROM}>`,
       to: [to],
       subject: "Reset your password",
       react: React.createElement(ResetPasswordEmail, {
