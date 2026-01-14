@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarPlus, User, LogOut, Send, ScrollText } from "lucide-react";
 import Link from "next/link";
 import { LoginDialog } from "@/components/login-dialog";
 
 export function HeaderDropdown() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const user = session?.user as {
     name?: string;
@@ -27,6 +28,10 @@ export function HeaderDropdown() {
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
   };
+
+  if (status === "loading") {
+    return <Skeleton className="h-8 w-8 rounded-full" />;
+  }
 
   if (!session) {
     return (
