@@ -32,12 +32,23 @@ export default function AppLayout({
       {/* Footer */}
       <footer className="mt-0 border-t">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-muted-foreground *:[a]:hover:text-primary mb-2 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+          <div className="text-muted-foreground *:[a]:hover:text-primary flex flex-wrap justify-center gap-x-2 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+            <span>
+              Built with ❤️ by{" "}
+              <a href="https://github.com/zlatanpham" className="underline">
+                Zlatan Pham
+              </a>
+            </span>
+            <span className="text-muted-foreground/50">•</span>
             <Link href="/features">Tính năng</Link>
-          </div>
-          <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-            Made with ❤️ by{" "}
-            <a href="https://github.com/zlatanpham">Zlatan Pham</a>
+            <span className="text-muted-foreground/50">•</span>
+            <a
+              href="https://github.com/zlatanpham/am-lich"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Mã nguồn
+            </a>
           </div>
         </div>
       </footer>

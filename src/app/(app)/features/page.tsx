@@ -6,9 +6,10 @@ import {
   Moon,
   ScrollText,
   Smartphone,
-  CheckCircle2,
+  Check,
   Clock,
   Star,
+  Download,
 } from "lucide-react";
 
 export default function FeaturesPage() {
@@ -44,15 +45,15 @@ export default function FeaturesPage() {
               "Thông tin tiết khí, giờ hoàng đạo",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="text-primary h-5 w-5" />
+                <Check className="text-primary h-5 w-5" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
         <div className="order-1 md:order-2">
-          <Card className="border-primary/20 overflow-hidden border-1 py-0 shadow-xl">
-            <CardHeader className="bg-muted/50 border-b py-3">
+          <Card className="border-primary/20 overflow-hidden border py-0 shadow-xl">
+            <CardHeader className="bg-muted/50 border-b py-3 pb-1!">
               <div className="flex items-center justify-between">
                 <div className="font-semibold">Tháng 3, 2025</div>
                 <div className="flex gap-1">
@@ -117,7 +118,7 @@ export default function FeaturesPage() {
       {/* Feature 2: Quản Lý Sự Kiện */}
       <section className="grid items-center gap-8 md:grid-cols-2">
         <div className="order-1">
-          <Card className="border-primary/10 border-1 shadow-lg">
+          <Card className="border-primary/10 border shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Sự kiện sắp tới</CardTitle>
@@ -181,7 +182,7 @@ export default function FeaturesPage() {
               "Phân loại sự kiện gia đình và lễ tiết",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="text-primary h-5 w-5" />
+                <Check className="text-primary h-5 w-5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -208,15 +209,15 @@ export default function FeaturesPage() {
               "Tự động điền họ tên, địa chỉ vào văn khấn",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="text-primary h-5 w-5" />
+                <Check className="text-primary h-5 w-5" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
         <div className="order-1 space-y-4 md:order-2">
-          <Card className="border-primary/10 bg-muted/50 border-1 shadow-lg">
-            <CardHeader className="pb-2">
+          <Card className="border-primary/10 bg-muted/50 border shadow-lg">
+            <CardHeader className="pb-0">
               <CardTitle className="text-sm">Danh sách tín chủ</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -235,15 +236,16 @@ export default function FeaturesPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-primary/10 border-1 shadow-lg">
-            <CardHeader className="pb-2">
+          <Card className="border-primary/10 border shadow-lg">
+            <CardHeader className="pb-0">
               <CardTitle className="text-sm">Mẫu văn khấn Mùng 1</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted/50 text-muted-foreground line-clamp-4 rounded-md p-3 text-[10px] leading-relaxed italic">
-                "Nam mô A Di Đà Phật! Con lạy chín phương Trời, mười phương Chư
-                Phật... Tín chủ con là [Nguyễn Văn An], ngụ tại [Số 123, Đường
-                ABC...], cùng toàn thể gia quyến thành tâm sắm lễ..."
+                &quot;Nam mô A Di Đà Phật! Con lạy chín phương Trời, mười phương
+                Chư Phật&hellip; Tín chủ con là [Nguyễn Văn An], ngụ tại [Số
+                123, Đường ABC&hellip;], cùng toàn thể gia quyến thành tâm sắm
+                lễ...&quot;
               </div>
             </CardContent>
           </Card>
@@ -324,11 +326,89 @@ export default function FeaturesPage() {
               "Dễ dàng xem lịch mọi lúc, mọi nơi",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="text-primary h-5 w-5" />
+                <Check className="text-primary h-5 w-5" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Feature 5: Xuất Lịch & Chia Sẻ */}
+      <section className="grid items-center gap-8 md:grid-cols-2">
+        <div className="order-2 space-y-4 md:order-1">
+          <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-lg">
+            <Download className="h-6 w-6" />
+          </div>
+          <h2 className="text-2xl font-bold">Xuất Lịch & Chia Sẻ</h2>
+          <p className="text-muted-foreground">
+            Xuất các sự kiện âm lịch sang các ứng dụng lịch phổ biến như Google
+            Calendar, Apple Calendar và Outlook. Nhận nhắc nhở tự động trên mọi
+            thiết bị và dễ dàng chia sẻ lịch với gia đình.
+          </p>
+          <ul className="space-y-2">
+            {[
+              "Xuất định dạng iCalendar (.ics) chuẩn",
+              "Đồng bộ Google Calendar, Apple, Outlook",
+              "Nhận thông báo nhắc nhở trên điện thoại",
+            ].map((item, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <Check className="text-primary h-5 w-5" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="order-1 space-y-4 md:order-2">
+          <Card className="border-primary/10 overflow-hidden border py-0 shadow-lg">
+            <CardHeader className="bg-muted/50 border-b pt-4 pb-2!">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Download className="h-4 w-4" />
+                Xuất lịch âm
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 px-4 pb-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-medium">
+                  <span>Chọn năm</span>
+                  <Badge variant="outline" className="text-[10px]">
+                    2025 (hiện tại)
+                  </Badge>
+                </div>
+                <div className="bg-muted/20 text-muted-foreground flex h-9 w-full items-center rounded-md border px-3 text-xs">
+                  Năm 2025
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary flex size-4 items-center justify-center rounded border">
+                    <Check className="size-3 text-white" />
+                  </div>
+                  <span className="text-xs">Sự kiện âm lịch (Mồng 1, Rằm)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary flex size-4 items-center justify-center rounded border">
+                    <Check className="size-3 text-white" />
+                  </div>
+                  <span className="text-xs">Sự kiện cá nhân</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50/50 p-2 text-[10px]">
+                  <div className="size-4 rounded-sm bg-blue-500" />
+                  <span>Google Calendar</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-md border border-slate-100 bg-slate-50/50 p-2 text-[10px]">
+                  <div className="size-4 rounded-sm bg-slate-500" />
+                  <span>Apple Calendar</span>
+                </div>
+              </div>
+              <button className="bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md py-2 text-xs font-medium opacity-90">
+                <Download className="size-3" />
+                Xuất file .ics
+              </button>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
