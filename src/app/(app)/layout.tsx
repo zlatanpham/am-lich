@@ -32,6 +32,9 @@ export default function AppLayout({
       {/* Footer */}
       <footer className="mt-0 border-t">
         <div className="container mx-auto px-4 py-8">
+          <div className="text-muted-foreground *:[a]:hover:text-primary mb-2 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+            <Link href="/features">Tính năng</Link>
+          </div>
           <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
             Made with ❤️ by{" "}
             <a href="https://github.com/zlatanpham">Zlatan Pham</a>
