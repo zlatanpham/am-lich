@@ -59,7 +59,11 @@ export function DateDetailDialog({
   day,
 }: DateDetailDialogProps) {
   const { data: session } = useSession();
-  const [showPrayerDialog, setShowPrayerDialog] = useState(false);
+  const [prayerEvent, setPrayerEvent] = useState<{
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
+    ownerUserId?: string;
+  } | null>(null);
 
   // Fetch shared events for the month containing this day
   const year = day?.gregorianDate.getFullYear() ?? new Date().getFullYear();
@@ -83,26 +87,6 @@ export function DateDetailDialog({
   if (!day) {
     return null;
   }
-
-  const isImportantDate = day.lunarDate.day === 1 || day.lunarDate.day === 15;
-  const ancestorEvent = day.events?.find(
-    (e) => e.eventType === "ancestor_worship",
-  );
-  // Also check for shared ancestor worship events
-  const sharedAncestorEvent = sharedEventsForDay.find(
-    (e) => e.eventType === "ancestor_worship",
-  );
-  const showPrayerButton =
-    session?.user &&
-    (isImportantDate || !!ancestorEvent || !!sharedAncestorEvent);
-
-  // Use personal ancestor event if available, otherwise use shared
-  const activeAncestorEvent = ancestorEvent || sharedAncestorEvent;
-  const prayerType = activeAncestorEvent
-    ? "ancestor"
-    : day.lunarDate.day === 1
-      ? "mong1"
-      : "ram15";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -226,23 +210,10 @@ export function DateDetailDialog({
 
           {/* Events Section */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="flex items-center gap-2 font-medium">
-                <CalendarDays className="h-4 w-4" />
-                Sự kiện của bạn
-              </h4>
-              {showPrayerButton && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 gap-1 px-2 text-xs"
-                  onClick={() => setShowPrayerDialog(true)}
-                >
-                  <ScrollText className="h-3.5 w-3.5" />
-                  Xem sớ khấn
-                </Button>
-              )}
-            </div>
+            <h4 className="flex items-center gap-2 font-medium">
+              <CalendarDays className="h-4 w-4" />
+              Sự kiện của bạn
+            </h4>
 
             {session?.user ? (
               day.events && day.events.length > 0 ? (
@@ -267,9 +238,25 @@ export function DateDetailDialog({
                         ) : (
                           <div className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
                         )}
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                        <span className="flex-1 text-sm font-medium text-blue-700 dark:text-blue-400">
                           {displayTitle}
                         </span>
+                        {isAncestorWorship && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 gap-1 px-1.5 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
+                            onClick={() =>
+                              setPrayerEvent({
+                                ancestorName: event.ancestorName,
+                                ancestorPrecall: event.ancestorPrecall,
+                              })
+                            }
+                          >
+                            <ScrollText className="h-3 w-3" />
+                            Xem sớ
+                          </Button>
+                        )}
                       </div>
                     );
                   })}
@@ -348,6 +335,23 @@ export function DateDetailDialog({
                             {sharerName}
                           </span>
                         </div>
+                        {isAncestorWorship && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 gap-1 px-1.5 text-xs text-purple-600 hover:bg-purple-100 hover:text-purple-700 dark:text-purple-400 dark:hover:bg-purple-900 dark:hover:text-purple-300"
+                            onClick={() =>
+                              setPrayerEvent({
+                                ancestorName: event.ancestorName,
+                                ancestorPrecall: event.ancestorPrecall,
+                                ownerUserId: event.sharedBy?.id,
+                              })
+                            }
+                          >
+                            <ScrollText className="h-3 w-3" />
+                            Xem sớ
+                          </Button>
+                        )}
                       </div>
                     );
                   })}
@@ -358,9 +362,9 @@ export function DateDetailDialog({
         </div>
 
         <PrayerPreviewDialog
-          open={showPrayerDialog}
-          onOpenChange={setShowPrayerDialog}
-          type={prayerType}
+          open={!!prayerEvent}
+          onOpenChange={(open) => !open && setPrayerEvent(null)}
+          type="ancestor"
           lunarDate={{
             day: day.lunarDate.day,
             month: day.lunarDate.month,
@@ -370,13 +374,9 @@ export function DateDetailDialog({
             yearName: day.lunarDate.zodiacYear,
             solarDate: day.gregorianDate,
           }}
-          ancestorName={activeAncestorEvent?.ancestorName || undefined}
-          ancestorPrecall={activeAncestorEvent?.ancestorPrecall || undefined}
-          ownerUserId={
-            sharedAncestorEvent && !ancestorEvent
-              ? sharedAncestorEvent.sharedBy?.id
-              : undefined
-          }
+          ancestorName={prayerEvent?.ancestorName ?? undefined}
+          ancestorPrecall={prayerEvent?.ancestorPrecall ?? undefined}
+          ownerUserId={prayerEvent?.ownerUserId}
         />
       </DialogContent>
     </Dialog>
