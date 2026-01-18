@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useTransition, Suspense } from "react";
 import { toast } from "sonner";
 import { login } from "@/app/actions/auth";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { AuthLayout } from "@/components/auth-layout";
 
 const loginSchema = z.object({
@@ -34,9 +35,17 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+const isValidCallbackUrl = (url: string) => {
+  return url.startsWith("/") && !url.startsWith("//");
+};
+
+function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const { update } = useSession();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+  const safeCallbackUrl =
+    callbackUrl && isValidCallbackUrl(callbackUrl) ? callbackUrl : "/";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,7 +64,7 @@ export default function LoginPage() {
         await login(formData);
         await update();
         // Use window.location.href to do a full page reload to ensure session state is properly synced
-        window.location.href = "/";
+        window.location.href = safeCallbackUrl;
       } catch (error) {
         console.log(error);
         toast.error(
@@ -147,7 +156,11 @@ export default function LoginPage() {
         <div className="text-center text-xs text-slate-500">
           Chưa có tài khoản?{" "}
           <Link
-            href="/signup"
+            href={
+              callbackUrl
+                ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : "/signup"
+            }
             className="text-slate-600 hover:text-slate-800 hover:underline"
           >
             Đăng ký ngay
@@ -155,5 +168,23 @@ export default function LoginPage() {
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthLayout>
+          <Card className="w-full border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
+            <CardContent className="py-8 text-center">
+              <div className="text-muted-foreground">Đang tải...</div>
+            </CardContent>
+          </Card>
+        </AuthLayout>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

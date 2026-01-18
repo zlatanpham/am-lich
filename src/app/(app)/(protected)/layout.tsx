@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 
 export default async function ProtectedLayout({
@@ -7,7 +8,10 @@ export default async function ProtectedLayout({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") || "/";
+    const callbackUrl = encodeURIComponent(pathname);
+    redirect(`/login?callbackUrl=${callbackUrl}`);
   }
 
   return <>{children}</>;

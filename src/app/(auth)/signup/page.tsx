@@ -45,6 +45,7 @@ function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get("invitation");
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const { data: invitationInfo } =
     api.eventSharing.validateInvitationToken.useQuery(
@@ -225,7 +226,11 @@ function SignUpForm() {
         <div className="text-center text-xs text-slate-500">
           Đã có tài khoản?{" "}
           <Link
-            href="/login"
+            href={
+              callbackUrl
+                ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : "/login"
+            }
             className="text-slate-600 hover:text-slate-800 hover:underline"
           >
             Đăng nhập
