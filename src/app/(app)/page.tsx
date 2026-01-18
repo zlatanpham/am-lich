@@ -21,7 +21,7 @@ export default function HomePage() {
 
         {/* Right column - Calendar grid */}
         <div className="lg:col-span-2">
-          <CalendarGrid showEvents={true} />
+          <CalendarGrid showEvents={true} showSharedEvents={true} />
         </div>
       </div>
     </div>

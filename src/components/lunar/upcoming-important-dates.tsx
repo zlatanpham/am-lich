@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +31,47 @@ export function UpcomingImportantDates() {
       enabled: !!session?.user,
     },
   );
+  const thirtyDaysFromNow = useMemo(() => {
+    const now = new Date();
+    const future = new Date(now);
+    future.setDate(future.getDate() + 30);
+    return { start: now, end: future };
+  }, []);
+
+  const { data: upcomingSharedEvents } =
+    api.eventSharing.getSharedEvents.useQuery(
+      {
+        startDate: thirtyDaysFromNow.start,
+        endDate: thirtyDaysFromNow.end,
+      },
+      {
+        enabled: !!session?.user,
+      },
+    );
+
+  // Combine personal and shared events, sorted by date
+  const allUpcomingEvents = useMemo(() => {
+    const personal = (upcomingEvents || []).map((event) => ({
+      ...event,
+      isShared: false as const,
+      sharedByName: null as string | null,
+    }));
+
+    const shared = (upcomingSharedEvents || [])
+      .filter((event) => event.gregorianDate !== null)
+      .map((event) => ({
+        ...event,
+        gregorianDate: event.gregorianDate!,
+        isShared: true as const,
+        sharedByName: event.sharedBy.name || event.sharedBy.email || null,
+      }));
+
+    return [...personal, ...shared].sort((a, b) => {
+      const dateA = a.gregorianDate ? new Date(a.gregorianDate).getTime() : 0;
+      const dateB = b.gregorianDate ? new Date(b.gregorianDate).getTime() : 0;
+      return dateA - dateB;
+    });
+  }, [upcomingEvents, upcomingSharedEvents]);
 
   if (isLoading) {
     return (
@@ -93,36 +134,57 @@ export function UpcomingImportantDates() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Upcoming Custom Events */}
-        {upcomingEvents && upcomingEvents.length > 0 && (
+        {/* Upcoming Custom Events (Personal + Shared) */}
+        {allUpcomingEvents.length > 0 && (
           <div className="space-y-3">
-            {upcomingEvents.slice(0, 3).map((event) => {
+            {allUpcomingEvents.slice(0, 5).map((event) => {
               const daysUntil = Math.ceil(
-                (event.gregorianDate.getTime() - new Date().getTime()) /
+                (new Date(event.gregorianDate).getTime() -
+                  new Date().getTime()) /
                   (1000 * 60 * 60 * 24),
               );
+              const isShared = event.isShared;
               return (
                 <div
-                  key={event.id}
-                  className="flex items-center justify-between rounded-lg bg-blue-50 p-3"
+                  key={`${isShared ? "shared" : "personal"}-${event.id}`}
+                  className={`flex items-center justify-between rounded-lg p-3 ${
+                    isShared ? "bg-purple-50" : "bg-blue-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="flex flex-shrink-0 gap-1">
                       <Badge
                         variant="outline"
-                        className="border-blue-300 bg-blue-100 text-blue-800"
+                        className={
+                          isShared
+                            ? "border-purple-300 bg-purple-100 text-purple-800"
+                            : "border-blue-300 bg-blue-100 text-blue-800"
+                        }
                       >
-                        Sự kiện
+                        {isShared ? "Chia sẻ" : "Sự kiện"}
                       </Badge>
                     </div>
                     <div>
-                      <p className="font-medium text-blue-900">{event.title}</p>
-                      <p className="text-sm text-blue-600">
+                      <p
+                        className={`font-medium ${isShared ? "text-purple-900" : "text-blue-900"}`}
+                      >
+                        {event.title}
+                      </p>
+                      <p
+                        className={`text-sm ${isShared ? "text-purple-600" : "text-blue-600"}`}
+                      >
                         {event.lunarDateFormatted}
+                        {isShared && event.sharedByName && (
+                          <span className="ml-1 text-purple-500">
+                            · từ {event.sharedByName}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-blue-700">
+                  <div
+                    className={`flex items-center gap-1 text-sm ${isShared ? "text-purple-700" : "text-blue-700"}`}
+                  >
                     <Clock className="h-4 w-4" />
                     <span>
                       {daysUntil === 0
