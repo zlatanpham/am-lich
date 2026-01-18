@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,8 +41,38 @@ type LunarEvent = {
   lunarDateFormatted?: string;
 };
 
+const VALID_TABS = ["lunar", "shared", "calendar"] as const;
+type TabValue = (typeof VALID_TABS)[number];
+
 export default function EventsPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const currentTab = useMemo(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && VALID_TABS.includes(tabParam as TabValue)) {
+      return tabParam as TabValue;
+    }
+    return "lunar";
+  }, [searchParams]);
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === "lunar") {
+        params.delete("tab");
+      } else {
+        params.set("tab", value);
+      }
+      const queryString = params.toString();
+      router.push(queryString ? `?${queryString}` : "/events", {
+        scroll: false,
+      });
+    },
+    [router, searchParams],
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -147,7 +178,11 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="lunar" className="space-y-6">
+      <Tabs
+        value={currentTab}
+        onValueChange={handleTabChange}
+        className="space-y-6"
+      >
         <TabsList>
           <TabsTrigger value="lunar" className="flex items-center gap-2">
             <Moon className="h-4 w-4" />
