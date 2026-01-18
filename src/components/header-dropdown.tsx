@@ -12,7 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarPlus, User, LogOut, Send, ScrollText } from "lucide-react";
+import {
+  CalendarPlus,
+  User,
+  LogOut,
+  Send,
+  ScrollText,
+  Share2,
+} from "lucide-react";
 import Link from "next/link";
 import { LoginDialog } from "@/components/login-dialog";
 
@@ -81,6 +88,13 @@ export function HeaderDropdown() {
           <Link href="/events" className="flex items-center">
             <CalendarPlus className="mr-2 h-4 w-4" />
             <span>Sự kiện của tôi</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/sharing" className="flex items-center">
+            <Share2 className="mr-2 h-4 w-4" />
+            <span>Chia sẻ sự kiện</span>
           </Link>
         </DropdownMenuItem>
 

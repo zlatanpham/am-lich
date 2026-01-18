@@ -30,6 +30,8 @@ interface PrayerPreviewDialogProps {
   };
   ancestorName?: string;
   ancestorPrecall?: string;
+  /** Owner user ID for shared events - when provided, fetch owner's prayer data */
+  ownerUserId?: string;
 }
 
 export function PrayerPreviewDialog({
@@ -39,16 +41,36 @@ export function PrayerPreviewDialog({
   lunarDate,
   ancestorName,
   ancestorPrecall,
+  ownerUserId,
 }: PrayerPreviewDialogProps) {
   const [copied, setCopied] = useState(false);
   const [renderedContent, setRenderedContent] = useState("");
 
-  const { data: petitioners, isLoading: loadingPetitioners } =
-    api.prayers.getPetitioners.useQuery(undefined, { enabled: open });
-  const { data: templates, isLoading: loadingTemplates } =
-    api.prayers.getTemplates.useQuery(undefined, { enabled: open });
-  const { data: settings, isLoading: loadingSettings } =
-    api.prayers.getSettings.useQuery(undefined, { enabled: open });
+  // For own events - fetch own prayer data
+  const { data: ownPetitioners, isLoading: loadingOwnPetitioners } =
+    api.prayers.getPetitioners.useQuery(undefined, {
+      enabled: open && !ownerUserId,
+    });
+  const { data: ownTemplates, isLoading: loadingOwnTemplates } =
+    api.prayers.getTemplates.useQuery(undefined, {
+      enabled: open && !ownerUserId,
+    });
+  const { data: ownSettings, isLoading: loadingOwnSettings } =
+    api.prayers.getSettings.useQuery(undefined, {
+      enabled: open && !ownerUserId,
+    });
+
+  // For shared events - fetch owner's prayer data
+  const { data: sharedData, isLoading: loadingSharedData } =
+    api.prayers.getSharedPrayerData.useQuery(
+      { ownerUserId: ownerUserId! },
+      { enabled: open && !!ownerUserId },
+    );
+
+  // Use the appropriate data source
+  const petitioners = ownerUserId ? sharedData?.petitioners : ownPetitioners;
+  const templates = ownerUserId ? sharedData?.templates : ownTemplates;
+  const settings = ownerUserId ? sharedData?.settings : ownSettings;
 
   useEffect(() => {
     if (petitioners && templates && open) {
@@ -116,7 +138,9 @@ export function PrayerPreviewDialog({
     }
   };
 
-  const isLoading = loadingPetitioners || loadingTemplates || loadingSettings;
+  const isLoading = ownerUserId
+    ? loadingSharedData
+    : loadingOwnPetitioners || loadingOwnTemplates || loadingOwnSettings;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

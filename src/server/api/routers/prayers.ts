@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
 import {
   DEFAULT_ANCESTOR_TEMPLATE,
   DEFAULT_MONG1_TEMPLATE,
@@ -165,5 +166,48 @@ export const prayersRouter = createTRPCRouter({
           userId: ctx.session.user.id,
         },
       });
+    }),
+
+  // Get prayer data for a shared event owner (verify share relationship)
+  getSharedPrayerData: protectedProcedure
+    .input(z.object({ ownerUserId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const userEmail = ctx.session.user.email?.toLowerCase();
+
+      // Verify there's an accepted share relationship
+      const share = await ctx.db.eventShare.findFirst({
+        where: {
+          ownerId: input.ownerUserId,
+          status: "ACCEPTED",
+          OR: [
+            { recipientId: userId },
+            { recipientEmail: userEmail, recipientId: null },
+          ],
+        },
+      });
+
+      if (!share) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Bạn không có quyền xem thông tin này",
+        });
+      }
+
+      // Fetch the owner's prayer data
+      const [petitioners, settings, templates] = await Promise.all([
+        ctx.db.petitioner.findMany({
+          where: { userId: input.ownerUserId },
+          orderBy: [{ isHead: "desc" }, { order: "asc" }],
+        }),
+        ctx.db.prayerSettings.findUnique({
+          where: { userId: input.ownerUserId },
+        }),
+        ctx.db.prayerTemplate.findMany({
+          where: { userId: input.ownerUserId },
+        }),
+      ]);
+
+      return { petitioners, settings, templates };
     }),
 });

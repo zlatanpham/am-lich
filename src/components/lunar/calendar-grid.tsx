@@ -17,11 +17,13 @@ import {
 interface CalendarGridProps {
   className?: string;
   showEvents?: boolean;
+  showSharedEvents?: boolean;
 }
 
 export function CalendarGrid({
   className,
   showEvents = false,
+  showSharedEvents = false,
 }: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDayFromAPI | null>(
@@ -36,6 +38,25 @@ export function CalendarGrid({
       year,
       month,
     });
+
+  // Fetch shared events for the calendar
+  const { data: sharedEventsData } =
+    api.eventSharing.getSharedEventsForCalendar.useQuery(
+      { year, month },
+      { enabled: showSharedEvents },
+    );
+
+  // Group shared events by date
+  const sharedEventsByDate = new Map<string, typeof sharedEventsData>();
+  if (sharedEventsData) {
+    for (const event of sharedEventsData) {
+      const dateKey = event.gregorianDate.toISOString().split("T")[0];
+      if (!sharedEventsByDate.has(dateKey!)) {
+        sharedEventsByDate.set(dateKey!, []);
+      }
+      sharedEventsByDate.get(dateKey!)!.push(event);
+    }
+  }
 
   // Prefetch adjacent months for smooth navigation
   const prevMonth = month === 0 ? 11 : month - 1;
@@ -282,7 +303,7 @@ export function CalendarGrid({
                       className="truncate rounded border border-blue-200 bg-blue-100 px-1 py-0.5 text-[10px] text-blue-700 sm:text-xs"
                       title={event?.title || "Sự kiện cá nhân"}
                     >
-                      📅 {event?.title || "Sự kiện"}
+                      {event?.title || "Sự kiện"}
                     </div>
                   ))}
                   {day.events.length > 1 && (
@@ -292,6 +313,33 @@ export function CalendarGrid({
                   )}
                 </div>
               )}
+
+              {/* Shared Events (if enabled) */}
+              {showSharedEvents &&
+                (() => {
+                  const dateKey = day.gregorianDate.toISOString().split("T")[0];
+                  const daySharedEvents =
+                    sharedEventsByDate.get(dateKey!) || [];
+                  if (daySharedEvents.length === 0) return null;
+                  return (
+                    <div className="mt-1 space-y-0.5 sm:mt-2 sm:space-y-1">
+                      {daySharedEvents.slice(0, 1).map((event, eventIndex) => (
+                        <div
+                          key={`${index}-shared-${eventIndex}`}
+                          className="truncate rounded border border-purple-200 bg-purple-100 px-1 py-0.5 text-[10px] text-purple-700 sm:text-xs"
+                          title={`${event.title} (${event.sharedBy?.name || event.sharedBy?.email})`}
+                        >
+                          {event.title}
+                        </div>
+                      ))}
+                      {daySharedEvents.length > 1 && (
+                        <div className="text-[10px] font-medium text-purple-600 sm:text-xs">
+                          +{daySharedEvents.length - 1}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
             </div>
           ))}
         </div>
@@ -315,6 +363,12 @@ export function CalendarGrid({
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className="h-2 w-2 rounded border border-blue-200 bg-blue-100 sm:h-3 sm:w-3"></div>
                 <span className="truncate">Sự kiện</span>
+              </div>
+            )}
+            {showSharedEvents && (
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="h-2 w-2 rounded border border-purple-200 bg-purple-100 sm:h-3 sm:w-3"></div>
+                <span className="truncate">Được chia sẻ</span>
               </div>
             )}
           </div>
