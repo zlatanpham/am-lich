@@ -60,10 +60,16 @@ export function DateDetailDialog({
 }: DateDetailDialogProps) {
   const { data: session } = useSession();
   const [prayerEvent, setPrayerEvent] = useState<{
+    type: "mong1" | "ram15" | "ancestor";
     ancestorName?: string | null;
     ancestorPrecall?: string | null;
     ownerUserId?: string;
   } | null>(null);
+
+  // Check if this is an important lunar date (1st or 15th)
+  const isImportantLunarDay =
+    day?.lunarDate.day === 1 || day?.lunarDate.day === 15;
+  const prayerTypeForDay = day?.lunarDate.day === 1 ? "mong1" : "ram15";
 
   // Fetch shared events for the month containing this day
   const year = day?.gregorianDate.getFullYear() ?? new Date().getFullYear();
@@ -196,12 +202,31 @@ export function DateDetailDialog({
             <>
               <Separator />
               <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
-                <h4 className="font-medium text-amber-800 dark:text-amber-400">
-                  Ý nghĩa văn hóa
-                </h4>
-                <p className="text-sm text-amber-700 dark:text-amber-500">
-                  {day.lunarDate.culturalSignificance}
-                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-amber-800 dark:text-amber-400">
+                      Ý nghĩa văn hóa
+                    </h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-500">
+                      {day.lunarDate.culturalSignificance}
+                    </p>
+                  </div>
+                  {session?.user && isImportantLunarDay && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1.5 px-2 text-xs text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-900 dark:hover:text-amber-300"
+                      onClick={() =>
+                        setPrayerEvent({
+                          type: prayerTypeForDay,
+                        })
+                      }
+                    >
+                      <ScrollText className="h-3.5 w-3.5" />
+                      Xem sớ khấn
+                    </Button>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -248,6 +273,7 @@ export function DateDetailDialog({
                             className="h-6 gap-1 px-1.5 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
                             onClick={() =>
                               setPrayerEvent({
+                                type: "ancestor",
                                 ancestorName: event.ancestorName,
                                 ancestorPrecall: event.ancestorPrecall,
                               })
@@ -342,6 +368,7 @@ export function DateDetailDialog({
                             className="h-6 gap-1 px-1.5 text-xs text-purple-600 hover:bg-purple-100 hover:text-purple-700 dark:text-purple-400 dark:hover:bg-purple-900 dark:hover:text-purple-300"
                             onClick={() =>
                               setPrayerEvent({
+                                type: "ancestor",
                                 ancestorName: event.ancestorName,
                                 ancestorPrecall: event.ancestorPrecall,
                                 ownerUserId: event.sharedBy?.id,
@@ -364,7 +391,7 @@ export function DateDetailDialog({
         <PrayerPreviewDialog
           open={!!prayerEvent}
           onOpenChange={(open) => !open && setPrayerEvent(null)}
-          type="ancestor"
+          type={prayerEvent?.type ?? "ancestor"}
           lunarDate={{
             day: day.lunarDate.day,
             month: day.lunarDate.month,

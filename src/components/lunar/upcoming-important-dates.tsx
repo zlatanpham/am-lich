@@ -12,7 +12,10 @@ import {
   DateDetailDialog,
   type CalendarDayFromAPI,
 } from "./date-detail-dialog";
-import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
+import {
+  gregorianToLunar,
+  type VietnameseLunarDate,
+} from "@/lib/lunar-calendar";
 
 export function UpcomingImportantDates() {
   const { data: session } = useSession();
@@ -125,6 +128,41 @@ export function UpcomingImportantDates() {
     setIsDialogOpen(true);
   };
 
+  const handleEventClick = (event: (typeof allUpcomingEvents)[number]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(event.gregorianDate);
+    eventDate.setHours(0, 0, 0, 0);
+
+    const lunarInfo = gregorianToLunar(eventDate);
+
+    // Build the events array for the dialog
+    const eventForDialog = event.isShared
+      ? undefined // Shared events are fetched by the dialog itself
+      : [
+          {
+            id: event.id,
+            title: event.title,
+            date: eventDate,
+            eventType: (event as { eventType?: string }).eventType,
+            ancestorName: (event as { ancestorName?: string | null })
+              .ancestorName,
+            ancestorPrecall: (event as { ancestorPrecall?: string | null })
+              .ancestorPrecall,
+          },
+        ];
+
+    setSelectedDay({
+      gregorianDate: eventDate,
+      lunarDate: lunarInfo,
+      isToday: eventDate.getTime() === today.getTime(),
+      isCurrentMonth: true,
+      isImportant: lunarInfo.day === 1 || lunarInfo.day === 15,
+      events: eventForDialog,
+    });
+    setIsDialogOpen(true);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -147,9 +185,20 @@ export function UpcomingImportantDates() {
               return (
                 <div
                   key={`${isShared ? "shared" : "personal"}-${event.id}`}
-                  className={`flex items-center justify-between rounded-lg p-3 ${
-                    isShared ? "bg-purple-50" : "bg-blue-50"
+                  className={`flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors ${
+                    isShared
+                      ? "bg-purple-50 hover:bg-purple-100"
+                      : "bg-blue-50 hover:bg-blue-100"
                   }`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleEventClick(event)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleEventClick(event);
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex flex-shrink-0 gap-1">
