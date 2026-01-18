@@ -74,6 +74,8 @@ model User {
   PrayerTemplate                   PrayerTemplate[]
   PrayerSettings                   PrayerSettings?
   VietnameseLunarEvent             VietnameseLunarEvent[]
+  sharedEventsOwned                EventShare[]                      @relation("EventShareOwner")
+  sharedEventsReceived             EventShare[]                      @relation("EventShareRecipient")
 }
 
 model Petitioner {
@@ -220,4 +222,47 @@ model VietnameseCulturalTip {
 
   @@index([lunarDay, tipCategory])
   @@index([isGoodDay, priority])
+}
+
+enum EventShareStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+model EventShare {
+  id             String           @id @default(cuid())
+  ownerId        String
+  recipientId    String?
+  recipientEmail String
+  status         EventShareStatus @default(PENDING)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  acceptedAt     DateTime?
+  declinedAt     DateTime?
+  cancelledAt    DateTime?
+
+  owner      User                  @relation("EventShareOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  recipient  User?                 @relation("EventShareRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  invitation EventShareInvitation?
+
+  @@unique([ownerId, recipientEmail])
+  @@index([ownerId])
+  @@index([recipientId])
+  @@index([recipientEmail])
+}
+
+model EventShareInvitation {
+  id           String     @id @default(cuid())
+  eventShareId String     @unique
+  token        String     @unique @default(cuid())
+  email        String
+  expiresAt    DateTime
+  createdAt    DateTime   @default(now())
+
+  eventShare EventShare @relation(fields: [eventShareId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
 }

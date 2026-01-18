@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   Moon,
@@ -19,12 +20,14 @@ import {
   CalendarDays,
   Flower2,
   ScrollText,
+  Users,
 } from "lucide-react";
 import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 import { LoginDialog } from "@/components/login-dialog";
 import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PrayerPreviewDialog } from "@/components/prayers/prayer-preview-dialog";
+import { api } from "@/trpc/react";
 
 // Type for the calendar day from API (events can be undefined or simplified array)
 export interface CalendarDayFromAPI {
@@ -57,6 +60,25 @@ export function DateDetailDialog({
 }: DateDetailDialogProps) {
   const { data: session } = useSession();
   const [showPrayerDialog, setShowPrayerDialog] = useState(false);
+
+  // Fetch shared events for the month containing this day
+  const year = day?.gregorianDate.getFullYear() ?? new Date().getFullYear();
+  const month = day?.gregorianDate.getMonth() ?? new Date().getMonth();
+
+  const { data: sharedEventsData } =
+    api.eventSharing.getSharedEventsForCalendar.useQuery(
+      { year, month },
+      { enabled: !!session?.user && !!day },
+    );
+
+  // Filter shared events for this specific day
+  const sharedEventsForDay = useMemo(() => {
+    if (!sharedEventsData || !day) return [];
+    const dateKey = day.gregorianDate.toISOString().split("T")[0];
+    return sharedEventsData.filter(
+      (event) => event.gregorianDate.toISOString().split("T")[0] === dateKey,
+    );
+  }, [sharedEventsData, day]);
 
   if (!day) {
     return null;
@@ -263,6 +285,57 @@ export function DateDetailDialog({
               </div>
             )}
           </div>
+
+          {/* Shared Events Section */}
+          {session?.user && sharedEventsForDay.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="flex items-center gap-2 font-medium">
+                  <Users className="h-4 w-4" />
+                  Sự kiện được chia sẻ
+                </h4>
+                <div className="space-y-2">
+                  {sharedEventsForDay.map((event) => {
+                    const sharerName =
+                      event.sharedBy?.name || event.sharedBy?.email || "Ai đó";
+                    const initials =
+                      sharerName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2) || "?";
+
+                    return (
+                      <div
+                        key={`shared-${event.id}`}
+                        className="flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 p-2 dark:border-purple-900 dark:bg-purple-950"
+                      >
+                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-purple-500" />
+                        <span className="flex-1 text-sm font-medium text-purple-700 dark:text-purple-400">
+                          {event.title}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage
+                              src={event.sharedBy?.image || undefined}
+                            />
+                            <AvatarFallback className="text-[10px]">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-muted-foreground text-xs">
+                            {sharerName}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <PrayerPreviewDialog

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect, Suspense } from "react";
 import {
   Card,
   CardContent,
@@ -21,10 +22,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/auth-layout";
+import { Users } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -38,12 +41,28 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get("invitation");
+
+  const { data: invitationInfo } =
+    api.eventSharing.validateInvitationToken.useQuery(
+      { token: invitationToken ?? "" },
+      { enabled: !!invitationToken },
+    );
+
   const registerUser = api.user.register.useMutation({
     onSuccess: () => {
-      toast.success("Tạo tài khoản thành công! Vui lòng đăng nhập.");
-      router.push("/login");
+      if (invitationToken && invitationInfo?.valid) {
+        toast.success(
+          "Tạo tài khoản thành công! Bạn có thể xem lời mời chia sẻ.",
+        );
+        router.push("/sharing");
+      } else {
+        toast.success("Tạo tài khoản thành công! Vui lòng đăng nhập.");
+        router.push("/login");
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Không thể tạo tài khoản.");
@@ -54,30 +73,56 @@ export default function SignUpPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
+      email: invitationInfo?.email ?? "",
       password: "",
       confirmPassword: "",
     },
   });
+
+  // Update email when invitation info is loaded
+  useEffect(() => {
+    if (invitationInfo?.valid && invitationInfo.email) {
+      form.setValue("email", invitationInfo.email);
+    }
+  }, [invitationInfo, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await registerUser.mutateAsync({
       name: values.name,
       email: values.email,
       password: values.password,
+      invitationToken: invitationToken ?? undefined,
     });
   }
 
   return (
     <AuthLayout>
       <div className="flex flex-col gap-4">
+        {invitationToken && invitationInfo?.valid && (
+          <Alert className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950">
+            <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <AlertDescription className="text-purple-700 dark:text-purple-300">
+              <strong>{invitationInfo.ownerName}</strong> muốn chia sẻ sự kiện
+              âm lịch với bạn. Tạo tài khoản để xem các sự kiện được chia sẻ.
+            </AlertDescription>
+          </Alert>
+        )}
+        {invitationToken && invitationInfo && !invitationInfo.valid && (
+          <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <AlertDescription className="text-red-700 dark:text-red-300">
+              {invitationInfo.error || "Mã mời không hợp lệ hoặc đã hết hạn."}
+            </AlertDescription>
+          </Alert>
+        )}
         <Card className="w-full border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
           <CardHeader className="space-y-1 pb-4 text-center">
             <CardTitle className="text-lg font-medium text-slate-800 dark:text-slate-200">
               Tạo tài khoản mới
             </CardTitle>
             <CardDescription className="text-sm text-slate-500 dark:text-slate-500">
-              Nhập thông tin để tạo tài khoản
+              {invitationToken && invitationInfo?.valid
+                ? "Tạo tài khoản để xem sự kiện được chia sẻ"
+                : "Nhập thông tin để tạo tài khoản"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
@@ -188,5 +233,23 @@ export default function SignUpPage() {
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthLayout>
+          <Card className="w-full border border-slate-200/50 bg-white/60 shadow-sm backdrop-blur-sm dark:border-slate-800/50 dark:bg-slate-900/60">
+            <CardContent className="py-8 text-center">
+              <div className="text-muted-foreground">Đang tải...</div>
+            </CardContent>
+          </Card>
+        </AuthLayout>
+      }
+    >
+      <SignUpForm />
+    </Suspense>
   );
 }

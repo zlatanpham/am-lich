@@ -29,10 +29,11 @@ export const userRouter = createTRPCRouter({
         password: z
           .string()
           .min(8, "Password must be at least 8 characters long"),
+        invitationToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { name, email, password } = input;
+      const { name, email, password, invitationToken } = input;
 
       const existingUser = await ctx.db.user.findUnique({
         where: { email },
@@ -72,6 +73,32 @@ export const userRouter = createTRPCRouter({
           },
         },
       });
+
+      // Handle invitation token if provided
+      if (invitationToken) {
+        const invitation = await ctx.db.eventShareInvitation.findUnique({
+          where: { token: invitationToken },
+          include: { eventShare: true },
+        });
+
+        if (
+          invitation &&
+          invitation.expiresAt > new Date() &&
+          invitation.eventShare.status === "PENDING" &&
+          invitation.email.toLowerCase() === email.toLowerCase()
+        ) {
+          // Link the share to the new user
+          await ctx.db.eventShare.update({
+            where: { id: invitation.eventShare.id },
+            data: { recipientId: newUser.id },
+          });
+
+          // Delete the invitation token
+          await ctx.db.eventShareInvitation.delete({
+            where: { id: invitation.id },
+          });
+        }
+      }
 
       return newUser;
     }),

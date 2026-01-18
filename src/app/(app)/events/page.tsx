@@ -12,9 +12,20 @@ import { EditEventDialog } from "@/components/lunar/edit-event-dialog";
 import { DeleteEventDialog } from "@/components/lunar/delete-event-dialog";
 import { ExportCalendarDialog } from "@/components/lunar/export-calendar-dialog";
 import { api } from "@/trpc/react";
-import { Plus, Search, Calendar, Moon, Download } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Calendar,
+  Moon,
+  Download,
+  Users,
+  Share2,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "next-auth/react";
+import { ShareInviteDialog } from "@/components/sharing/share-invite-dialog";
+import { SharedEventCard } from "@/components/sharing/shared-event-card";
+import Link from "next/link";
 
 type LunarEvent = {
   id: string;
@@ -36,6 +47,7 @@ export default function EventsPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<LunarEvent | null>(null);
 
   const { data: events, isLoading: eventsLoading } =
@@ -53,6 +65,11 @@ export default function EventsPage() {
         enabled: !!session?.user,
       },
     );
+
+  const { data: sharedEvents, isLoading: sharedLoading } =
+    api.eventSharing.getSharedEvents.useQuery({}, { enabled: !!session?.user });
+
+  const sharedEventCount = sharedEvents?.length ?? 0;
 
   const filteredEvents =
     events?.filter((event: LunarEvent) => {
@@ -115,6 +132,7 @@ export default function EventsPage() {
       setShowEditDialog(false);
       setShowDeleteDialog(false);
       setShowExportDialog(false);
+      setShowShareDialog(false);
     };
   }, []);
 
@@ -134,6 +152,15 @@ export default function EventsPage() {
           <TabsTrigger value="lunar" className="flex items-center gap-2">
             <Moon className="h-4 w-4" />
             Sự kiện âm lịch
+          </TabsTrigger>
+          <TabsTrigger value="shared" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Được chia sẻ
+            {sharedEventCount > 0 && (
+              <span className="ml-1 rounded-full bg-purple-500 px-1.5 py-0.5 text-xs text-white">
+                {sharedEventCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="calendar" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -191,14 +218,24 @@ export default function EventsPage() {
               <Plus className="mr-2 h-4 w-4" />
               Tạo sự kiện âm lịch
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowExportDialog(true)}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Xuất lịch
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowShareDialog(true)}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Chia sẻ
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(true)}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Xuất lịch
+              </Button>
+            </div>
           </div>
 
           {/* Search and filters */}
@@ -302,8 +339,60 @@ export default function EventsPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="shared" className="space-y-6">
+          {sharedLoading ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <div className="text-muted-foreground">Đang tải...</div>
+              </CardContent>
+            </Card>
+          ) : sharedEvents && sharedEvents.length > 0 ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">
+                  {sharedEvents.length} sự kiện được chia sẻ
+                </h3>
+                <Button variant="outline" asChild>
+                  <Link href="/events/shared">Xem tất cả</Link>
+                </Button>
+              </div>
+              {sharedEvents.slice(0, 10).map((event) => (
+                <SharedEventCard key={event.id} event={event} />
+              ))}
+              {sharedEvents.length > 10 && (
+                <div className="text-center">
+                  <Button variant="outline" asChild>
+                    <Link href="/events/shared">
+                      Xem thêm {sharedEvents.length - 10} sự kiện
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Users className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                <h3 className="mb-2 text-lg font-semibold">
+                  Chưa có sự kiện được chia sẻ
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Khi có người chia sẻ sự kiện với bạn và bạn chấp nhận, các sự
+                  kiện sẽ xuất hiện ở đây.
+                </p>
+                <Button asChild>
+                  <Link href="/sharing">
+                    <Users className="mr-2 h-4 w-4" />
+                    Xem lời mời chia sẻ
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         <TabsContent value="calendar" className="space-y-6">
-          <CalendarGrid showEvents={true} />
+          <CalendarGrid showEvents={true} showSharedEvents={true} />
         </TabsContent>
       </Tabs>
 
@@ -327,6 +416,11 @@ export default function EventsPage() {
       <ExportCalendarDialog
         open={showExportDialog}
         onOpenChange={setShowExportDialog}
+      />
+
+      <ShareInviteDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
       />
     </div>
   );
