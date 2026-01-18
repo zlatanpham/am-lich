@@ -128,7 +128,7 @@ export function CalendarGrid({
               {vietnameseText.months[month]} năm {year}
             </span>
             <span className="sm:hidden">
-              {vietnameseText.months[month]?.substring(0, 3)} {year}
+              {vietnameseText.months[month]} {year}
             </span>
             {isLoading && (
               <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
