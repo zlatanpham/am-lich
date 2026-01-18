@@ -357,7 +357,7 @@ export default function EventsPage() {
                 </Button>
               </div>
               {sharedEvents.slice(0, 10).map((event) => (
-                <SharedEventCard key={event.id} event={event} />
+                <SharedEventCard key={event.id} event={event} compact />
               ))}
               {sharedEvents.length > 10 && (
                 <div className="text-center">
