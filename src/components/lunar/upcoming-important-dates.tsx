@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,9 +8,19 @@ import { api } from "@/trpc/react";
 import { Calendar, Clock } from "lucide-react";
 import { vietnameseText } from "@/lib/vietnamese-localization";
 import { useSession } from "next-auth/react";
+import {
+  DateDetailDialog,
+  type CalendarDayFromAPI,
+} from "./date-detail-dialog";
+import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
 
 export function UpcomingImportantDates() {
   const { data: session } = useSession();
+  const [selectedDay, setSelectedDay] = useState<CalendarDayFromAPI | null>(
+    null,
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const { data, isLoading, error } =
     api.lunarCalendar.getNextImportantVietnameseDates.useQuery();
   const { data: upcomingEvents } = api.lunarEvents.getUpcoming.useQuery(
@@ -51,6 +62,27 @@ export function UpcomingImportantDates() {
   if (!data) return null;
 
   const { nextMong1, nextRam } = data;
+
+  const handleDateClick = (
+    date: Date,
+    lunarInfo: VietnameseLunarDate,
+    vietnameseHoliday?: string,
+  ) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const clickedDate = new Date(date);
+    clickedDate.setHours(0, 0, 0, 0);
+
+    setSelectedDay({
+      gregorianDate: date,
+      lunarDate: lunarInfo,
+      isToday: clickedDate.getTime() === today.getTime(),
+      isCurrentMonth: true,
+      isImportant: lunarInfo.day === 1 || lunarInfo.day === 15,
+      vietnameseHoliday,
+    });
+    setIsDialogOpen(true);
+  };
 
   return (
     <Card>
@@ -107,7 +139,18 @@ export function UpcomingImportantDates() {
         )}
 
         {/* Next Mồng 1 */}
-        <div className="bg-muted/50 rounded-lg p-3">
+        <div
+          className="hover:bg-muted bg-muted/50 cursor-pointer rounded-lg p-3 transition-colors"
+          role="button"
+          tabIndex={0}
+          onClick={() => handleDateClick(nextMong1.date, nextMong1.lunarInfo)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleDateClick(nextMong1.date, nextMong1.lunarInfo);
+            }
+          }}
+        >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-3">
               <Badge
@@ -139,7 +182,18 @@ export function UpcomingImportantDates() {
         </div>
 
         {/* Next Rằm */}
-        <div className="bg-muted/50 rounded-lg p-3">
+        <div
+          className="hover:bg-muted bg-muted/50 cursor-pointer rounded-lg p-3 transition-colors"
+          role="button"
+          tabIndex={0}
+          onClick={() => handleDateClick(nextRam.date, nextRam.lunarInfo)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleDateClick(nextRam.date, nextRam.lunarInfo);
+            }
+          }}
+        >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-3">
               <Badge
@@ -177,6 +231,12 @@ export function UpcomingImportantDates() {
           </p>
         </div>
       </CardContent>
+
+      <DateDetailDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        day={selectedDay}
+      />
     </Card>
   );
 }
