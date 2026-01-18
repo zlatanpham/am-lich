@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { HydrateClient } from "@/trpc/server";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 export const metadata: Metadata = {
   title: "Âm Lịch Việt Nam",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: [
-    { rel: "icon", url: "/favicon.png", type: "image/png", sizes: "64x64" },
+    { rel: "icon", url: "/icon-72x72.png", type: "image/png", sizes: "64x64" },
     {
       rel: "apple-touch-icon",
       url: "/icons/icon-192x192.png",
@@ -196,6 +197,7 @@ export default function RootLayout({
           </TRPCReactProvider>
         </SessionProvider>
         <Toaster />
+        <PwaInstallBanner />
       </body>
     </html>
   );
