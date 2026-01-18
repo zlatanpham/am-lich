@@ -64,12 +64,12 @@ export function PetitionerList() {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <CardTitle>Danh sách tín chủ</CardTitle>
             <CardDescription>Đang tải danh sách...</CardDescription>
           </div>
-          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-9 w-full sm:w-32" />
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -87,14 +87,18 @@ export function PetitionerList() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <CardTitle>Danh sách tín chủ</CardTitle>
           <CardDescription>
             Cấu hình danh sách người thực hiện nghi lễ
           </CardDescription>
         </div>
-        <Button onClick={handleAdd} size="sm">
+        <Button
+          onClick={handleAdd}
+          size="sm"
+          className="w-full shrink-0 sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Thêm tín chủ
         </Button>
@@ -108,63 +112,113 @@ export function PetitionerList() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Họ tên</TableHead>
-                  <TableHead>Năm sinh</TableHead>
-                  <TableHead className="w-[100px]">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {petitioners?.map((p: Petitioner) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {p.name}
-                        {p.isHead && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-primary/10 text-primary border-none"
-                          >
-                            Chính
-                          </Badge>
-                        )}
-                      </div>
-                      {p.buddhistName && (
-                        <div className="text-muted-foreground text-xs">
-                          Pháp danh: {p.buddhistName}
-                        </div>
+          <>
+            {/* Mobile view - card list */}
+            <div className="space-y-3 sm:hidden">
+              {petitioners?.map((p: Petitioner) => (
+                <div
+                  key={p.id}
+                  className="bg-muted/30 flex items-center justify-between rounded-lg p-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate font-medium">{p.name}</span>
+                      {p.isHead && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/10 text-primary shrink-0 border-none"
+                        >
+                          Chính
+                        </Badge>
                       )}
-                    </TableCell>
-                    <TableCell>{p.birthYear}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(p)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (p.id) handleDelete(p.id);
-                          }}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    </div>
+                    <div className="text-muted-foreground text-sm">
+                      {p.birthYear}
+                      {p.buddhistName && ` · ${p.buddhistName}`}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(p)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (p.id) handleDelete(p.id);
+                      }}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop view - table */}
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Họ tên</TableHead>
+                    <TableHead>Năm sinh</TableHead>
+                    <TableHead className="w-[100px]">Thao tác</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {petitioners?.map((p: Petitioner) => (
+                    <TableRow key={p.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {p.name}
+                          {p.isHead && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-primary/10 text-primary border-none"
+                            >
+                              Chính
+                            </Badge>
+                          )}
+                        </div>
+                        {p.buddhistName && (
+                          <div className="text-muted-foreground text-xs">
+                            Pháp danh: {p.buddhistName}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>{p.birthYear}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(p)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (p.id) handleDelete(p.id);
+                            }}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
 
         <PetitionerFormDialog
