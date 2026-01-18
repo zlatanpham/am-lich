@@ -15,6 +15,9 @@ interface SharedEvent {
   lunarMonth: number;
   lunarDay: number;
   isRecurring: boolean;
+  eventType?: string;
+  ancestorName?: string | null;
+  ancestorPrecall?: string | null;
   gregorianDate?: Date | null;
   lunarDateFormatted?: string;
   sharedBy?: {

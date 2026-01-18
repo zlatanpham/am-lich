@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Repeat } from "lucide-react";
+import { Calendar, Repeat, Flower2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -15,6 +15,9 @@ interface SharedEventCardProps {
     lunarMonth: number;
     lunarDay: number;
     isRecurring: boolean;
+    eventType?: string;
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
     gregorianDate?: Date | null;
     lunarDateFormatted?: string;
     sharedBy?: {
@@ -39,14 +42,22 @@ export function SharedEventCard({
       .join("")
       .toUpperCase()
       .slice(0, 2) || "?";
+  const isAncestorWorship = event.eventType === "ancestor_worship";
+  const displayTitle =
+    isAncestorWorship && event.ancestorPrecall && event.ancestorName
+      ? `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`
+      : event.title;
 
   if (compact) {
     return (
       <div className="flex items-center gap-3 rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-800 dark:bg-purple-950">
         <div className="flex-1">
           <div className="flex items-center gap-2">
+            {isAncestorWorship && (
+              <Flower2 className="h-4 w-4 flex-shrink-0 text-purple-600 dark:text-purple-400" />
+            )}
             <span className="font-medium text-purple-900 dark:text-purple-100">
-              {event.title}
+              {displayTitle}
             </span>
             {event.isRecurring && (
               <Repeat className="h-3 w-3 text-purple-600 dark:text-purple-400" />
@@ -79,8 +90,11 @@ export function SharedEventCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
+              {isAncestorWorship && (
+                <Flower2 className="h-5 w-5 flex-shrink-0 text-purple-600 dark:text-purple-400" />
+              )}
               <h3 className="font-semibold text-purple-900 dark:text-purple-100">
-                {event.title}
+                {displayTitle}
               </h3>
               {event.isRecurring && (
                 <Badge

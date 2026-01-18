@@ -88,10 +88,17 @@ export function DateDetailDialog({
   const ancestorEvent = day.events?.find(
     (e) => e.eventType === "ancestor_worship",
   );
+  // Also check for shared ancestor worship events
+  const sharedAncestorEvent = sharedEventsForDay.find(
+    (e) => e.eventType === "ancestor_worship",
+  );
   const showPrayerButton =
-    session?.user && (isImportantDate || !!ancestorEvent);
+    session?.user &&
+    (isImportantDate || !!ancestorEvent || !!sharedAncestorEvent);
 
-  const prayerType = ancestorEvent
+  // Use personal ancestor event if available, otherwise use shared
+  const activeAncestorEvent = ancestorEvent || sharedAncestorEvent;
+  const prayerType = activeAncestorEvent
     ? "ancestor"
     : day.lunarDate.day === 1
       ? "mong1"
@@ -306,15 +313,27 @@ export function DateDetailDialog({
                         .join("")
                         .toUpperCase()
                         .slice(0, 2) || "?";
+                    const isAncestorWorship =
+                      event.eventType === "ancestor_worship";
+                    const displayTitle =
+                      isAncestorWorship &&
+                      event.ancestorPrecall &&
+                      event.ancestorName
+                        ? `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`
+                        : event.title;
 
                     return (
                       <div
                         key={`shared-${event.id}`}
                         className="flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 p-2 dark:border-purple-900 dark:bg-purple-950"
                       >
-                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-purple-500" />
+                        {isAncestorWorship ? (
+                          <Flower2 className="h-4 w-4 flex-shrink-0 text-purple-500" />
+                        ) : (
+                          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-purple-500" />
+                        )}
                         <span className="flex-1 text-sm font-medium text-purple-700 dark:text-purple-400">
-                          {event.title}
+                          {displayTitle}
                         </span>
                         <div className="flex items-center gap-1">
                           <Avatar className="h-5 w-5">
@@ -351,8 +370,13 @@ export function DateDetailDialog({
             yearName: day.lunarDate.zodiacYear,
             solarDate: day.gregorianDate,
           }}
-          ancestorName={ancestorEvent?.ancestorName || undefined}
-          ancestorPrecall={ancestorEvent?.ancestorPrecall || undefined}
+          ancestorName={activeAncestorEvent?.ancestorName || undefined}
+          ancestorPrecall={activeAncestorEvent?.ancestorPrecall || undefined}
+          ownerUserId={
+            sharedAncestorEvent && !ancestorEvent
+              ? sharedAncestorEvent.sharedBy?.id
+              : undefined
+          }
         />
       </DialogContent>
     </Dialog>

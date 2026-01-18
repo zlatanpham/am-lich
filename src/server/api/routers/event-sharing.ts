@@ -633,6 +633,9 @@ export const eventSharingRouter = createTRPCRouter({
         lunarDay: number;
         isRecurring: boolean;
         reminderDays: number;
+        eventType: string;
+        ancestorName: string | null;
+        ancestorPrecall: string | null;
         gregorianDate: Date;
         lunarDateFormatted: string;
         isShared: boolean;
@@ -671,6 +674,9 @@ export const eventSharingRouter = createTRPCRouter({
                     lunarDay: event.lunarDay,
                     isRecurring: event.isRecurring,
                     reminderDays: event.reminderDays,
+                    eventType: event.eventType,
+                    ancestorName: event.ancestorName,
+                    ancestorPrecall: event.ancestorPrecall,
                     gregorianDate,
                     lunarDateFormatted: formatLunarDate(lunarInfo),
                     isShared: true,
@@ -702,6 +708,9 @@ export const eventSharingRouter = createTRPCRouter({
                   lunarDay: event.lunarDay,
                   isRecurring: event.isRecurring,
                   reminderDays: event.reminderDays,
+                  eventType: event.eventType,
+                  ancestorName: event.ancestorName,
+                  ancestorPrecall: event.ancestorPrecall,
                   gregorianDate,
                   lunarDateFormatted: formatLunarDate(lunarInfo),
                   isShared: true,
