@@ -36,6 +36,7 @@ export function ExportCalendarDialog({
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [includeLunarEvents, setIncludeLunarEvents] = useState(true);
   const [includePersonalEvents, setIncludePersonalEvents] = useState(true);
+  const [includeSharedEvents, setIncludeSharedEvents] = useState(true);
 
   const exportMutation = api.calendarExport.exportYear.useMutation({
     onSuccess: (data) => {
@@ -60,7 +61,7 @@ export function ExportCalendarDialog({
   });
 
   const handleExport = () => {
-    if (!includeLunarEvents && !includePersonalEvents) {
+    if (!includeLunarEvents && !includePersonalEvents && !includeSharedEvents) {
       toast.error("Vui lòng chọn ít nhất một loại sự kiện để xuất");
       return;
     }
@@ -69,6 +70,7 @@ export function ExportCalendarDialog({
       year: parseInt(selectedYear),
       includeLunarEvents,
       includePersonalEvents,
+      includeSharedEvents,
     });
   };
 
@@ -133,6 +135,17 @@ export function ExportCalendarDialog({
               />
               <Label htmlFor="personal-events" className="text-sm font-normal">
                 Sự kiện cá nhân
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="shared-events"
+                checked={includeSharedEvents}
+                onCheckedChange={(checked) => setIncludeSharedEvents(!!checked)}
+              />
+              <Label htmlFor="shared-events" className="text-sm font-normal">
+                Sự kiện được chia sẻ
               </Label>
             </div>
           </div>

@@ -11,7 +11,7 @@ function generateICalendarContent(
     title: string;
     description?: string | null;
     date: Date;
-    eventType: "lunar" | "personal";
+    eventType: "lunar" | "personal" | "shared";
   }>,
 ): string {
   const now = new Date();
@@ -41,7 +41,7 @@ function generateICalendarContent(
       `DTSTAMP:${timestamp}`,
       `SUMMARY:${event.title}`,
       event.description ? `DESCRIPTION:${event.description}` : "",
-      `CATEGORIES:${event.eventType === "lunar" ? "Vietnamese Lunar Calendar" : "Personal Event"}`,
+      `CATEGORIES:${event.eventType === "lunar" ? "Vietnamese Lunar Calendar" : event.eventType === "shared" ? "Shared Event" : "Personal Event"}`,
       "END:VEVENT",
     );
   });
@@ -61,6 +61,7 @@ export const calendarExportRouter = createTRPCRouter({
         year: z.number().min(1900).max(2100).default(new Date().getFullYear()),
         includeLunarEvents: z.boolean().default(true),
         includePersonalEvents: z.boolean().default(true),
+        includeSharedEvents: z.boolean().default(true),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -70,7 +71,7 @@ export const calendarExportRouter = createTRPCRouter({
         title: string;
         description?: string | null;
         date: Date;
-        eventType: "lunar" | "personal";
+        eventType: "lunar" | "personal" | "shared";
       }> = [];
 
       // Get lunar calendar events (important dates like Mồng 1, Rằm)
@@ -131,21 +132,30 @@ export const calendarExportRouter = createTRPCRouter({
         for (const event of lunarEvents) {
           try {
             if (event.isRecurring) {
-              // For recurring events, add instance for the specified year
-              const gregorianDate = lunarToGregorian(
-                input.year,
-                event.lunarMonth,
-                event.lunarDay,
-              );
+              // Try both current year and previous year to handle late lunar months
+              // (lunar month 11/12 can fall in the next gregorian year)
+              for (const lunarYear of [input.year, input.year - 1]) {
+                try {
+                  const gregorianDate = lunarToGregorian(
+                    lunarYear,
+                    event.lunarMonth,
+                    event.lunarDay,
+                  );
 
-              if (gregorianDate.getFullYear() === input.year) {
-                events.push({
-                  id: `lunar-event-${event.id}-${input.year}`,
-                  title: event.title,
-                  description: event.description,
-                  date: gregorianDate,
-                  eventType: "personal",
-                });
+                  if (gregorianDate.getFullYear() === input.year) {
+                    events.push({
+                      id: `lunar-event-${event.id}-${lunarYear}`,
+                      title: event.title,
+                      description: event.description,
+                      date: gregorianDate,
+                      eventType: "personal",
+                    });
+                    break; // Found the occurrence for this year
+                  }
+                } catch {
+                  // Skip invalid dates for this lunar year
+                  continue;
+                }
               }
             } else {
               // For non-recurring events, only add if it's for the specified year
@@ -175,21 +185,30 @@ export const calendarExportRouter = createTRPCRouter({
         for (const event of vietnameseLunarEvents) {
           try {
             if (event.isRecurring) {
-              // For recurring events, add instance for the specified year
-              const gregorianDate = lunarToGregorian(
-                input.year,
-                event.lunarMonth,
-                event.lunarDay,
-              );
+              // Try both current year and previous year to handle late lunar months
+              // (lunar month 11/12 can fall in the next gregorian year)
+              for (const lunarYear of [input.year, input.year - 1]) {
+                try {
+                  const gregorianDate = lunarToGregorian(
+                    lunarYear,
+                    event.lunarMonth,
+                    event.lunarDay,
+                  );
 
-              if (gregorianDate.getFullYear() === input.year) {
-                events.push({
-                  id: `vietnamese-event-${event.id}-${input.year}`,
-                  title: event.title,
-                  description: event.description,
-                  date: gregorianDate,
-                  eventType: "personal",
-                });
+                  if (gregorianDate.getFullYear() === input.year) {
+                    events.push({
+                      id: `vietnamese-event-${event.id}-${lunarYear}`,
+                      title: event.title,
+                      description: event.description,
+                      date: gregorianDate,
+                      eventType: "personal",
+                    });
+                    break; // Found the occurrence for this year
+                  }
+                } catch {
+                  // Skip invalid dates for this lunar year
+                  continue;
+                }
               }
             } else {
               // For non-recurring events, only add if it's for the specified year
@@ -212,6 +231,106 @@ export const calendarExportRouter = createTRPCRouter({
           } catch {
             // Skip invalid dates
             continue;
+          }
+        }
+      }
+
+      // Get shared events from other users
+      if (input.includeSharedEvents) {
+        const userEmail = ctx.session.user.email?.toLowerCase();
+
+        // Get accepted shares where current user is the recipient
+        const acceptedShares = await ctx.db.eventShare.findMany({
+          where: {
+            status: "ACCEPTED",
+            OR: [
+              { recipientId: userId },
+              ...(userEmail
+                ? [{ recipientEmail: userEmail, recipientId: null }]
+                : []),
+            ],
+          },
+          include: {
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        if (acceptedShares.length > 0) {
+          // Create a map of ownerId to sharer info for quick lookup
+          const ownerMap = new Map(
+            acceptedShares.map((share) => [
+              share.ownerId,
+              share.owner.name ?? share.owner.email ?? "Unknown",
+            ]),
+          );
+          const ownerIds = acceptedShares.map((share) => share.ownerId);
+
+          // Fetch all events from all share owners at once
+          const sharedLunarEvents = await ctx.db.lunarEvent.findMany({
+            where: {
+              userId: { in: ownerIds },
+              isActive: true,
+            },
+          });
+
+          // Process shared LunarEvent entries
+          for (const event of sharedLunarEvents) {
+            const sharerName = ownerMap.get(event.userId) ?? "Unknown";
+
+            try {
+              if (event.isRecurring) {
+                // Try both current year and previous year to handle late lunar months
+                // (lunar month 11/12 can fall in the next gregorian year)
+                for (const lunarYear of [input.year, input.year - 1]) {
+                  try {
+                    const gregorianDate = lunarToGregorian(
+                      lunarYear,
+                      event.lunarMonth,
+                      event.lunarDay,
+                    );
+
+                    if (gregorianDate.getFullYear() === input.year) {
+                      events.push({
+                        id: `shared-${event.id}-${lunarYear}`,
+                        title: `${event.title} [from ${sharerName}]`,
+                        description: event.description,
+                        date: gregorianDate,
+                        eventType: "shared",
+                      });
+                      break; // Found the occurrence for this year, no need to check other lunar years
+                    }
+                  } catch {
+                    // Skip invalid dates for this lunar year
+                    continue;
+                  }
+                }
+              } else {
+                if (event.lunarYear === input.year) {
+                  const gregorianDate = lunarToGregorian(
+                    event.lunarYear,
+                    event.lunarMonth,
+                    event.lunarDay,
+                  );
+
+                  events.push({
+                    id: `shared-${event.id}`,
+                    title: `${event.title} [from ${sharerName}]`,
+                    description: event.description,
+                    date: gregorianDate,
+                    eventType: "shared",
+                  });
+                }
+              }
+            } catch {
+              // Skip invalid dates
+              continue;
+            }
           }
         }
       }
