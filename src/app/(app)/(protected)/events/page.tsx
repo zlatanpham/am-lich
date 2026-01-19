@@ -169,13 +169,13 @@ export default function EventsPage() {
 
   return (
     <div className="space-y-6 py-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Quản lý sự kiện âm lịch</h1>
-          <p className="text-muted-foreground">
-            Quản lý các sự kiện âm lịch và nhắc nhở truyền thống
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold sm:text-3xl">
+          Quản lý sự kiện âm lịch
+        </h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Quản lý các sự kiện âm lịch và nhắc nhở truyền thống
+        </p>
       </div>
 
       <Tabs

@@ -39,7 +39,7 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg space-y-6 py-8">
-      <h2 className="text-xl font-medium tracking-tight">My Account</h2>
+      <h1 className="text-2xl font-bold sm:text-3xl">Tài khoản</h1>
 
       {isLoading ? (
         <AccountPageSkeleton />

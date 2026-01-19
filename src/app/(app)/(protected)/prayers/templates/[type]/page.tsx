@@ -93,8 +93,10 @@ export default function TemplateEditorPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">{templateTitle}</h1>
-          <p className="text-muted-foreground">Tùy chỉnh nội dung văn khấn</p>
+          <h1 className="text-2xl font-bold sm:text-3xl">{templateTitle}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Tùy chỉnh nội dung văn khấn
+          </p>
         </div>
       </div>
 

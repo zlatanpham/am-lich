@@ -58,8 +58,10 @@ export default function SharedEventsPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Sự kiện được chia sẻ</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-bold sm:text-3xl">
+              Sự kiện được chia sẻ
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
               Xem các sự kiện âm lịch được chia sẻ bởi người khác
             </p>
           </div>

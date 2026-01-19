@@ -62,8 +62,8 @@ export default function PrayersPage() {
   return (
     <div className="container mx-auto space-y-8 py-8">
       <div>
-        <h1 className="text-3xl font-bold">Cấu hình Sớ khấn</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold sm:text-3xl">Cấu hình Sớ khấn</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Quản lý tín chủ và các mẫu văn khấn truyền thống
         </p>
       </div>
