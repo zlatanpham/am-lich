@@ -60,7 +60,7 @@ export default function PrayersPage() {
   };
 
   return (
-    <div className="container mx-auto space-y-8 py-8">
+    <div className="space-y-6 py-6">
       <div>
         <h1 className="text-2xl font-bold sm:text-3xl">Cấu hình Sớ khấn</h1>
         <p className="text-muted-foreground text-sm sm:text-base">

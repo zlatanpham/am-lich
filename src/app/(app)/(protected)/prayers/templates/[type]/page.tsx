@@ -82,10 +82,10 @@ export default function TemplateEditorPage() {
     }
   };
 
-  if (isLoading) return <div className="container py-8">Đang tải...</div>;
+  if (isLoading) return <div className="py-6">Đang tải...</div>;
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="space-y-6 py-6">
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="icon">
           <Link href="/prayers">
