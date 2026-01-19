@@ -213,9 +213,9 @@ export function DateDetailDialog({
                   </div>
                   {session?.user && isImportantLunarDay && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-7 gap-1.5 px-2 text-xs text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-900 dark:hover:text-amber-300"
+                      className="h-7 gap-1.5 border-amber-300 px-2 text-xs text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900 dark:hover:text-amber-300"
                       onClick={() =>
                         setPrayerEvent({
                           type: prayerTypeForDay,
@@ -223,7 +223,7 @@ export function DateDetailDialog({
                       }
                     >
                       <ScrollText className="h-3.5 w-3.5" />
-                      Xem sớ khấn
+                      Xem sớ
                     </Button>
                   )}
                 </div>
@@ -268,9 +268,9 @@ export function DateDetailDialog({
                         </span>
                         {isAncestorWorship && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="h-6 gap-1 px-1.5 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
+                            className="h-6 gap-1 border-blue-300 px-2 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
                             onClick={() =>
                               setPrayerEvent({
                                 type: "ancestor",
@@ -348,7 +348,10 @@ export function DateDetailDialog({
                         <span className="flex-1 text-sm font-medium text-purple-700 dark:text-purple-400">
                           {displayTitle}
                         </span>
-                        <div className="flex items-center gap-1">
+                        <div
+                          className="flex items-center gap-1"
+                          title={sharerName}
+                        >
                           <Avatar className="h-5 w-5">
                             <AvatarImage
                               src={event.sharedBy?.image || undefined}
@@ -357,15 +360,15 @@ export function DateDetailDialog({
                               {initials}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-muted-foreground hidden text-xs sm:inline">
                             {sharerName}
                           </span>
                         </div>
                         {isAncestorWorship && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="h-6 gap-1 px-1.5 text-xs text-purple-600 hover:bg-purple-100 hover:text-purple-700 dark:text-purple-400 dark:hover:bg-purple-900 dark:hover:text-purple-300"
+                            className="h-6 gap-1 border-purple-300 px-2 text-xs text-purple-600 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900 dark:hover:text-purple-300"
                             onClick={() =>
                               setPrayerEvent({
                                 type: "ancestor",
