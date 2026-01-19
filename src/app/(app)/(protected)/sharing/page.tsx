@@ -32,66 +32,71 @@ export default function SharingPage() {
 
   return (
     <div className="space-y-6 py-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Chia sẻ sự kiện</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold sm:text-3xl">Chia sẻ sự kiện</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Quản lý việc chia sẻ sự kiện âm lịch với người khác
           </p>
         </div>
-        <Button onClick={() => setShowInviteDialog(true)}>
+        <Button
+          onClick={() => setShowInviteDialog(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Mời chia sẻ
         </Button>
       </div>
 
       <Tabs defaultValue="received" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="received" className="flex items-center gap-2">
+        <TabsList className="w-full sm:w-fit">
+          <TabsTrigger
+            value="received"
+            className="flex items-center gap-1 sm:gap-2"
+          >
             <Inbox className="h-4 w-4" />
-            Nhận được
+            <span className="text-xs sm:text-sm">Nhận được</span>
             {pendingReceived && pendingReceived.length > 0 && (
-              <span className="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+              <span className="ml-1 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white">
                 {pendingReceived.length}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="sent" className="flex items-center gap-2">
+          <TabsTrigger
+            value="sent"
+            className="flex items-center gap-1 sm:gap-2"
+          >
             <Send className="h-4 w-4" />
-            Đã gửi
+            <span className="text-xs sm:text-sm">Đã gửi</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="received" className="space-y-6">
           {/* Statistics */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-4">
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Users className="text-muted-foreground h-8 w-8" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {acceptedReceived?.length ?? 0}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      Đang theo dõi
-                    </p>
-                  </div>
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <Users className="text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+                  <p className="text-muted-foreground text-xs leading-tight">
+                    Đang theo dõi
+                  </p>
+                  <p className="text-lg font-bold sm:text-2xl">
+                    {acceptedReceived?.length ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Inbox className="text-muted-foreground h-8 w-8" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {pendingReceived?.length ?? 0}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      Lời mời chờ xử lý
-                    </p>
-                  </div>
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <Inbox className="text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+                  <p className="text-muted-foreground text-xs leading-tight">
+                    Lời mời chờ xử lý
+                  </p>
+                  <p className="text-lg font-bold sm:text-2xl">
+                    {pendingReceived?.length ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -100,13 +105,13 @@ export default function SharingPage() {
           {/* Pending invitations */}
           {pendingReceived && pendingReceived.length > 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Inbox className="h-5 w-5" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Inbox className="h-4 w-4" />
                   Lời mời chờ xử lý
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="divide-y px-4 pb-2">
                 {pendingReceived.map((share) => (
                   <ReceivedShareCard key={share.id} share={share} />
                 ))}
@@ -117,13 +122,13 @@ export default function SharingPage() {
           {/* Accepted shares */}
           {acceptedReceived && acceptedReceived.length > 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Users className="h-5 w-5" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Users className="h-4 w-4" />
                   Đang theo dõi
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="divide-y px-4 pb-2">
                 {acceptedReceived.map((share) => (
                   <ReceivedShareCard key={share.id} share={share} />
                 ))}
@@ -172,13 +177,13 @@ export default function SharingPage() {
             </Card>
           ) : sentShares && sentShares.length > 0 ? (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Send className="h-5 w-5" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Send className="h-4 w-4" />
                   Lời mời đã gửi ({sentShares.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="divide-y px-4 pb-2">
                 {sentShares.map((share) => (
                   <SentShareCard key={share.id} share={share} />
                 ))}

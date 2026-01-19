@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -93,46 +92,48 @@ export function SentShareCard({ share }: SentShareCardProps) {
       .slice(0, 2) || "?";
 
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={share.recipient?.image || undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium">{displayName}</p>
-            <p className="text-muted-foreground text-sm">
-              {formatDistanceToNow(new Date(share.createdAt), {
-                addSuffix: true,
-                locale: vi,
-              })}
-            </p>
-          </div>
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3">
+        <Avatar className="h-9 w-9">
+          <AvatarImage src={share.recipient?.image || undefined} />
+          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{displayName}</p>
+          <p className="text-muted-foreground text-xs">
+            {formatDistanceToNow(new Date(share.createdAt), {
+              addSuffix: true,
+              locale: vi,
+            })}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={status.variant} className="flex items-center gap-1">
-            <StatusIcon className="h-3 w-3" />
-            {status.label}
-          </Badge>
-          {(share.status === "PENDING" || share.status === "ACCEPTED") && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => cancelShare.mutate({ shareId: share.id })}
-              disabled={cancelShare.status === "pending"}
-              title="Hủy chia sẻ"
-            >
-              {cancelShare.status === "pending" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4 text-red-500" />
-              )}
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge
+          variant={status.variant}
+          className="flex items-center gap-1 text-xs"
+        >
+          <StatusIcon className="h-3 w-3" />
+          {status.label}
+        </Badge>
+        {(share.status === "PENDING" || share.status === "ACCEPTED") && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => cancelShare.mutate({ shareId: share.id })}
+            disabled={cancelShare.status === "pending"}
+            title="Hủy chia sẻ"
+          >
+            {cancelShare.status === "pending" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 text-red-500" />
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -180,99 +181,103 @@ export function ReceivedShareCard({ share }: ReceivedShareCardProps) {
     respondToShare.status === "pending" || unsubscribe.status === "pending";
 
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={share.owner.image || undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium">{displayName}</p>
-            <p className="text-muted-foreground text-sm">
-              {formatDistanceToNow(new Date(share.createdAt), {
-                addSuffix: true,
-                locale: vi,
-              })}
-            </p>
-          </div>
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3">
+        <Avatar className="h-9 w-9">
+          <AvatarImage src={share.owner.image || undefined} />
+          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{displayName}</p>
+          <p className="text-muted-foreground text-xs">
+            {formatDistanceToNow(new Date(share.createdAt), {
+              addSuffix: true,
+              locale: vi,
+            })}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          {share.status === "PENDING" && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  respondToShare.mutate({
-                    shareId: share.id,
-                    action: "decline",
-                  })
-                }
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <X className="mr-1 h-4 w-4" />
-                    Từ chối
-                  </>
-                )}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() =>
-                  respondToShare.mutate({
-                    shareId: share.id,
-                    action: "accept",
-                  })
-                }
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Check className="mr-1 h-4 w-4" />
-                    Chấp nhận
-                  </>
-                )}
-              </Button>
-            </>
-          )}
-          {share.status === "ACCEPTED" && (
-            <>
-              <Badge
-                variant={status.variant}
-                className="flex items-center gap-1"
-              >
-                <StatusIcon className="h-3 w-3" />
-                {status.label}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => unsubscribe.mutate({ shareId: share.id })}
-                disabled={isPending}
-                title="Hủy theo dõi"
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                )}
-              </Button>
-            </>
-          )}
-          {(share.status === "DECLINED" || share.status === "CANCELLED") && (
-            <Badge variant={status.variant} className="flex items-center gap-1">
+      </div>
+      <div className="flex items-center gap-2">
+        {share.status === "PENDING" && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2 text-xs"
+              onClick={() =>
+                respondToShare.mutate({
+                  shareId: share.id,
+                  action: "decline",
+                })
+              }
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <X className="mr-1 h-3 w-3" />
+                  Từ chối
+                </>
+              )}
+            </Button>
+            <Button
+              size="sm"
+              className="h-8 px-2 text-xs"
+              onClick={() =>
+                respondToShare.mutate({
+                  shareId: share.id,
+                  action: "accept",
+                })
+              }
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Check className="mr-1 h-3 w-3" />
+                  Chấp nhận
+                </>
+              )}
+            </Button>
+          </>
+        )}
+        {share.status === "ACCEPTED" && (
+          <>
+            <Badge
+              variant={status.variant}
+              className="flex items-center gap-1 text-xs"
+            >
               <StatusIcon className="h-3 w-3" />
               {status.label}
             </Badge>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => unsubscribe.mutate({ shareId: share.id })}
+              disabled={isPending}
+              title="Hủy theo dõi"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 text-red-500" />
+              )}
+            </Button>
+          </>
+        )}
+        {(share.status === "DECLINED" || share.status === "CANCELLED") && (
+          <Badge
+            variant={status.variant}
+            className="flex items-center gap-1 text-xs"
+          >
+            <StatusIcon className="h-3 w-3" />
+            {status.label}
+          </Badge>
+        )}
+      </div>
+    </div>
   );
 }
