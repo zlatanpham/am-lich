@@ -183,23 +183,32 @@ export default function EventsPage() {
         onValueChange={handleTabChange}
         className="space-y-6"
       >
-        <TabsList>
-          <TabsTrigger value="lunar" className="flex items-center gap-2">
-            <Moon className="h-4 w-4" />
-            Sự kiện âm lịch
+        <TabsList className="w-full sm:w-fit">
+          <TabsTrigger
+            value="lunar"
+            className="flex items-center gap-1 sm:gap-2"
+          >
+            <Moon className="hidden h-4 w-4 sm:block" />
+            <span className="text-xs sm:text-sm">Sự kiện âm lịch</span>
           </TabsTrigger>
-          <TabsTrigger value="shared" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Được chia sẻ
+          <TabsTrigger
+            value="shared"
+            className="flex items-center gap-1 sm:gap-2"
+          >
+            <Users className="hidden h-4 w-4 sm:block" />
+            <span className="text-xs sm:text-sm">Được chia sẻ</span>
             {sharedEventCount > 0 && (
               <span className="ml-1 rounded-full bg-purple-500 px-1.5 py-0.5 text-xs text-white">
                 {sharedEventCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Xem lịch
+          <TabsTrigger
+            value="calendar"
+            className="flex items-center gap-1 sm:gap-2"
+          >
+            <Calendar className="hidden h-4 w-4 sm:block" />
+            <span className="text-xs sm:text-sm">Xem lịch</span>
           </TabsTrigger>
         </TabsList>
 
