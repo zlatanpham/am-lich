@@ -144,15 +144,15 @@ export function PrayerPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[700px]">
+      <DialogContent className="flex max-h-[90vh] flex-col p-4 sm:max-w-[700px] sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ScrollText className="h-5 w-5" />
+            <ScrollText className="h-4 w-4 sm:h-5 sm:w-5" />
             Nội dung Sớ khấn
           </DialogTitle>
         </DialogHeader>
 
-        <div className="bg-muted/30 min-h-[300px] flex-1 overflow-y-auto rounded-md p-6 font-serif text-lg leading-relaxed whitespace-pre-wrap">
+        <div className="sm:bg-muted/30 min-h-[200px] flex-1 overflow-y-auto p-2 font-serif text-base leading-relaxed whitespace-pre-wrap sm:rounded-md sm:p-6 sm:text-lg">
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-4 w-3/4" />
@@ -167,7 +167,7 @@ export function PrayerPreviewDialog({
           )}
         </div>
 
-        <DialogFooter className="mt-4 flex flex-row justify-between gap-2 sm:justify-end">
+        <DialogFooter className="mt-2 flex flex-row justify-between gap-2 sm:mt-4 sm:justify-end">
           <Button
             variant="outline"
             onClick={handlePrint}
