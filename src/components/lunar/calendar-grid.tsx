@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ export function CalendarGrid({
   showEvents = false,
   showSharedEvents = false,
 }: CalendarGridProps) {
+  const { data: session } = useSession();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDayFromAPI | null>(
     null,
@@ -39,11 +41,11 @@ export function CalendarGrid({
       month,
     });
 
-  // Fetch shared events for the calendar
+  // Fetch shared events for the calendar (only when user is signed in)
   const { data: sharedEventsData } =
     api.eventSharing.getSharedEventsForCalendar.useQuery(
       { year, month },
-      { enabled: showSharedEvents },
+      { enabled: showSharedEvents && !!session?.user },
     );
 
   // Group shared events by date
