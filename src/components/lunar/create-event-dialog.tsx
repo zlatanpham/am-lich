@@ -21,11 +21,15 @@ import { toast } from "sonner";
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialLunarDate?: { year: number; month: number; day: number };
+  onEventCreated?: () => void;
 }
 
 export function CreateEventDialog({
   open,
   onOpenChange,
+  initialLunarDate,
+  onEventCreated,
 }: CreateEventDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,6 +51,7 @@ export function CreateEventDialog({
         toast.success("Sự kiện đã được tạo thành công!");
         resetForm();
         onOpenChange(false);
+        onEventCreated?.();
       }
     },
     onError: (error) => {
@@ -59,10 +64,23 @@ export function CreateEventDialog({
   const utils = api.useUtils();
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
   }, []);
+
+  // Prefill lunar date when dialog opens with initial values
+  useEffect(() => {
+    if (open) {
+      isMountedRef.current = true;
+      if (initialLunarDate) {
+        setLunarYear(initialLunarDate.year.toString());
+        setLunarMonth(initialLunarDate.month.toString());
+        setLunarDay(initialLunarDate.day.toString());
+      }
+    }
+  }, [open, initialLunarDate]);
 
   const resetForm = () => {
     if (isMountedRef.current) {
@@ -129,10 +147,13 @@ export function CreateEventDialog({
           eventType === "ancestor_worship" ? ancestorPrecall.trim() : undefined,
       });
 
-      // Refetch events to update the list
+      // Refetch events to update the list and calendar
       if (isMountedRef.current) {
-        await utils.lunarEvents.getAll.invalidate();
-        await utils.lunarEvents.getUpcoming.invalidate();
+        await Promise.all([
+          utils.lunarEvents.getAll.invalidate(),
+          utils.lunarEvents.getUpcoming.invalidate(),
+          utils.lunarCalendar.getVietnameseCalendarMonth.invalidate(),
+        ]);
       }
     } finally {
       if (isMountedRef.current) {

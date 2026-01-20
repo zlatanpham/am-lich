@@ -21,12 +21,14 @@ import {
   Flower2,
   ScrollText,
   Users,
+  Plus,
 } from "lucide-react";
 import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 import { LoginDialog } from "@/components/login-dialog";
 import type { VietnameseLunarDate } from "@/lib/lunar-calendar";
 import { useState, useMemo } from "react";
 import { PrayerPreviewDialog } from "@/components/prayers/prayer-preview-dialog";
+import { CreateEventDialog } from "@/components/lunar/create-event-dialog";
 import { api } from "@/trpc/react";
 
 // Type for the calendar day from API (events can be undefined or simplified array)
@@ -65,6 +67,7 @@ export function DateDetailDialog({
     ancestorPrecall?: string | null;
     ownerUserId?: string;
   } | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Check if this is an important lunar date (1st or 15th)
   const isImportantLunarDay =
@@ -235,63 +238,78 @@ export function DateDetailDialog({
 
           {/* Events Section */}
           <div className="space-y-3">
-            <h4 className="flex items-center gap-2 font-medium">
-              <CalendarDays className="h-4 w-4" />
-              Sự kiện của bạn
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="flex items-center gap-2 font-medium">
+                <CalendarDays className="h-4 w-4" />
+                Sự kiện của bạn
+              </h4>
+              {session?.user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5"
+                  onClick={() => setShowCreateDialog(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Thêm sự kiện
+                </Button>
+              )}
+            </div>
 
             {session?.user ? (
-              day.events && day.events.length > 0 ? (
-                <div className="space-y-2">
-                  {day.events.map((event) => {
-                    const isAncestorWorship =
-                      event.eventType === "ancestor_worship";
-                    const displayTitle =
-                      isAncestorWorship &&
-                      event.ancestorPrecall &&
-                      event.ancestorName
-                        ? `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`
-                        : event.title;
+              <>
+                {day.events && day.events.length > 0 ? (
+                  <div className="space-y-2">
+                    {day.events.map((event) => {
+                      const isAncestorWorship =
+                        event.eventType === "ancestor_worship";
+                      const displayTitle =
+                        isAncestorWorship &&
+                        event.ancestorPrecall &&
+                        event.ancestorName
+                          ? `Giỗ ${event.ancestorPrecall} ${event.ancestorName}`
+                          : event.title;
 
-                    return (
-                      <div
-                        key={event.id}
-                        className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950"
-                      >
-                        {isAncestorWorship ? (
-                          <Flower2 className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                        ) : (
-                          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
-                        )}
-                        <span className="flex-1 text-sm font-medium text-blue-700 dark:text-blue-400">
-                          {displayTitle}
-                        </span>
-                        {isAncestorWorship && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-6 gap-1 border-blue-300 px-2 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
-                            onClick={() =>
-                              setPrayerEvent({
-                                type: "ancestor",
-                                ancestorName: event.ancestorName,
-                                ancestorPrecall: event.ancestorPrecall,
-                              })
-                            }
-                          >
-                            <ScrollText className="h-3 w-3" />
-                            Xem sớ
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  Không có sự kiện nào trong ngày này.
-                </p>
-              )
+                      return (
+                        <div
+                          key={event.id}
+                          className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950"
+                        >
+                          {isAncestorWorship ? (
+                            <Flower2 className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                          ) : (
+                            <div className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                          )}
+                          <span className="flex-1 text-sm font-medium text-blue-700 dark:text-blue-400">
+                            {displayTitle}
+                          </span>
+                          {isAncestorWorship && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 gap-1 border-blue-300 px-2 text-xs text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300"
+                              onClick={() =>
+                                setPrayerEvent({
+                                  type: "ancestor",
+                                  ancestorName: event.ancestorName,
+                                  ancestorPrecall: event.ancestorPrecall,
+                                })
+                              }
+                            >
+                              <ScrollText className="h-3 w-3" />
+                              Xem sớ
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    Không có sự kiện nào trong ngày này.
+                  </p>
+                )}
+              </>
             ) : (
               <div className="bg-muted/50 rounded-lg py-4 text-center">
                 <p className="text-muted-foreground mb-3 text-sm">
@@ -407,6 +425,17 @@ export function DateDetailDialog({
           ancestorName={prayerEvent?.ancestorName ?? undefined}
           ancestorPrecall={prayerEvent?.ancestorPrecall ?? undefined}
           ownerUserId={prayerEvent?.ownerUserId}
+        />
+
+        <CreateEventDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          initialLunarDate={{
+            year: day.lunarDate.year,
+            month: day.lunarDate.month,
+            day: day.lunarDate.day,
+          }}
+          onEventCreated={() => onOpenChange(false)}
         />
       </DialogContent>
     </Dialog>
