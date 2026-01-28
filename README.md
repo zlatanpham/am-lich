@@ -87,6 +87,16 @@ Copy the generated keys into your `.env` file:
 - `VAPID_PRIVATE_KEY` - The private key
 - `VAPID_SUBJECT` - Your email address (e.g., `mailto:you@example.com`)
 
+#### Important: Vercel Hobby Plan Limitations
+
+On the **Vercel Hobby plan**, cron jobs have the following limitations:
+
+- **Hourly precision**: Cron jobs can only run at the start of each hour
+- **Execution delay**: Jobs scheduled for a specific hour may run anytime within that hour (e.g., 8:00 job could run at 8:00, 8:30, or 8:59)
+- **User impact**: Notifications may arrive up to 59 minutes after the user's preferred time
+
+This means if a user sets notifications for 8:00 AM, they might receive them anytime between 8:00 AM and 8:59 AM. This is a platform limitation on the free tier.
+
 ### 3. Database Setup
 
 Start PostgreSQL using Docker:

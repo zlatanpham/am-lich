@@ -5,9 +5,14 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes timeout for cron jobs
 
 /**
- * Vercel Cron Job - Runs every hour
- * Checks for users whose notification time matches current time
- * and sends them push notifications for upcoming events
+ * Vercel Cron Job - Runs daily at 6:00 AM
+ *
+ * IMPORTANT: On Hobby plan, Vercel cron jobs have hourly precision with
+ * up to 59 minutes delay. A job scheduled for 6:00 can run anytime
+ * between 6:00 and 6:59. All subscribed users will be notified at this time.
+ *
+ * This cron job processes ALL users who have push notifications enabled
+ * and sends them notifications for upcoming events.
  */
 export async function GET(request: Request) {
   try {
@@ -31,25 +36,32 @@ export async function GET(request: Request) {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
+    const actualTime = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
 
     console.log(
-      `Running notification cron job at ${currentHour}:${currentMinute.toString().padStart(2, "0")}`,
+      `[CRON] Daily notification job running at ${actualTime} (scheduled for 06:00)`,
+    );
+    console.log(
+      `[CRON] Note: On Hobby plan, cron may run anytime within the hour`,
     );
 
-    // Process notifications for users whose preferred time matches current time
+    // Process notifications for ALL users with enabled notifications
+    // Fixed at 6:00 AM - all users get notified at this time
     const result = await processScheduledNotifications(
-      currentHour,
-      currentMinute,
+      6, // Fixed at 6 AM
+      0,
     );
 
     console.log(
-      `Cron job completed: ${result.processed} users processed, ${result.notificationsSent} notifications sent, ${result.errors} errors`,
+      `[CRON] Completed: ${result.processed} users, ${result.notificationsSent} notifications, ${result.errors} errors`,
     );
 
     return NextResponse.json({
       success: true,
       timestamp: now.toISOString(),
-      currentTime: `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`,
+      scheduledTime: "06:00",
+      actualRunTime: actualTime,
+      note: "On Hobby plan, notifications may arrive up to 59 minutes after 6:00 AM",
       ...result,
     });
   } catch (error) {

@@ -4,32 +4,10 @@ import { api } from "@/trpc/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Clock, Calendar, Users, Moon, Heart } from "lucide-react";
+import { Bell, Clock, Calendar, Users, Moon, Heart, Info } from "lucide-react";
 import { PushNotificationManager } from "./push-notification-manager";
 import { toast } from "sonner";
-
-// Generate time options from 00:00 to 23:45 in 15-minute intervals
-const generateTimeOptions = () => {
-  const options: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 15) {
-      const h = hour.toString().padStart(2, "0");
-      const m = minute.toString().padStart(2, "0");
-      options.push(`${h}:${m}`);
-    }
-  }
-  return options;
-};
-
-const timeOptions = generateTimeOptions();
 
 interface Preferences {
   enabled: boolean;
@@ -56,23 +34,8 @@ export function NotificationSettings() {
       },
     });
 
-  const updateTimeMutation =
-    api.notificationPreferences.updateNotificationTime.useMutation({
-      onSuccess: () => {
-        toast.success("Đã cập nhật giờ thông báo");
-        void refetchPreferences();
-      },
-      onError: (error: { message: string }) => {
-        toast.error("Lỗi cập nhật: " + error.message);
-      },
-    });
-
   const handleToggle = (key: keyof Preferences, value: boolean) => {
     updateMutation.mutate({ [key]: value });
-  };
-
-  const handleTimeChange = (time: string) => {
-    updateTimeMutation.mutate({ time });
   };
 
   return (
@@ -89,31 +52,22 @@ export function NotificationSettings() {
 
         <Separator />
 
-        {/* Notification Time */}
+        {/* Fixed Notification Schedule Info */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Clock className="text-muted-foreground h-4 w-4" />
-            <Label className="font-medium">Giờ nhận thông báo</Label>
+            <Label className="font-medium">Thờii gian thông báo</Label>
           </div>
-          <Select
-            value={preferences?.notificationTime ?? "08:00"}
-            onValueChange={handleTimeChange}
-            disabled={updateTimeMutation.isPending}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chọn giờ" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeOptions.map((time) => (
-                <SelectItem key={time} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-muted-foreground text-sm">
-            Thông báo sẽ được gửi vào giờ này mỗi ngày
-          </p>
+          <div className="bg-muted space-y-2 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <span className="text-primary text-2xl font-bold">06:00</span>
+              <span className="text-muted-foreground">mỗi ngày</span>
+            </div>
+            <div className="text-muted-foreground flex items-start gap-2 text-sm">
+              <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <p>Thông báo sẽ được gửi vào khoảng 6:00 sáng hàng ngày.</p>
+            </div>
+          </div>
         </div>
 
         <Separator />
