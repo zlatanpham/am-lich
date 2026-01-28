@@ -217,7 +217,7 @@ export function PushNotificationManager() {
       {isSubscribed && status?.preferences?.enabled && (
         <div className="flex items-center gap-2 text-sm text-green-600">
           <CheckCircle className="h-4 w-4" />
-          <span>Thông báo sẽ gửi vào khoảng 06:00 hàng ngày</span>
+          <span>Thông báo sẽ gửi vào khoảng 09:00 hàng ngày</span>
         </div>
       )}
     </div>

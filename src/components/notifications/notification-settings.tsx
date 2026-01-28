@@ -60,12 +60,12 @@ export function NotificationSettings() {
           </div>
           <div className="bg-muted space-y-2 rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <span className="text-primary text-2xl font-bold">06:00</span>
+              <span className="text-primary text-2xl font-bold">09:00</span>
               <span className="text-muted-foreground">mỗi ngày</span>
             </div>
             <div className="text-muted-foreground flex items-start gap-2 text-sm">
               <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p>Thông báo sẽ được gửi vào khoảng 6:00 sáng hàng ngày.</p>
+              <p>Thông báo sẽ được gửi vào khoảng 9:00 sáng hàng ngày.</p>
             </div>
           </div>
         </div>

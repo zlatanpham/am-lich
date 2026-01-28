@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes timeout for cron jobs
 
 /**
- * Vercel Cron Job - Runs daily at 6:00 AM
+ * Vercel Cron Job - Runs daily at 9:00 AM
  *
  * IMPORTANT: On Hobby plan, Vercel cron jobs have hourly precision with
- * up to 59 minutes delay. A job scheduled for 6:00 can run anytime
- * between 6:00 and 6:59. All subscribed users will be notified at this time.
+ * up to 59 minutes delay. A job scheduled for 9:00 can run anytime
+ * between 9:00 and 9:59. All subscribed users will be notified at this time.
  *
  * This cron job processes ALL users who have push notifications enabled
  * and sends them notifications for upcoming events.
@@ -39,16 +39,16 @@ export async function GET(request: Request) {
     const actualTime = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
 
     console.log(
-      `[CRON] Daily notification job running at ${actualTime} (scheduled for 06:00)`,
+      `[CRON] Daily notification job running at ${actualTime} (scheduled for 09:00)`,
     );
     console.log(
       `[CRON] Note: On Hobby plan, cron may run anytime within the hour`,
     );
 
     // Process notifications for ALL users with enabled notifications
-    // Fixed at 6:00 AM - all users get notified at this time
+    // Fixed at 9:00 AM - all users get notified at this time
     const result = await processScheduledNotifications(
-      6, // Fixed at 6 AM
+      9, // Fixed at 9 AM
       0,
     );
 
@@ -59,9 +59,9 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       timestamp: now.toISOString(),
-      scheduledTime: "06:00",
+      scheduledTime: "09:00",
       actualRunTime: actualTime,
-      note: "On Hobby plan, notifications may arrive up to 59 minutes after 6:00 AM",
+      note: "On Hobby plan, notifications may arrive up to 59 minutes after 9:00 AM",
       ...result,
     });
   } catch (error) {
