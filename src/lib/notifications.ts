@@ -313,10 +313,14 @@ async function findNextRam(
 
 /**
  * Process notifications for all users at their preferred time
+ * @param currentHour - Current hour (0-23)
+ * @param currentMinute - Current minute (0-59)
+ * @param force - If true, process all enabled users regardless of their notification time
  */
 export async function processScheduledNotifications(
   currentHour: number,
   currentMinute: number,
+  force = false,
 ): Promise<{
   processed: number;
   notificationsSent: number;
@@ -326,20 +330,38 @@ export async function processScheduledNotifications(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Get users whose notification time matches current time and haven't been notified today
-  const users = await db.notificationPreference.findMany({
-    where: {
-      enabled: true,
-      notificationTime: currentTime,
-      OR: [
-        { lastNotifiedAt: null },
-        {
-          lastNotifiedAt: {
-            lt: today,
-          },
+  // Build the where clause based on force mode
+  const whereClause: {
+    enabled: true;
+    notificationTime?: string;
+    OR: [
+      { lastNotifiedAt: null },
+      {
+        lastNotifiedAt: {
+          lt: Date;
+        };
+      },
+    ];
+  } = {
+    enabled: true,
+    OR: [
+      { lastNotifiedAt: null },
+      {
+        lastNotifiedAt: {
+          lt: today,
         },
-      ],
-    },
+      },
+    ],
+  };
+
+  // Only filter by notificationTime if not in force mode
+  if (!force) {
+    whereClause.notificationTime = currentTime;
+  }
+
+  // Get users to notify
+  const users = await db.notificationPreference.findMany({
+    where: whereClause,
     include: {
       user: {
         include: {

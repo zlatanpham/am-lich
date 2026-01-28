@@ -32,24 +32,36 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check for force mode query parameter
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get("force") === "true";
+
     // Get current time
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     const actualTime = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
 
-    console.log(
-      `[CRON] Daily notification job running at ${actualTime} (scheduled for 09:00)`,
-    );
-    console.log(
-      `[CRON] Note: On Hobby plan, cron may run anytime within the hour`,
-    );
+    if (force) {
+      console.log(
+        `[CRON] FORCE MODE: Processing ALL enabled users regardless of notification time`,
+      );
+    } else {
+      console.log(
+        `[CRON] Daily notification job running at ${actualTime} (scheduled for 09:00)`,
+      );
+      console.log(
+        `[CRON] Note: On Hobby plan, cron may run anytime within the hour`,
+      );
+    }
 
-    // Process notifications for ALL users with enabled notifications
-    // Fixed at 9:00 AM - all users get notified at this time
+    // Process notifications
+    // In normal mode: only users with notificationTime matching current time (9:00)
+    // In force mode: all enabled users regardless of their notification time
     const result = await processScheduledNotifications(
       9, // Fixed at 9 AM
       0,
+      force, // Pass force flag to process all enabled users when true
     );
 
     console.log(
@@ -61,7 +73,10 @@ export async function GET(request: Request) {
       timestamp: now.toISOString(),
       scheduledTime: "09:00",
       actualRunTime: actualTime,
-      note: "On Hobby plan, notifications may arrive up to 59 minutes after 9:00 AM",
+      force: force,
+      note: force
+        ? "Force mode: Processed all enabled users regardless of notification time"
+        : "On Hobby plan, notifications may arrive up to 59 minutes after 9:00 AM",
       ...result,
     });
   } catch (error) {
