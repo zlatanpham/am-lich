@@ -11,6 +11,7 @@ A comprehensive Vietnamese lunar calendar web application with event management 
 - **Authentication**: Secure user accounts with Email/Password
 - **Export Functionality**: Export calendars to various formats
 - **Modern UI**: Responsive design optimized for Vietnamese users
+- **Push Notifications**: Get notified about upcoming events (Mồng 1, Rằm, personal events, shared events)
 
 ## Tech Stack
 
@@ -57,7 +58,44 @@ NEXTAUTH_URL="http://localhost:3000"
 # Email (Resend)
 RESEND_API_KEY="your-resend-api-key"
 EMAIL_FROM="noreply@yourdomain.com"
+
+# Push Notifications (VAPID Keys)
+# Generate with: npx web-push generate-vapid-keys
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="your-vapid-public-key"
+VAPID_PRIVATE_KEY="your-vapid-private-key"
+VAPID_SUBJECT="mailto:your-email@example.com"
+
+# Vercel Cron Secret (generate a random string)
+CRON_SECRET="your-random-secret"
 ```
+
+#### Generating VAPID Keys for Push Notifications
+
+To enable push notifications, you need to generate VAPID keys:
+
+```bash
+# Install web-push globally (if not already installed)
+npm install -g web-push
+
+# Generate VAPID keys
+web-push generate-vapid-keys
+```
+
+Copy the generated keys into your `.env` file:
+
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - The public key
+- `VAPID_PRIVATE_KEY` - The private key
+- `VAPID_SUBJECT` - Your email address (e.g., `mailto:you@example.com`)
+
+#### Important: Vercel Hobby Plan Limitations
+
+On the **Vercel Hobby plan**, cron jobs have the following limitations:
+
+- **Hourly precision**: Cron jobs can only run at the start of each hour
+- **Execution delay**: Jobs scheduled for a specific hour may run anytime within that hour (e.g., 8:00 job could run at 8:00, 8:30, or 8:59)
+- **User impact**: Notifications may arrive up to 59 minutes after the user's preferred time
+
+This means if a user sets notifications for 8:00 AM, they might receive them anytime between 8:00 AM and 8:59 AM. This is a platform limitation on the free tier.
 
 ### 3. Database Setup
 
@@ -203,6 +241,10 @@ Ensure all production environment variables are set:
 - `AUTH_SECRET` - Strong random secret (use `openssl rand -base64 32`)
 - `NEXTAUTH_URL` - Your production domain
 - `RESEND_API_KEY` and `EMAIL_FROM`
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` - For push notifications
+- `CRON_SECRET` - Random secret for securing cron jobs
+
+**Note**: VAPID keys must be generated before deployment. See [Generating VAPID Keys](#generating-vapid-keys-for-push-notifications) section above.
 
 ### Database Migration
 

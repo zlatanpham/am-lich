@@ -297,3 +297,110 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
+
+// ============================================
+// PUSH NOTIFICATION SUPPORT
+// ============================================
+
+// Handle push events from server
+self.addEventListener("push", (event) => {
+  console.log("Push event received:", event);
+
+  let data;
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = {};
+  }
+
+  const title = data.title || "Âm Lịch Việt Nam";
+  const options = {
+    body: data.body || "Bạn có thông báo mới",
+    icon: data.icon || "/icon-192x192.png",
+    badge: data.badge || "/badge-72x72.png",
+    tag: data.tag || "lunar-event",
+    requireInteraction: data.requireInteraction ?? true,
+    renotify: true,
+    data: {
+      url: data.data?.url || "/",
+      eventId: data.data?.eventId,
+      ...data.data,
+    },
+  };
+
+  // Update badge count if supported
+  if ("setAppBadge" in navigator) {
+    event.waitUntil(
+      Promise.all([
+        self.registration.showNotification(title, options),
+        updateBadgeCount(),
+      ]),
+    );
+  } else {
+    event.waitUntil(self.registration.showNotification(title, options));
+  }
+});
+
+// Handle notification click
+self.addEventListener("notificationclick", (event) => {
+  console.log("Notification clicked:", event);
+
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/";
+
+  // Clear badge when user interacts with notification
+  if ("clearAppBadge" in navigator) {
+    navigator.clearAppBadge();
+  }
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        // If a window client is already open, focus it
+        for (const client of clientList) {
+          if (client.url === url && "focus" in client) {
+            return client.focus();
+          }
+        }
+        // Otherwise open a new window
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      }),
+  );
+});
+
+// Handle notification close (dismiss without clicking)
+self.addEventListener("notificationclose", (event) => {
+  console.log("Notification closed:", event);
+});
+
+// Update badge count
+async function updateBadgeCount() {
+  try {
+    // Try to get current badge count from storage or increment
+    const cache = await caches.open("badge-cache");
+    const response = await cache.match("badge-count");
+    let count = 1;
+
+    if (response) {
+      const data = await response.json();
+      count = (data.count || 0) + 1;
+    }
+
+    // Store updated count
+    await cache.put(
+      "badge-count",
+      new Response(JSON.stringify({ count, timestamp: Date.now() })),
+    );
+
+    // Set badge
+    if ("setAppBadge" in navigator) {
+      await navigator.setAppBadge(count);
+    }
+  } catch (error) {
+    console.error("Error updating badge:", error);
+  }
+}
