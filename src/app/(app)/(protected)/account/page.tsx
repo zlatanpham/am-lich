@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { EditNameDialog } from "./_components/edit-name-dialog";
 import { ResetPasswordDialog } from "./_components/reset-password-dialog";
+import { NotificationSettings } from "@/components/notifications/notification-settings";
 import { api } from "@/trpc/react";
 import AccountPageSkeleton from "./_components/page-skeleton";
 
@@ -102,6 +103,11 @@ export default function AccountPage() {
                 }}
               />
             </div>
+
+            <Separator />
+
+            {/* Notification Settings */}
+            <NotificationSettings />
           </div>
         </>
       )}

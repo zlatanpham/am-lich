@@ -12,6 +12,8 @@ import { lunarEventsRouter } from "./routers/lunar-events";
 import { calendarExportRouter } from "./routers/calendar-export";
 import { prayersRouter } from "./routers/prayers";
 import { eventSharingRouter } from "./routers/event-sharing";
+import { pushRouter } from "./routers/push";
+import { notificationPreferencesRouter } from "./routers/notification-preferences";
 
 export const appRouter = createTRPCRouter({
   organization: organizationRouter,
@@ -21,6 +23,8 @@ export const appRouter = createTRPCRouter({
   calendarExport: calendarExportRouter,
   prayers: prayersRouter,
   eventSharing: eventSharingRouter,
+  push: pushRouter,
+  notificationPreferences: notificationPreferencesRouter,
 });
 
 // export type definition of API

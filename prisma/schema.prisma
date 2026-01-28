@@ -76,6 +76,9 @@ model User {
   VietnameseLunarEvent             VietnameseLunarEvent[]
   sharedEventsOwned                EventShare[]                      @relation("EventShareOwner")
   sharedEventsReceived             EventShare[]                      @relation("EventShareRecipient")
+  pushSubscription                 PushSubscription?
+  notificationPreference           NotificationPreference?
+  notificationLogs                 NotificationLog[]
 }
 
 model Petitioner {
@@ -265,4 +268,55 @@ model EventShareInvitation {
 
   @@index([token])
   @@index([email])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  endpoint  String   @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  enabled               Boolean  @default(true)
+  notificationTime      String   @default("08:00")
+  personalEvents        Boolean  @default(true)
+  sharedEvents          Boolean  @default(true)
+  systemEvents          Boolean  @default(true)
+  ancestorWorshipEvents Boolean  @default(true)
+  lastNotifiedAt        DateTime?
+  badgeCount            Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([enabled, notificationTime])
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String?
+  eventType String
+  title     String
+  body      String
+  sentAt    DateTime @default(now())
+  success   Boolean
+  error     String?
+  isRead    Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sentAt])
+  @@index([userId, isRead])
+  @@index([eventType, sentAt])
 }
