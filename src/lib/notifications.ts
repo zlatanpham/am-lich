@@ -11,7 +11,7 @@ import type { NotificationPreference } from "@prisma/client";
 function initializeWebPush() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT;
+  let subject = process.env.VAPID_SUBJECT;
 
   if (!publicKey) {
     console.error("[WEBPUSH] VAPID_PUBLIC_KEY is not set");
@@ -21,9 +21,21 @@ function initializeWebPush() {
     console.error("[WEBPUSH] VAPID_PRIVATE_KEY is not set");
     return false;
   }
+
+  // Use default subject if not provided
   if (!subject) {
-    console.error("[WEBPUSH] VAPID_SUBJECT is not set");
-    return false;
+    subject = "mailto:admin@am-lich.app";
+    console.log("[WEBPUSH] Using default VAPID_SUBJECT");
+  }
+
+  // Auto-add mailto: prefix if subject looks like an email address
+  if (
+    subject.includes("@") &&
+    !subject.startsWith("mailto:") &&
+    !subject.startsWith("http")
+  ) {
+    subject = `mailto:${subject}`;
+    console.log("[WEBPUSH] Auto-added mailto: prefix to VAPID_SUBJECT");
   }
 
   try {
