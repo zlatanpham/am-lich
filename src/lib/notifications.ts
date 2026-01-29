@@ -139,6 +139,10 @@ export async function getNotificationsForUser(
           (gregorianDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
         );
 
+        console.log(
+          `[CRON DEBUG] Event "${event.title}": lunar=${event.lunarYear}-${event.lunarMonth}-${event.lunarDay}, gregorian=${gregorianDate.toISOString()}, daysUntil=${daysUntil}, reminderDays=${event.reminderDays}, today=${today.toISOString()}`,
+        );
+
         // Check if today is the reminder day
         if (daysUntil === event.reminderDays && daysUntil > 0) {
           const lunarInfo = gregorianToLunar(gregorianDate);
