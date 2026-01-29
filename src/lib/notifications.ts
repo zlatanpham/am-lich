@@ -8,17 +8,35 @@ import {
 import type { NotificationPreference } from "@prisma/client";
 
 // Initialize web-push with VAPID keys
-if (
-  process.env.VAPID_PUBLIC_KEY &&
-  process.env.VAPID_PRIVATE_KEY &&
-  process.env.VAPID_SUBJECT
-) {
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT,
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY,
-  );
+function initializeWebPush() {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  const subject = process.env.VAPID_SUBJECT;
+
+  if (!publicKey) {
+    console.error("[WEBPUSH] VAPID_PUBLIC_KEY is not set");
+    return false;
+  }
+  if (!privateKey) {
+    console.error("[WEBPUSH] VAPID_PRIVATE_KEY is not set");
+    return false;
+  }
+  if (!subject) {
+    console.error("[WEBPUSH] VAPID_SUBJECT is not set");
+    return false;
+  }
+
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    console.log("[WEBPUSH] VAPID keys initialized successfully");
+    return true;
+  } catch (error) {
+    console.error("[WEBPUSH] Failed to initialize VAPID keys:", error);
+    return false;
+  }
 }
+
+const isWebPushInitialized = initializeWebPush();
 
 export interface PushNotificationPayload {
   title: string;
@@ -46,6 +64,13 @@ export async function sendPushNotification(
   subscription: webpush.PushSubscription,
   payload: PushNotificationPayload,
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isWebPushInitialized) {
+    return {
+      success: false,
+      error: "WebPush not initialized. Check VAPID keys configuration.",
+    };
+  }
+
   try {
     const notificationPayload = JSON.stringify({
       title: payload.title,
