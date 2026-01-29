@@ -9,6 +9,7 @@ import { SessionProvider } from "next-auth/react";
 import { HydrateClient } from "@/trpc/server";
 import { Toaster } from "@/components/ui/sonner";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
+import { BadgeClearer } from "@/components/badge-clearer";
 
 export const metadata: Metadata = {
   title: "Âm Lịch Việt Nam",
@@ -197,6 +198,7 @@ export default function RootLayout({
           </TRPCReactProvider>
         </SessionProvider>
         <Toaster />
+        <BadgeClearer />
         <PwaInstallBanner />
       </body>
     </html>
