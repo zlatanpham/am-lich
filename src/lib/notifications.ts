@@ -365,6 +365,27 @@ export async function processScheduledNotifications(): Promise<{
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  console.log(
+    `[CRON DEBUG] Looking for users with enabled=true and lastNotifiedAt < ${today.toISOString()} or null`,
+  );
+
+  // First, let's see how many total enabled users exist
+  const allEnabled = await db.notificationPreference.count({
+    where: { enabled: true },
+  });
+  console.log(`[CRON DEBUG] Total enabled users: ${allEnabled}`);
+
+  // Check how many were notified today
+  const notifiedToday = await db.notificationPreference.count({
+    where: {
+      enabled: true,
+      lastNotifiedAt: {
+        gte: today,
+      },
+    },
+  });
+  console.log(`[CRON DEBUG] Users notified today: ${notifiedToday}`);
+
   // Get all enabled users who haven't been notified today
   const users = await db.notificationPreference.findMany({
     where: {
