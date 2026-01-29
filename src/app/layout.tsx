@@ -195,11 +195,11 @@ export default function RootLayout({
         <SessionProvider>
           <TRPCReactProvider>
             <HydrateClient>{children}</HydrateClient>
+            <Toaster />
+            <BadgeClearer />
+            <PwaInstallBanner />
           </TRPCReactProvider>
         </SessionProvider>
-        <Toaster />
-        <BadgeClearer />
-        <PwaInstallBanner />
       </body>
     </html>
   );

@@ -9,7 +9,8 @@ import { api } from "@/trpc/react";
  * when the app initializes. This runs on every page load for authenticated users.
  */
 export function BadgeClearer() {
-  const { status } = useSession();
+  const session = useSession();
+  const status = session?.status;
   const clearBadgeMutation =
     api.notificationPreferences.clearBadge.useMutation();
 
