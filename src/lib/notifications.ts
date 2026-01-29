@@ -349,56 +349,31 @@ async function findNextRam(
 }
 
 /**
- * Process notifications for all users at their preferred time
- * @param currentHour - Current hour (0-23)
- * @param currentMinute - Current minute (0-59)
- * @param force - If true, process all enabled users regardless of their notification time
+ * Process notifications for all enabled users
+ * Simplified version: processes all users with enabled notifications and push subscriptions
+ * regardless of notification time. Only skips users who were already notified today.
  */
-export async function processScheduledNotifications(
-  currentHour: number,
-  currentMinute: number,
-  force = false,
-): Promise<{
+export async function processScheduledNotifications(): Promise<{
   processed: number;
   notificationsSent: number;
   errors: number;
 }> {
-  const currentTime = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Build the where clause based on force mode
-  const whereClause: {
-    enabled: true;
-    notificationTime?: string;
-    OR: [
-      { lastNotifiedAt: null },
-      {
-        lastNotifiedAt: {
-          lt: Date;
-        };
-      },
-    ];
-  } = {
-    enabled: true,
-    OR: [
-      { lastNotifiedAt: null },
-      {
-        lastNotifiedAt: {
-          lt: today,
-        },
-      },
-    ],
-  };
-
-  // Only filter by notificationTime if not in force mode
-  if (!force) {
-    whereClause.notificationTime = currentTime;
-  }
-
-  // Get users to notify
+  // Get all enabled users who haven't been notified today
   const users = await db.notificationPreference.findMany({
-    where: whereClause,
+    where: {
+      enabled: true,
+      OR: [
+        { lastNotifiedAt: null },
+        {
+          lastNotifiedAt: {
+            lt: today,
+          },
+        },
+      ],
+    },
     include: {
       user: {
         include: {
@@ -408,14 +383,25 @@ export async function processScheduledNotifications(
     },
   });
 
+  console.log(`[CRON] Found ${users.length} users to process`);
+
   let notificationsSent = 0;
   let errors = 0;
 
   for (const pref of users) {
-    if (!pref.user.pushSubscription) continue;
+    if (!pref.user.pushSubscription) {
+      console.log(
+        `[CRON] User ${pref.userId} has no push subscription, skipping`,
+      );
+      continue;
+    }
 
     try {
       const notifications = await getNotificationsForUser(pref.userId, pref);
+
+      console.log(
+        `[CRON] User ${pref.userId}: found ${notifications.length} notifications`,
+      );
 
       for (const notification of notifications) {
         const subscription: webpush.PushSubscription = {
@@ -470,7 +456,7 @@ export async function processScheduledNotifications(
       });
     } catch (error) {
       console.error(
-        `Error processing notifications for user ${pref.userId}:`,
+        `[CRON] Error processing notifications for user ${pref.userId}:`,
         error,
       );
       errors++;
