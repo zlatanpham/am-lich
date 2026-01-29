@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron/notifications?force=true",
+      "path": "/api/cron/notifications",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/test/push-notification",
+      "schedule": "0 0 1 1 * 2126"
     }
   ]
 }
