@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/test/push-notification",
-      "schedule": "0 0 1 1 * 2126"
+      "schedule": "0 0 29 2 *"
     }
   ]
 }
