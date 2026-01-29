@@ -44,11 +44,7 @@ export async function GET(request: Request) {
     console.log("[TEST PUSH] Starting test push notification...");
 
     // Check VAPID configuration
-    if (
-      !process.env.VAPID_PUBLIC_KEY ||
-      !process.env.VAPID_PRIVATE_KEY ||
-      !process.env.VAPID_SUBJECT
-    ) {
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
       console.error("[TEST PUSH] VAPID keys not configured");
       return NextResponse.json(
         {
@@ -56,7 +52,6 @@ export async function GET(request: Request) {
           missing: {
             VAPID_PUBLIC_KEY: !process.env.VAPID_PUBLIC_KEY,
             VAPID_PRIVATE_KEY: !process.env.VAPID_PRIVATE_KEY,
-            VAPID_SUBJECT: !process.env.VAPID_SUBJECT,
           },
           message:
             "Please set VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT environment variables",
