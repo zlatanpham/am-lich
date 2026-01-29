@@ -39,10 +39,13 @@ export const pushRouter = createTRPCRouter({
           },
         });
 
-        // Ensure notification preferences exist
+        // Ensure notification preferences exist and are enabled
         await ctx.db.notificationPreference.upsert({
           where: { userId },
-          update: {},
+          update: {
+            enabled: true,
+            updatedAt: new Date(),
+          },
           create: {
             userId,
             enabled: true,

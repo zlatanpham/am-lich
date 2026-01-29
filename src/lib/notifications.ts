@@ -139,10 +139,6 @@ export async function getNotificationsForUser(
           (gregorianDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
         );
 
-        console.log(
-          `[CRON DEBUG] Event "${event.title}": lunar=${event.lunarYear}-${event.lunarMonth}-${event.lunarDay}, gregorian=${gregorianDate.toISOString()}, daysUntil=${daysUntil}, reminderDays=${event.reminderDays}, today=${today.toISOString()}`,
-        );
-
         // Check if today is the reminder day
         if (daysUntil === event.reminderDays && daysUntil > 0) {
           const lunarInfo = gregorianToLunar(gregorianDate);
@@ -356,8 +352,9 @@ async function findNextRam(
  * Process notifications for all enabled users
  * Simplified version: processes all users with enabled notifications and push subscriptions
  * regardless of notification time. Only skips users who were already notified today.
+ * @param force - If true, bypass the lastNotifiedAt check (for testing)
  */
-export async function processScheduledNotifications(): Promise<{
+export async function processScheduledNotifications(force = false): Promise<{
   processed: number;
   notificationsSent: number;
   errors: number;
@@ -365,40 +362,36 @@ export async function processScheduledNotifications(): Promise<{
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  console.log(
-    `[CRON DEBUG] Looking for users with enabled=true and lastNotifiedAt < ${today.toISOString()} or null`,
-  );
-
-  // First, let's see how many total enabled users exist
-  const allEnabled = await db.notificationPreference.count({
-    where: { enabled: true },
-  });
-  console.log(`[CRON DEBUG] Total enabled users: ${allEnabled}`);
-
-  // Check how many were notified today
-  const notifiedToday = await db.notificationPreference.count({
-    where: {
-      enabled: true,
-      lastNotifiedAt: {
-        gte: today,
+  // Build where clause based on force mode
+  const whereClause: {
+    enabled: true;
+    OR?: [
+      { lastNotifiedAt: null },
+      {
+        lastNotifiedAt: {
+          lt: Date;
+        };
       },
-    },
-  });
-  console.log(`[CRON DEBUG] Users notified today: ${notifiedToday}`);
+    ];
+  } = {
+    enabled: true,
+  };
 
-  // Get all enabled users who haven't been notified today
-  const users = await db.notificationPreference.findMany({
-    where: {
-      enabled: true,
-      OR: [
-        { lastNotifiedAt: null },
-        {
-          lastNotifiedAt: {
-            lt: today,
-          },
+  // Only filter by lastNotifiedAt if not in force mode
+  if (!force) {
+    whereClause.OR = [
+      { lastNotifiedAt: null },
+      {
+        lastNotifiedAt: {
+          lt: today,
         },
-      ],
-    },
+      },
+    ];
+  }
+
+  // Get all enabled users who haven't been notified today (or all enabled users if force mode)
+  const users = await db.notificationPreference.findMany({
+    where: whereClause,
     include: {
       user: {
         include: {

@@ -54,8 +54,16 @@ export async function GET(request: Request) {
       `[CRON] Starting daily notification job at ${now.toISOString()}`,
     );
 
+    // Check for force mode query parameter (for testing)
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get("force") === "true";
+
+    if (force) {
+      console.log("[CRON] FORCE MODE: Bypassing lastNotifiedAt check");
+    }
+
     // Process all enabled users with pending notifications
-    const result = await processScheduledNotifications();
+    const result = await processScheduledNotifications(force);
 
     console.log(
       `[CRON] Completed: ${result.processed} users processed, ${result.notificationsSent} notifications sent, ${result.errors} errors`,
