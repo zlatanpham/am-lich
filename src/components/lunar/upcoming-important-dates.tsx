@@ -232,7 +232,7 @@ export function UpcomingImportantDates() {
                 return (
                   <div
                     key={`${isShared ? "shared" : "personal"}-${event.id}`}
-                    className="group flex cursor-pointer items-center justify-between rounded-lg border border-slate-100 bg-white p-2 shadow-sm transition-all hover:border-slate-200 hover:shadow-md sm:p-3"
+                    className="group flex cursor-pointer items-center justify-between rounded-lg border bg-white p-2 transition-all hover:border-slate-200 sm:p-3"
                     role="button"
                     tabIndex={0}
                     onClick={() => handleEventClick(event)}
@@ -292,7 +292,7 @@ export function UpcomingImportantDates() {
               return (
                 <div
                   key={lunarDate.type}
-                  className={`group flex cursor-pointer items-center justify-between rounded-lg border border-slate-100 bg-white p-2 shadow-sm transition-all hover:shadow-md sm:p-3 ${
+                  className={`group flex cursor-pointer items-center justify-between rounded-lg border bg-white p-2 transition-all sm:p-3 ${
                     isRam ? "hover:border-purple-200" : "hover:border-amber-200"
                   }`}
                   role="button"
