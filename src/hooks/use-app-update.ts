@@ -165,6 +165,52 @@ export function useAppUpdate(): UseAppUpdateReturn {
     }
   }, [isUpdateDismissed]);
 
+  // Check for updates when app comes back from background
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let visibilityTimeout: NodeJS.Timeout | null = null;
+    let lastCheckTime = Date.now();
+    const MIN_CHECK_INTERVAL = 30 * 1000; // 30 seconds minimum between checks
+    const VISIBILITY_DELAY = 1000; // 1 second delay before checking
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Clear any existing timeout
+        if (visibilityTimeout) {
+          clearTimeout(visibilityTimeout);
+        }
+
+        // Check if enough time has passed since last check
+        const timeSinceLastCheck = Date.now() - lastCheckTime;
+        if (timeSinceLastCheck < MIN_CHECK_INTERVAL) {
+          return;
+        }
+
+        // Delay the check to avoid spamming when user is quickly switching apps
+        visibilityTimeout = setTimeout(() => {
+          lastCheckTime = Date.now();
+          checkForUpdates();
+        }, VISIBILITY_DELAY);
+      } else {
+        // Clear timeout if app goes to background before check runs
+        if (visibilityTimeout) {
+          clearTimeout(visibilityTimeout);
+          visibilityTimeout = null;
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (visibilityTimeout) {
+        clearTimeout(visibilityTimeout);
+      }
+    };
+  }, [checkForUpdates]);
+
   // Apply update - skip waiting and reload
   const applyUpdate = useCallback(() => {
     if (typeof window === "undefined") return;
