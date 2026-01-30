@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { BadgeClearer } from "@/components/badge-clearer";
 import { AppUpdateToast } from "@/components/app-update-toast";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
   title: "Âm Lịch Việt Nam",
@@ -195,7 +196,9 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <TRPCReactProvider>
-            <HydrateClient>{children}</HydrateClient>
+            <ErrorBoundary>
+              <HydrateClient>{children}</HydrateClient>
+            </ErrorBoundary>
             <Toaster />
             <BadgeClearer />
             <PwaInstallBanner />
