@@ -7,7 +7,7 @@ export default function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background flex min-h-screen flex-col">
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
@@ -25,7 +25,7 @@ export default function AppLayout({
       </header>
 
       {/* Main content */}
-      <main className="container mx-auto px-4">
+      <main className="container mx-auto flex-1 px-4">
         <Suspense fallback={null}>{children}</Suspense>
       </main>
 
