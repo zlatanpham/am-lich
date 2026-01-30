@@ -286,26 +286,38 @@ export const lunarCalendarRouter = createTRPCRouter({
     }),
 
   /**
-   * Get next important Vietnamese lunar dates (Mồng 1 and Rằm)
+   * Get next important Vietnamese lunar dates (Mồng 1 and Rằm) sorted by date
    */
   getNextImportantVietnameseDates: publicProcedure.query(() => {
     const nextDates = getNextImportantVietnameseLunarDate();
 
+    const mong1Data = {
+      type: "mong1" as const,
+      date: nextDates.mong1,
+      daysUntil: daysUntilVietnam(nextDates.mong1),
+      lunarInfo: nextDates.mong1Info,
+      formattedDate: formatVietnameseDate(nextDates.mong1),
+      culturalSignificance: getVietnameseCulturalSignificanceText(1),
+    };
+
+    const ramData = {
+      type: "ram" as const,
+      date: nextDates.ram,
+      daysUntil: daysUntilVietnam(nextDates.ram),
+      lunarInfo: nextDates.ramInfo,
+      formattedDate: formatVietnameseDate(nextDates.ram),
+      culturalSignificance: getVietnameseCulturalSignificanceText(15),
+    };
+
+    // Sort by date (earliest first)
+    const sortedDates = [mong1Data, ramData].sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+
     return {
-      nextMong1: {
-        date: nextDates.mong1,
-        daysUntil: daysUntilVietnam(nextDates.mong1),
-        lunarInfo: nextDates.mong1Info,
-        formattedDate: formatVietnameseDate(nextDates.mong1),
-        culturalSignificance: getVietnameseCulturalSignificanceText(1),
-      },
-      nextRam: {
-        date: nextDates.ram,
-        daysUntil: daysUntilVietnam(nextDates.ram),
-        lunarInfo: nextDates.ramInfo,
-        formattedDate: formatVietnameseDate(nextDates.ram),
-        culturalSignificance: getVietnameseCulturalSignificanceText(15),
-      },
+      dates: sortedDates,
+      nextMong1: mong1Data,
+      nextRam: ramData,
     };
   }),
 

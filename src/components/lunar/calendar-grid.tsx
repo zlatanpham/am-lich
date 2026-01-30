@@ -233,7 +233,9 @@ export function CalendarGrid({
                   "ring-primary ring-1 ring-offset-1 sm:ring-2 sm:ring-offset-2",
                 day.isImportant &&
                   day.isCurrentMonth &&
-                  "border-amber-400 bg-amber-50",
+                  (day.importantDayType === "ram15"
+                    ? "border-purple-400 bg-purple-50"
+                    : "border-amber-400 bg-amber-50"),
               )}
             >
               {/* Gregorian date */}
@@ -250,7 +252,12 @@ export function CalendarGrid({
                   {day.isImportant && (
                     <Badge
                       variant="secondary"
-                      className="h-3 px-0.5 py-0 text-[10px] sm:h-4 sm:px-1 sm:text-xs"
+                      className={cn(
+                        "h-3 px-0.5 py-0 text-[10px] sm:h-4 sm:px-1 sm:text-xs",
+                        day.importantDayType === "ram15"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-amber-100 text-amber-700",
+                      )}
                     >
                       {day.lunarDate.day === 1 ? "M1" : "R"}
                     </Badge>
