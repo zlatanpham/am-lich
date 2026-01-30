@@ -233,7 +233,7 @@ export function CalendarGrid({
                   "ring-primary ring-1 ring-offset-1 sm:ring-2 sm:ring-offset-2",
                 day.isImportant &&
                   day.isCurrentMonth &&
-                  "bg-accent/50 border-accent",
+                  "border-amber-400 bg-amber-50",
               )}
             >
               {/* Gregorian date */}
@@ -354,7 +354,7 @@ export function CalendarGrid({
               <span className="truncate">{vietnameseText.today}</span>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
-              <div className="bg-accent/50 h-2 w-2 rounded sm:h-3 sm:w-3"></div>
+              <div className="h-2 w-2 rounded border border-amber-400 bg-amber-50 sm:h-3 sm:w-3"></div>
               <span className="truncate">Ngày quan trọng</span>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
