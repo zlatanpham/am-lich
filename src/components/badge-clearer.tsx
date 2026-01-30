@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 
@@ -11,14 +11,17 @@ import { api } from "@/trpc/react";
 export function BadgeClearer() {
   const session = useSession();
   const status = session?.status;
+  const hasRun = useRef(false);
   const clearBadgeMutation =
     api.notificationPreferences.clearBadge.useMutation();
 
   useEffect(() => {
-    // Only clear badge if user is authenticated
-    if (status !== "authenticated") {
+    // Only clear badge if user is authenticated and we haven't run yet
+    if (status !== "authenticated" || hasRun.current) {
       return;
     }
+
+    hasRun.current = true;
 
     const clearBadge = async () => {
       try {
