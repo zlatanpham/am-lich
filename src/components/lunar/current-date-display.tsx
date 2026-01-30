@@ -3,16 +3,23 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
-import { vietnameseText } from "@/lib/vietnamese-localization";
+import {
+  vietnameseText,
+  getVietnameseDayAssessment,
+} from "@/lib/vietnamese-localization";
 import { useSession } from "next-auth/react";
-import { Calendar, Flower, Share2, Sparkles } from "lucide-react";
+import { Calendar, Flower, Share2 } from "lucide-react";
 import {
   DateDetailDialog,
   type CalendarDayFromAPI,
 } from "./date-detail-dialog";
-import { gregorianToLunar } from "@/lib/lunar-calendar";
+import {
+  gregorianToLunar,
+  getVietnameseCanChiYear,
+  formatVietnameseLunarDate,
+} from "@/lib/lunar-calendar";
+import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 
 export function CurrentDateDisplay() {
   const { data: session } = useSession();
@@ -21,8 +28,21 @@ export function CurrentDateDisplay() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data, isLoading, error } =
-    api.lunarCalendar.getCurrentVietnameseLunarDate.useQuery();
+  // Calculate lunar date client-side - no loading needed!
+  const lunarData = useMemo(() => {
+    const today = new Date();
+    const lunarDate = gregorianToLunar(today);
+    const culturalAssessment = getVietnameseDayAssessment(lunarDate.day);
+    const zodiacYear = getVietnameseCanChiYear(lunarDate.year);
+
+    return {
+      lunarDate,
+      formattedDate: formatVietnameseLunarDate(lunarDate),
+      culturalAssessment,
+      zodiacYear,
+      vietnameseDate: formatVietnameseDate(today),
+    };
+  }, []);
 
   // Get today's date range for fetching events
   const todayDateRange = useMemo(() => {
@@ -81,43 +101,13 @@ export function CurrentDateDisplay() {
     });
   }, [todaysEvents, todaysSharedEvents]);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{vietnameseText.currentLunarDate}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-6 w-3/4" />
-          <Skeleton className="h-6 w-1/2" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{vietnameseText.currentLunarDate}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-destructive">Lỗi khi tải thông tin âm lịch</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!data) return null;
-
   const {
     lunarDate,
     formattedDate,
     culturalAssessment,
     zodiacYear,
     vietnameseDate,
-  } = data;
+  } = lunarData;
 
   const handleEventClick = (event: (typeof allTodaysEvents)[number]) => {
     const today = new Date();

@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { api } from "@/trpc/react";
 import {
   Calendar,
@@ -23,8 +22,12 @@ import {
 } from "./date-detail-dialog";
 import {
   gregorianToLunar,
+  getNextImportantVietnameseLunarDate,
+  daysUntilVietnam,
+  getVietnameseCulturalSignificanceText,
   type VietnameseLunarDate,
 } from "@/lib/lunar-calendar";
+import { formatVietnameseDate } from "@/lib/vietnamese-localization";
 
 export function UpcomingImportantDates() {
   const { data: session } = useSession();
@@ -33,8 +36,39 @@ export function UpcomingImportantDates() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data, isLoading, error } =
-    api.lunarCalendar.getNextImportantVietnameseDates.useQuery();
+  // Calculate next important dates client-side - no loading needed!
+  const importantDates = useMemo(() => {
+    const nextDates = getNextImportantVietnameseLunarDate();
+
+    const mong1Data = {
+      type: "mong1" as const,
+      date: nextDates.mong1,
+      daysUntil: daysUntilVietnam(nextDates.mong1),
+      lunarInfo: nextDates.mong1Info,
+      formattedDate: formatVietnameseDate(nextDates.mong1),
+      culturalSignificance: getVietnameseCulturalSignificanceText(1),
+    };
+
+    const ramData = {
+      type: "ram" as const,
+      date: nextDates.ram,
+      daysUntil: daysUntilVietnam(nextDates.ram),
+      lunarInfo: nextDates.ramInfo,
+      formattedDate: formatVietnameseDate(nextDates.ram),
+      culturalSignificance: getVietnameseCulturalSignificanceText(15),
+    };
+
+    // Sort by date (earliest first)
+    const sortedDates = [mong1Data, ramData].sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+
+    return {
+      dates: sortedDates,
+      nextMong1: mong1Data,
+      nextRam: ramData,
+    };
+  }, []);
   const { data: upcomingEvents } = api.lunarEvents.getUpcoming.useQuery(
     {
       days: 30,
@@ -85,37 +119,8 @@ export function UpcomingImportantDates() {
     });
   }, [upcomingEvents, upcomingSharedEvents]);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{vietnameseText.nextImportantDates}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{vietnameseText.nextImportantDates}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-destructive">Lỗi khi tải ngày quan trọng</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!data) return null;
-
-  // Use the sorted dates array from the backend
-  const sortedDates = data.dates;
+  // Use the sorted dates array calculated client-side
+  const sortedDates = importantDates.dates;
 
   const handleDateClick = (
     date: Date,
@@ -282,7 +287,7 @@ export function UpcomingImportantDates() {
             <span>Ngày âm lịch quan trọng</span>
           </div>
           <div className="space-y-2">
-            {sortedDates.map((lunarDate) => {
+            {sortedDates.map((lunarDate: (typeof sortedDates)[number]) => {
               const isRam = lunarDate.type === "ram";
               return (
                 <div
