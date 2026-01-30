@@ -49,6 +49,7 @@ export interface VietnameseCalendarDay {
   isToday: boolean;
   isCurrentMonth: boolean;
   isImportant: boolean; // Mồng 1 (1st) or Rằm (15th) lunar day
+  importantDayType?: "mong1" | "ram15"; // Type of important day for styling
   events: VietnameseLunarEvent[];
   vietnameseHoliday?: string; // Vietnamese traditional holiday name
 }
@@ -553,12 +554,18 @@ export function generateVietnameseCalendarMonth(
       currentDate,
     );
 
+    const isImportant = lunarDate.day === 1 || lunarDate.day === 15;
     days.push({
       gregorianDate: new Date(currentDate),
       lunarDate,
       isToday: currentDate.toDateString() === today.toDateString(),
       isCurrentMonth: currentDate.getMonth() === month,
-      isImportant: lunarDate.day === 1 || lunarDate.day === 15,
+      isImportant,
+      importantDayType: isImportant
+        ? lunarDate.day === 1
+          ? "mong1"
+          : "ram15"
+        : undefined,
       events: dayEvents,
       vietnameseHoliday,
     });

@@ -5,7 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
-import { Calendar, Clock } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Sparkles,
+  Moon,
+  Share2,
+  Flower,
+  PartyPopper,
+  Star,
+} from "lucide-react";
 import { vietnameseText } from "@/lib/vietnamese-localization";
 import { useSession } from "next-auth/react";
 import {
@@ -105,7 +114,8 @@ export function UpcomingImportantDates() {
 
   if (!data) return null;
 
-  const { nextMong1, nextRam } = data;
+  // Use the sorted dates array from the backend
+  const sortedDates = data.dates;
 
   const handleDateClick = (
     date: Date,
@@ -171,173 +181,187 @@ export function UpcomingImportantDates() {
           {vietnameseText.nextImportantDates}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Upcoming Custom Events (Personal + Shared) */}
+      <CardContent className="space-y-5">
+        {/* Section: Upcoming Events */}
         {allUpcomingEvents.length > 0 && (
           <div className="space-y-3">
-            {allUpcomingEvents.slice(0, 5).map((event) => {
-              const daysUntil = Math.ceil(
-                (new Date(event.gregorianDate).getTime() -
-                  new Date().getTime()) /
-                  (1000 * 60 * 60 * 24),
-              );
-              const isShared = event.isShared;
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <span>Sự kiện sắp tới</span>
+            </div>
+            <div className="space-y-2">
+              {allUpcomingEvents.slice(0, 5).map((event) => {
+                const daysUntil = Math.ceil(
+                  (new Date(event.gregorianDate).getTime() -
+                    new Date().getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                const isShared = event.isShared;
+                const eventType = (event as { eventType?: string }).eventType;
+                const isAncestorWorship = eventType === "ancestor_worship";
+
+                // Get icon based on event type
+                const getEventIcon = () => {
+                  if (isShared) {
+                    return (
+                      <Share2 className="h-3.5 w-3.5 text-pink-600 sm:h-4 sm:w-4" />
+                    );
+                  }
+                  if (isAncestorWorship) {
+                    return (
+                      <Flower className="h-3.5 w-3.5 text-blue-600 sm:h-4 sm:w-4" />
+                    );
+                  }
+                  // Default personal event icon
+                  return (
+                    <PartyPopper className="h-3.5 w-3.5 text-blue-600 sm:h-4 sm:w-4" />
+                  );
+                };
+
+                // Get background color based on event type
+                const getIconBgColor = () => {
+                  if (isShared) return "bg-pink-100";
+                  return "bg-blue-100";
+                };
+
+                return (
+                  <div
+                    key={`${isShared ? "shared" : "personal"}-${event.id}`}
+                    className="group flex cursor-pointer items-center justify-between rounded-lg border border-slate-100 bg-white p-2 shadow-sm transition-all hover:border-slate-200 hover:shadow-md sm:p-3"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleEventClick(event)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleEventClick(event);
+                      }
+                    }}
+                  >
+                    <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                      <div
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8 ${getIconBgColor()}`}
+                      >
+                        {getEventIcon()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900 sm:text-base">
+                          {event.title}
+                        </p>
+                        <p className="text-xs text-slate-500 sm:text-sm">
+                          {event.lunarDateFormatted}
+                          {isShared && event.sharedByName && (
+                            <span className="ml-1 text-pink-600">
+                              · từ {event.sharedByName}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 sm:gap-1.5 sm:px-2.5 sm:py-1">
+                      <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                      <span>
+                        {daysUntil === 0
+                          ? "Hôm nay"
+                          : daysUntil === 1
+                            ? "Ngày mai"
+                            : `${daysUntil} ngày`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Section: Important Lunar Dates */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <Moon className="h-4 w-4 text-indigo-500" />
+            <span>Ngày âm lịch quan trọng</span>
+          </div>
+          <div className="space-y-2">
+            {sortedDates.map((lunarDate) => {
+              const isRam = lunarDate.type === "ram";
               return (
                 <div
-                  key={`${isShared ? "shared" : "personal"}-${event.id}`}
-                  className={`flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors ${
-                    isShared
-                      ? "bg-purple-50 hover:bg-purple-100"
-                      : "bg-blue-50 hover:bg-blue-100"
+                  key={lunarDate.type}
+                  className={`group flex cursor-pointer items-center justify-between rounded-lg border border-slate-100 bg-white p-2 shadow-sm transition-all hover:shadow-md sm:p-3 ${
+                    isRam ? "hover:border-purple-200" : "hover:border-amber-200"
                   }`}
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleEventClick(event)}
+                  onClick={() =>
+                    handleDateClick(lunarDate.date, lunarDate.lunarInfo)
+                  }
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      handleEventClick(event);
+                      handleDateClick(lunarDate.date, lunarDate.lunarInfo);
                     }
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-shrink-0 gap-1">
-                      <Badge
-                        variant="outline"
-                        className={
-                          isShared
-                            ? "border-purple-300 bg-purple-100 text-purple-800"
-                            : "border-blue-300 bg-blue-100 text-blue-800"
-                        }
-                      >
-                        {isShared ? "Chia sẻ" : "Sự kiện"}
-                      </Badge>
+                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <div
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8 ${
+                        isRam ? "bg-purple-100" : "bg-amber-100"
+                      }`}
+                    >
+                      {lunarDate.type === "mong1" ? (
+                        <Star
+                          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
+                            isRam ? "text-purple-600" : "text-amber-600"
+                          }`}
+                        />
+                      ) : (
+                        <Moon
+                          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
+                            isRam ? "text-purple-600" : "text-amber-600"
+                          }`}
+                        />
+                      )}
                     </div>
-                    <div>
-                      <p
-                        className={`font-medium ${isShared ? "text-purple-900" : "text-blue-900"}`}
-                      >
-                        {event.title}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-900 sm:text-base">
+                        {lunarDate.type === "mong1" ? "Mồng 1" : "Rằm"}{" "}
+                        {lunarDate.lunarInfo.monthName}
                       </p>
-                      <p
-                        className={`text-sm ${isShared ? "text-purple-600" : "text-blue-600"}`}
-                      >
-                        {event.lunarDateFormatted}
-                        {isShared && event.sharedByName && (
-                          <span className="ml-1 text-purple-500">
-                            · từ {event.sharedByName}
-                          </span>
-                        )}
+                      <p className="text-xs text-slate-500 sm:text-sm">
+                        {lunarDate.formattedDate}
                       </p>
                     </div>
                   </div>
                   <div
-                    className={`flex items-center gap-1 text-sm ${isShared ? "text-purple-700" : "text-blue-700"}`}
+                    className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium sm:gap-1.5 sm:px-2.5 sm:py-1 ${
+                      isRam
+                        ? "bg-purple-50 text-purple-700"
+                        : "bg-amber-50 text-amber-700"
+                    }`}
                   >
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     <span>
-                      {daysUntil === 0
-                        ? "Hôm nay"
-                        : daysUntil === 1
-                          ? "Ngày mai"
-                          : `còn ${daysUntil} ngày`}
+                      {lunarDate.daysUntil === 0
+                        ? vietnameseText.today
+                        : lunarDate.daysUntil === 1
+                          ? vietnameseText.tomorrow
+                          : `${lunarDate.daysUntil} ngày`}
                     </span>
                   </div>
                 </div>
               );
             })}
           </div>
-        )}
-
-        {/* Next Mồng 1 */}
-        <div
-          className="hover:bg-muted bg-muted/50 cursor-pointer rounded-lg p-3 transition-colors"
-          role="button"
-          tabIndex={0}
-          onClick={() => handleDateClick(nextMong1.date, nextMong1.lunarInfo)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleDateClick(nextMong1.date, nextMong1.lunarInfo);
-            }
-          }}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-3">
-              <Badge
-                variant="outline"
-                className="mt-0.5 shrink-0 border-blue-200 bg-blue-50 text-blue-700"
-              >
-                {vietnameseText.mong1}
-              </Badge>
-              <div className="min-w-0">
-                <p className="leading-tight font-medium">
-                  {nextMong1.lunarInfo.monthName}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {nextMong1.formattedDate}
-                </p>
-              </div>
-            </div>
-            <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-sm">
-              <Clock className="h-4 w-4" />
-              <span>
-                {nextMong1.daysUntil === 0
-                  ? vietnameseText.today
-                  : nextMong1.daysUntil === 1
-                    ? vietnameseText.tomorrow
-                    : `${nextMong1.daysUntil} ngày`}
-              </span>
-            </div>
-          </div>
         </div>
 
-        {/* Next Rằm */}
-        <div
-          className="hover:bg-muted bg-muted/50 cursor-pointer rounded-lg p-3 transition-colors"
-          role="button"
-          tabIndex={0}
-          onClick={() => handleDateClick(nextRam.date, nextRam.lunarInfo)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleDateClick(nextRam.date, nextRam.lunarInfo);
-            }
-          }}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-3">
-              <Badge
-                variant="outline"
-                className="mt-0.5 shrink-0 border-orange-200 bg-orange-50 text-orange-700"
-              >
-                {vietnameseText.ram}
-              </Badge>
-              <div className="min-w-0">
-                <p className="leading-tight font-medium">
-                  {nextRam.lunarInfo.monthName}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {nextRam.formattedDate}
-                </p>
-              </div>
-            </div>
-            <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-sm">
-              <Clock className="h-4 w-4" />
-              <span>
-                {nextRam.daysUntil === 0
-                  ? vietnameseText.today
-                  : nextRam.daysUntil === 1
-                    ? vietnameseText.tomorrow
-                    : `${nextRam.daysUntil} ngày`}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-muted-foreground space-y-1 border-t pt-2 text-center text-xs">
-          <p>Mồng 1 là ngày trăng non, Rằm là ngày trăng tròn</p>
-          <p className="text-blue-600">
+        {/* Footer Info */}
+        <div className="rounded-lg bg-slate-50 p-3 text-center">
+          <p className="text-xs text-slate-600">
+            <span className="font-medium text-amber-700">Mồng 1</span> là ngày
+            trăng non, <span className="font-medium text-amber-700">Rằm</span>{" "}
+            là ngày trăng tròn
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
             Cả hai ngày đều quan trọng trong văn hóa Việt Nam
           </p>
         </div>
