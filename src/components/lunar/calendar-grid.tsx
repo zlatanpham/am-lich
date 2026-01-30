@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { vietnameseText } from "@/lib/vietnamese-localization";
+import {
+  generateVietnameseCalendarMonth,
+  getVietnameseCanChiYear,
+  lunarToGregorian,
+  type VietnameseCalendarDay,
+} from "@/lib/lunar-calendar";
 import {
   DateDetailDialog,
   type CalendarDayFromAPI,
@@ -19,6 +24,18 @@ interface CalendarGridProps {
   className?: string;
   showEvents?: boolean;
   showSharedEvents?: boolean;
+}
+
+// Extended day type with events
+interface CalendarDayWithEvents extends Omit<VietnameseCalendarDay, "events"> {
+  events?: Array<{
+    id: string;
+    title: string;
+    date: Date;
+    eventType?: string;
+    ancestorName?: string | null;
+    ancestorPrecall?: string | null;
+  }>;
 }
 
 export function CalendarGrid({
@@ -35,11 +52,27 @@ export function CalendarGrid({
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const { data, isLoading, error } =
-    api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
-      year,
-      month,
-    });
+  // Generate calendar client-side (no API call needed!)
+  const calendarData = useMemo(() => {
+    const calendarMonth = generateVietnameseCalendarMonth(year, month);
+    const zodiacYear = getVietnameseCanChiYear(year);
+
+    return {
+      ...calendarMonth,
+      zodiacYear,
+      vietnameseMonthName: calendarMonth.lunarMonthInfo.vietnameseMonthName,
+    };
+  }, [year, month]);
+
+  // Fetch user lunar events separately (only when needed)
+  const { data: userEvents, isLoading: isLoadingEvents } =
+    api.lunarEvents.getAll.useQuery(
+      { includeInactive: false },
+      {
+        enabled: showEvents && !!session?.user,
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      },
+    );
 
   // Fetch shared events for the calendar (only when user is signed in)
   const { data: sharedEventsData } =
@@ -48,33 +81,129 @@ export function CalendarGrid({
       { enabled: showSharedEvents && !!session?.user },
     );
 
-  // Group shared events by date
-  const sharedEventsByDate = new Map<string, typeof sharedEventsData>();
-  if (sharedEventsData) {
-    for (const event of sharedEventsData) {
-      const dateKey = event.gregorianDate.toISOString().split("T")[0];
-      if (!sharedEventsByDate.has(dateKey!)) {
-        sharedEventsByDate.set(dateKey!, []);
-      }
-      sharedEventsByDate.get(dateKey!)!.push(event);
+  // Convert lunar events to gregorian dates and merge with calendar days
+  const daysWithEvents = useMemo(() => {
+    if (!userEvents || userEvents.length === 0) {
+      return calendarData.days.map((day) => ({
+        ...day,
+        events: undefined,
+      })) as CalendarDayWithEvents[];
     }
-  }
 
-  // Prefetch adjacent months for smooth navigation
-  const prevMonth = month === 0 ? 11 : month - 1;
-  const prevYear = month === 0 ? year - 1 : year;
-  const nextMonth = month === 11 ? 0 : month + 1;
-  const nextYear = month === 11 ? year + 1 : year;
+    // Get start and end of the month to filter events
+    const startOfMonth = new Date(year, month, 1);
+    const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
 
-  api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
-    year: prevYear,
-    month: prevMonth,
-  });
+    // Convert lunar events to gregorian dates and filter for this month
+    const lunarEventsForMonth: Array<{
+      id: string;
+      title: string;
+      date: Date;
+      eventType?: string;
+      ancestorName?: string | null;
+      ancestorPrecall?: string | null;
+    }> = [];
 
-  api.lunarCalendar.getVietnameseCalendarMonth.useQuery({
-    year: nextYear,
-    month: nextMonth,
-  });
+    for (const lunarEvent of userEvents) {
+      try {
+        if (lunarEvent.isRecurring) {
+          // For recurring events, check both current year and previous year
+          // because lunar months can span across Gregorian years
+          const yearsToCheck = [year - 1, year, year + 1];
+
+          for (const eventYear of yearsToCheck) {
+            try {
+              const gregorianDate = lunarToGregorian(
+                eventYear,
+                lunarEvent.lunarMonth,
+                lunarEvent.lunarDay,
+              );
+
+              // Check if the event falls within the current month
+              if (
+                gregorianDate >= startOfMonth &&
+                gregorianDate <= endOfMonth
+              ) {
+                // Avoid duplicates by checking if we already added this event for this date
+                const existingEvent = lunarEventsForMonth.find(
+                  (e) =>
+                    e.id === lunarEvent.id &&
+                    e.date.toDateString() === gregorianDate.toDateString(),
+                );
+
+                if (!existingEvent) {
+                  lunarEventsForMonth.push({
+                    id: lunarEvent.id,
+                    title: lunarEvent.title,
+                    date: gregorianDate,
+                    eventType: lunarEvent.eventType,
+                    ancestorName: lunarEvent.ancestorName,
+                    ancestorPrecall: lunarEvent.ancestorPrecall,
+                  });
+                }
+              }
+            } catch {
+              // Skip invalid dates for this year
+              continue;
+            }
+          }
+        } else {
+          // For non-recurring events, only check the specific year
+          const gregorianDate = lunarToGregorian(
+            lunarEvent.lunarYear,
+            lunarEvent.lunarMonth,
+            lunarEvent.lunarDay,
+          );
+
+          // Check if the event falls within the current month
+          if (gregorianDate >= startOfMonth && gregorianDate <= endOfMonth) {
+            lunarEventsForMonth.push({
+              id: lunarEvent.id,
+              title: lunarEvent.title,
+              date: gregorianDate,
+              eventType: lunarEvent.eventType,
+              ancestorName: lunarEvent.ancestorName,
+              ancestorPrecall: lunarEvent.ancestorPrecall,
+            });
+          }
+        }
+      } catch {
+        // Skip invalid lunar dates
+        continue;
+      }
+    }
+
+    // Sort events by date
+    lunarEventsForMonth.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Merge events into calendar days
+    return calendarData.days.map((day) => {
+      const dayEvents = lunarEventsForMonth.filter((event) => {
+        const eventDate = new Date(event.date);
+        return eventDate.toDateString() === day.gregorianDate.toDateString();
+      });
+
+      return {
+        ...day,
+        events: dayEvents.length > 0 ? dayEvents : undefined,
+      };
+    });
+  }, [calendarData.days, userEvents, year, month]);
+
+  // Group shared events by date
+  const sharedEventsByDate = useMemo(() => {
+    const map = new Map<string, typeof sharedEventsData>();
+    if (sharedEventsData) {
+      for (const event of sharedEventsData) {
+        const dateKey = event.gregorianDate.toISOString().split("T")[0];
+        if (!map.has(dateKey!)) {
+          map.set(dateKey!, []);
+        }
+        map.get(dateKey!)!.push(event);
+      }
+    }
+    return map;
+  }, [sharedEventsData]);
 
   const navigateMonth = (direction: "prev" | "next") => {
     setCurrentDate(new Date(year, month + (direction === "next" ? 1 : -1), 1));
@@ -84,14 +213,24 @@ export function CalendarGrid({
     setCurrentDate(new Date());
   };
 
-  const handleDayClick = (day: CalendarDayFromAPI) => {
-    setSelectedDay(day);
+  const handleDayClick = (day: CalendarDayWithEvents) => {
+    // Convert to the format expected by DateDetailDialog
+    const dialogDay: CalendarDayFromAPI = {
+      gregorianDate: day.gregorianDate,
+      lunarDate: day.lunarDate,
+      isToday: day.isToday,
+      isCurrentMonth: day.isCurrentMonth,
+      isImportant: day.isImportant,
+      events: day.events,
+      vietnameseHoliday: day.vietnameseHoliday,
+    };
+    setSelectedDay(dialogDay);
     setIsDialogOpen(true);
   };
 
   const handleDayKeyDown = (
     e: React.KeyboardEvent,
-    day: CalendarDayFromAPI,
+    day: CalendarDayWithEvents,
   ) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -99,47 +238,7 @@ export function CalendarGrid({
     }
   };
 
-  if (isLoading && !data) {
-    // Only show full skeleton on initial load, not on navigation
-    return (
-      <Card className={className}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-32" />
-            <div className="flex gap-2">
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-16 w-16" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 42 }, (_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle>{vietnameseText.lunarCalendar}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-destructive">Lỗi khi tải lịch âm</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!data?.days || !data.lunarMonthInfo) return null;
-
-  const { zodiacYear } = data;
+  const { zodiacYear } = calendarData;
   const weekDays = vietnameseText.weekdaysShort;
 
   return (
@@ -153,7 +252,7 @@ export function CalendarGrid({
             <span className="sm:hidden">
               {vietnameseText.months[month]} {year}
             </span>
-            {isLoading && (
+            {isLoadingEvents && (
               <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
             )}
           </CardTitle>
@@ -194,8 +293,9 @@ export function CalendarGrid({
         </div>
         <div className="text-muted-foreground space-y-1 text-xs sm:text-sm">
           <p className="truncate">
-            Âm lịch: {data.lunarMonthInfo?.vietnameseMonthName || "Đang tải..."}{" "}
-            năm {data.lunarMonthInfo?.lunarYear || year}
+            Âm lịch:{" "}
+            {calendarData.lunarMonthInfo?.vietnameseMonthName || "Đang tải..."}{" "}
+            năm {calendarData.lunarMonthInfo?.lunarYear || year}
           </p>
           <p className="truncate">Năm: {zodiacYear || "Đang tải..."}</p>
         </div>
@@ -215,7 +315,7 @@ export function CalendarGrid({
 
         {/* Calendar days */}
         <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {data.days.map((day, index) => (
+          {daysWithEvents.map((day, index) => (
             <div
               key={`day-${day.gregorianDate.getTime()}-${index}`}
               role="button"
