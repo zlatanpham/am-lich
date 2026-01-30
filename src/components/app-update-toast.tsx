@@ -72,11 +72,9 @@ export function AppUpdateToast() {
       );
     }
 
-    // Cleanup toast when status changes
+    // Cleanup toast when component unmounts
     return () => {
-      if (status !== "available") {
-        toast.dismiss("app-update-notification");
-      }
+      toast.dismiss("app-update-notification");
     };
   }, [status, updateInfo, applyUpdate, dismissUpdate]);
 
