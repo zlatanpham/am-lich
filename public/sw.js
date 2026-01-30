@@ -3,6 +3,9 @@ const CACHE_NAME = "lunar-calendar-v1";
 const STATIC_CACHE = "lunar-calendar-static-v1";
 const DYNAMIC_CACHE = "lunar-calendar-dynamic-v1";
 
+// Current version - will be replaced during build
+let CURRENT_VERSION = "1.0.0";
+
 // Files to cache for offline functionality
 const STATIC_FILES = [
   "/",
@@ -11,13 +14,64 @@ const STATIC_FILES = [
   // Add core CSS and JS files here when built
 ];
 
+// Fetch current version from version.json
+async function fetchCurrentVersion() {
+  try {
+    const response = await fetch("/version.json", {
+      cache: "no-cache",
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.version || "1.0.0";
+    }
+  } catch (error) {
+    console.log("Failed to fetch version:", error);
+  }
+  return "1.0.0";
+}
+
+// Check if there's a new version available
+async function checkForUpdates() {
+  try {
+    const newVersion = await fetchCurrentVersion();
+    if (newVersion !== CURRENT_VERSION) {
+      console.log(
+        `New version available: ${newVersion} (current: ${CURRENT_VERSION})`,
+      );
+      return newVersion;
+    }
+  } catch (error) {
+    console.log("Error checking for updates:", error);
+  }
+  return null;
+}
+
+// Notify all clients about update
+async function notifyClientsAboutUpdate(newVersion) {
+  const clients = await self.clients.matchAll({ type: "window" });
+  clients.forEach((client) => {
+    client.postMessage({
+      type: "UPDATE_AVAILABLE",
+      version: newVersion,
+      currentVersion: CURRENT_VERSION,
+    });
+  });
+}
+
 // Install event - cache static resources
 self.addEventListener("install", (event) => {
   console.log("Service Worker installing...");
 
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
+    fetchCurrentVersion()
+      .then((version) => {
+        CURRENT_VERSION = version;
+        console.log("Service Worker version:", CURRENT_VERSION);
+        return caches.open(STATIC_CACHE);
+      })
       .then((cache) => {
         console.log("Caching static files");
         return cache.addAll(STATIC_FILES);
@@ -32,7 +86,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and check for updates
 self.addEventListener("activate", (event) => {
   console.log("Service Worker activating...");
 
@@ -54,6 +108,15 @@ self.addEventListener("activate", (event) => {
       .then(() => {
         console.log("Service Worker activated");
         return self.clients.claim();
+      })
+      .then(() => {
+        // Check for updates after activation
+        return checkForUpdates();
+      })
+      .then((newVersion) => {
+        if (newVersion) {
+          return notifyClientsAboutUpdate(newVersion);
+        }
       }),
   );
 });
@@ -69,6 +132,31 @@ self.addEventListener("fetch", (event) => {
 
   // Skip external requests
   if (!request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Handle version.json specially - always fetch fresh
+  if (request.url.includes("/version.json")) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" })
+        .then((response) => {
+          // Check if version changed after fetching
+          response
+            .clone()
+            .json()
+            .then((data) => {
+              if (data.version && data.version !== CURRENT_VERSION) {
+                notifyClientsAboutUpdate(data.version);
+              }
+            })
+            .catch(() => {});
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache if network fails
+          return caches.match(request);
+        }),
+    );
     return;
   }
 
@@ -295,6 +383,27 @@ async function syncPendingEvents() {
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+
+  // Handle manual version check
+  if (event.data && event.data.type === "CHECK_FOR_UPDATES") {
+    event.waitUntil(
+      checkForUpdates().then((newVersion) => {
+        if (newVersion) {
+          notifyClientsAboutUpdate(newVersion);
+        } else {
+          // Notify that no update is available
+          self.clients.matchAll({ type: "window" }).then((clients) => {
+            clients.forEach((client) => {
+              client.postMessage({
+                type: "NO_UPDATE_AVAILABLE",
+                currentVersion: CURRENT_VERSION,
+              });
+            });
+          });
+        }
+      }),
+    );
   }
 });
 

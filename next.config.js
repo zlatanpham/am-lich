@@ -3,8 +3,32 @@
  * for Docker builds.
  */
 import "./src/env.js";
+import { writeFileSync } from "fs";
+import { join } from "path";
+
+const buildTimestamp = Date.now();
+const buildVersion = `${buildTimestamp}`;
+
+// Write version to public folder for service worker access
+try {
+  writeFileSync(
+    join(process.cwd(), "public", "version.json"),
+    JSON.stringify({
+      version: buildVersion,
+      timestamp: buildTimestamp,
+      buildDate: new Date().toISOString(),
+    }),
+  );
+} catch (error) {
+  console.warn("Failed to write version.json:", error);
+}
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: buildVersion,
+    NEXT_PUBLIC_BUILD_TIMESTAMP: buildTimestamp.toString(),
+  },
+};
 
 export default config;
