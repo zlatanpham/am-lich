@@ -174,59 +174,6 @@ model LunarEvent {
   @@index([lunarYear, lunarMonth, lunarDay])
 }
 
-model VietnameseHoliday {
-  id                   String   @id @default(cuid())
-  name                 String   @db.VarChar(255)
-  lunarMonth           Int?     @db.SmallInt
-  lunarDay             Int?     @db.SmallInt
-  gregorianMonth       Int?     @db.SmallInt
-  gregorianDay         Int?     @db.SmallInt
-  description          String?
-  category             String   @db.VarChar(50)
-  culturalSignificance String?
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  @@index([lunarMonth, lunarDay])
-  @@index([gregorianMonth, gregorianDay])
-  @@index([category])
-}
-
-model VietnameseZodiacInfo {
-  id              String   @id @default(cuid())
-  year            Int      @unique
-  vietnameseYear  String   @db.VarChar(50)
-  canChi          String   @db.VarChar(20)
-  animalName      String   @db.VarChar(50)
-  element         String   @db.VarChar(20)
-  characteristics String?
-  luckyNumbers    String?  @db.VarChar(100)
-  luckyColors     String?  @db.VarChar(100)
-  culturalNotes   String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([year])
-}
-
-model VietnameseCulturalTip {
-  id              String   @id @default(cuid())
-  lunarDay        Int      @db.SmallInt
-  tipCategory     String   @db.VarChar(50)
-  title           String   @db.VarChar(255)
-  content         String
-  culturalContext String?
-  isGoodDay       Boolean  @default(true)
-  priority        Int      @default(1) @db.SmallInt
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([lunarDay, tipCategory])
-  @@index([isGoodDay, priority])
-}
-
 enum EventShareStatus {
   PENDING
   ACCEPTED
