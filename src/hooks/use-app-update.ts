@@ -51,118 +51,80 @@ export function useAppUpdate(): UseAppUpdateReturn {
     return false;
   }, []);
 
-  // Check for updates
+  // Check for updates by comparing client bundle version with server version
+  // This always fetches version.json directly and compares with NEXT_PUBLIC_APP_VERSION
+  // baked into the JS bundle, ensuring accurate detection even when SW updates transparently
   const checkForUpdates = useCallback(() => {
     if (typeof window === "undefined") return;
 
     setStatus("checking");
 
-    if (registration?.active) {
-      // Send message to service worker to check for updates
-      registration.active.postMessage({ type: "CHECK_FOR_UPDATES" });
-    } else {
-      // Fallback: manually check version.json
-      void fetch("/version.json", { cache: "no-store" })
-        .then((res) => res.json())
-        .then((data) => {
-          const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
-          if (data.version && data.version !== currentVersion) {
-            const info: UpdateInfo = {
-              version: data.version,
-              currentVersion: currentVersion || "unknown",
-            };
-            setUpdateInfo(info);
+    const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
 
-            if (!isUpdateDismissed()) {
-              setStatus("available");
-            } else {
-              setStatus("dismissed");
-            }
+    // Always fetch version.json directly and compare with client bundle version
+    void fetch("/version.json", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { version?: string }) => {
+        if (data.version && data.version !== currentVersion) {
+          const info: UpdateInfo = {
+            version: data.version,
+            currentVersion: currentVersion || "unknown",
+          };
+          setUpdateInfo(info);
+
+          if (!isUpdateDismissed()) {
+            setStatus("available");
           } else {
-            setStatus("not-available");
+            setStatus("dismissed");
           }
-        })
-        .catch(() => {
-          setStatus("not-available");
-        });
-    }
-  }, [registration, isUpdateDismissed]);
-
-  // Listen for service worker messages
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "UPDATE_AVAILABLE") {
-        const info: UpdateInfo = {
-          version: event.data.version,
-          currentVersion: event.data.currentVersion,
-        };
-        setUpdateInfo(info);
-
-        // Only show as available if not dismissed
-        if (!isUpdateDismissed()) {
-          setStatus("available");
         } else {
-          setStatus("dismissed");
+          setStatus("not-available");
         }
-      } else if (event.data?.type === "NO_UPDATE_AVAILABLE") {
+      })
+      .catch(() => {
         setStatus("not-available");
-        setUpdateInfo(null);
-      }
-    };
-
-    navigator.serviceWorker?.addEventListener("message", handleMessage);
-
-    return () => {
-      navigator.serviceWorker?.removeEventListener("message", handleMessage);
-    };
+      });
   }, [isUpdateDismissed]);
 
-  // Get service worker registration on mount
+  // Get service worker registration on mount and check for updates
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (hasCheckedOnMount.current) return;
 
+    hasCheckedOnMount.current = true;
+
+    // Get SW registration for applyUpdate functionality
     if ("serviceWorker" in navigator) {
       void navigator.serviceWorker.ready.then((reg) => {
         setRegistration(reg);
-        hasCheckedOnMount.current = true;
-
-        // Check for updates on mount
-        setStatus("checking");
-
-        if (reg.active) {
-          // Send message to service worker to check for updates
-          reg.active.postMessage({ type: "CHECK_FOR_UPDATES" });
-        } else {
-          // Fallback: manually check version.json
-          void fetch("/version.json", { cache: "no-store" })
-            .then((res) => res.json())
-            .then((data) => {
-              const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
-              if (data.version && data.version !== currentVersion) {
-                const info: UpdateInfo = {
-                  version: data.version,
-                  currentVersion: currentVersion || "unknown",
-                };
-                setUpdateInfo(info);
-
-                if (!isUpdateDismissed()) {
-                  setStatus("available");
-                } else {
-                  setStatus("dismissed");
-                }
-              } else {
-                setStatus("not-available");
-              }
-            })
-            .catch(() => {
-              setStatus("not-available");
-            });
-        }
       });
     }
+
+    // Check for updates on mount by fetching version.json directly
+    const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+
+    void fetch("/version.json", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { version?: string }) => {
+        if (data.version && data.version !== currentVersion) {
+          const info: UpdateInfo = {
+            version: data.version,
+            currentVersion: currentVersion || "unknown",
+          };
+          setUpdateInfo(info);
+
+          if (!isUpdateDismissed()) {
+            setStatus("available");
+          } else {
+            setStatus("dismissed");
+          }
+        } else {
+          setStatus("not-available");
+        }
+      })
+      .catch(() => {
+        setStatus("not-available");
+      });
   }, [isUpdateDismissed]);
 
   // Check for updates when app comes back from background
