@@ -11,7 +11,7 @@ export function AppUpdateToast() {
 
   useEffect(() => {
     if (status === "available" && updateInfo) {
-      // Show update notification toast
+      // Show update notification toast with unique ID - Sonner will not create duplicates
       toast.custom(
         (t) => (
           <div className="bg-card w-full max-w-sm rounded-lg border p-4 shadow-lg">
@@ -71,11 +71,7 @@ export function AppUpdateToast() {
         },
       );
     }
-
-    // Cleanup toast when component unmounts
-    return () => {
-      toast.dismiss("app-update-notification");
-    };
+    // NO cleanup function - toast persists until user action (close button, update button, or later button)
   }, [status, updateInfo, applyUpdate, dismissUpdate]);
 
   // This component doesn't render anything directly
