@@ -239,22 +239,57 @@ async function getSystemEventNotifications(
 ): Promise<NotificationItem[]> {
   const notifications: NotificationItem[] = [];
 
+  // DEBUG: Log timezone info
+  const utcDate = today.toISOString();
+  const vietnamFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const vietnamDateStr = vietnamFormatter.format(today);
+  console.log(`[SYSTEM_EVENTS] Today (input param): ${utcDate}`);
+  console.log(`[SYSTEM_EVENTS] Today in Vietnam TZ: ${vietnamDateStr}`);
+  console.log(
+    `[SYSTEM_EVENTS] Today.getTime(): ${today.getTime()} (${new Date(today.getTime()).toISOString()})`,
+  );
+
   // Find next Mồng 1 and Rằm
   const nextMong1 = await findNextMong1(today);
   const nextRam = await findNextRam(today);
+
+  // DEBUG: Log found dates
+  console.log(
+    `[SYSTEM_EVENTS] Next Mồng 1: ${nextMong1 ? nextMong1.date.toISOString() : "null"} (month ${nextMong1?.lunarMonth})`,
+  );
+  console.log(
+    `[SYSTEM_EVENTS] Next Rằm: ${nextRam ? nextRam.date.toISOString() : "null"} (month ${nextRam?.lunarMonth})`,
+  );
 
   // Check Mồng 1 (notify 1 day before)
   if (nextMong1) {
     const daysUntil = Math.ceil(
       (nextMong1.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
+    console.log(
+      `[SYSTEM_EVENTS] Mồng 1 daysUntil: ${daysUntil} (target: ${nextMong1.date.getTime()}, today: ${today.getTime()}, diff: ${nextMong1.date.getTime() - today.getTime()}ms)`,
+    );
     if (daysUntil === 1) {
+      console.log(`[SYSTEM_EVENTS] ✓ Mồng 1 notification WILL be sent`);
       notifications.push({
         title: "🌑 Mồng 1 sắp tới",
         body: `Ngày mai là Mồng 1 tháng ${nextMong1.lunarMonth} Âm lịch`,
         eventType: "system",
         url: "/calendar",
       });
+    } else {
+      console.log(
+        `[SYSTEM_EVENTS] ✗ Mồng 1 notification skipped (daysUntil=${daysUntil}, need 1)`,
+      );
     }
   }
 
@@ -263,16 +298,27 @@ async function getSystemEventNotifications(
     const daysUntil = Math.ceil(
       (nextRam.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
+    console.log(
+      `[SYSTEM_EVENTS] Rằm daysUntil: ${daysUntil} (target: ${nextRam.date.getTime()}, today: ${today.getTime()}, diff: ${nextRam.date.getTime() - today.getTime()}ms)`,
+    );
     if (daysUntil === 1) {
+      console.log(`[SYSTEM_EVENTS] ✓ Rằm notification WILL be sent`);
       notifications.push({
         title: "🌕 Rằm sắp tới",
         body: `Ngày mai là Rằm tháng ${nextRam.lunarMonth} Âm lịch`,
         eventType: "system",
         url: "/calendar",
       });
+    } else {
+      console.log(
+        `[SYSTEM_EVENTS] ✗ Rằm notification skipped (daysUntil=${daysUntil}, need 1)`,
+      );
     }
   }
 
+  console.log(
+    `[SYSTEM_EVENTS] Total system notifications: ${notifications.length}`,
+  );
   return notifications;
 }
 
@@ -285,11 +331,21 @@ async function findNextMong1(
   const currentLunar = gregorianToLunar(fromDate);
   const currentYear = fromDate.getFullYear();
 
+  console.log(
+    `[findNextMong1] fromDate: ${fromDate.toISOString()}, currentLunar: day=${currentLunar.day}, month=${currentLunar.month}, year=${currentLunar.year}`,
+  );
+
   // Check remaining months of current year
   for (let month = currentLunar.month; month <= 12; month++) {
     try {
       const gregorianDate = lunarToGregorian(currentYear, month, 1);
+      console.log(
+        `[findNextMong1] Checking lunar month ${month}: gregorian=${gregorianDate.toISOString()}, >= fromDate? ${gregorianDate >= fromDate}`,
+      );
       if (gregorianDate >= fromDate) {
+        console.log(
+          `[findNextMong1] Found: lunar month ${month} = ${gregorianDate.toISOString()}`,
+        );
         return { date: gregorianDate, lunarMonth: month };
       }
     } catch {
@@ -301,7 +357,13 @@ async function findNextMong1(
   for (let month = 1; month <= 3; month++) {
     try {
       const gregorianDate = lunarToGregorian(currentYear + 1, month, 1);
+      console.log(
+        `[findNextMong1] Checking lunar month ${month} (next year): gregorian=${gregorianDate.toISOString()}, >= fromDate? ${gregorianDate >= fromDate}`,
+      );
       if (gregorianDate >= fromDate) {
+        console.log(
+          `[findNextMong1] Found: lunar month ${month} (next year) = ${gregorianDate.toISOString()}`,
+        );
         return { date: gregorianDate, lunarMonth: month };
       }
     } catch {
@@ -309,6 +371,7 @@ async function findNextMong1(
     }
   }
 
+  console.log(`[findNextMong1] No Mồng 1 found`);
   return null;
 }
 
@@ -321,11 +384,21 @@ async function findNextRam(
   const currentLunar = gregorianToLunar(fromDate);
   const currentYear = fromDate.getFullYear();
 
+  console.log(
+    `[findNextRam] fromDate: ${fromDate.toISOString()}, currentLunar: day=${currentLunar.day}, month=${currentLunar.month}, year=${currentLunar.year}`,
+  );
+
   // Check remaining months of current year
   for (let month = currentLunar.month; month <= 12; month++) {
     try {
       const gregorianDate = lunarToGregorian(currentYear, month, 15);
+      console.log(
+        `[findNextRam] Checking lunar month ${month}: gregorian=${gregorianDate.toISOString()}, >= fromDate? ${gregorianDate >= fromDate}`,
+      );
       if (gregorianDate >= fromDate) {
+        console.log(
+          `[findNextRam] Found: lunar month ${month} = ${gregorianDate.toISOString()}`,
+        );
         return { date: gregorianDate, lunarMonth: month };
       }
     } catch {
@@ -337,7 +410,13 @@ async function findNextRam(
   for (let month = 1; month <= 3; month++) {
     try {
       const gregorianDate = lunarToGregorian(currentYear + 1, month, 15);
+      console.log(
+        `[findNextRam] Checking lunar month ${month} (next year): gregorian=${gregorianDate.toISOString()}, >= fromDate? ${gregorianDate >= fromDate}`,
+      );
       if (gregorianDate >= fromDate) {
+        console.log(
+          `[findNextRam] Found: lunar month ${month} (next year) = ${gregorianDate.toISOString()}`,
+        );
         return { date: gregorianDate, lunarMonth: month };
       }
     } catch {
@@ -345,6 +424,7 @@ async function findNextRam(
     }
   }
 
+  console.log(`[findNextRam] No Rằm found`);
   return null;
 }
 

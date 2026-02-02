@@ -50,9 +50,20 @@ export async function GET(request: Request) {
     }
 
     const now = new Date();
+    const vietnamFormatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
     console.log(
-      `[CRON] Starting daily notification job at ${now.toISOString()}`,
+      `[CRON] Starting daily notification job at ${now.toISOString()} (UTC)`,
     );
+    console.log(`[CRON] Vietnam time: ${vietnamFormatter.format(now)}`);
 
     // Check for force mode query parameter (for testing)
     const { searchParams } = new URL(request.url);
