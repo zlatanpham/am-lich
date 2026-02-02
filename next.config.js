@@ -11,14 +11,16 @@ const buildVersion = `${buildTimestamp}`;
 
 // Write version to public folder for service worker access
 try {
+  const versionData = {
+    version: buildVersion,
+    timestamp: buildTimestamp,
+    buildDate: new Date().toISOString(),
+  };
   writeFileSync(
     join(process.cwd(), "public", "version.json"),
-    JSON.stringify({
-      version: buildVersion,
-      timestamp: buildTimestamp,
-      buildDate: new Date().toISOString(),
-    }),
+    JSON.stringify(versionData),
   );
+  console.log(`[Build] Generated version.json: ${JSON.stringify(versionData)}`);
 } catch (error) {
   console.warn("Failed to write version.json:", error);
 }

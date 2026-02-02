@@ -60,12 +60,24 @@ export function useAppUpdate(): UseAppUpdateReturn {
     setStatus("checking");
 
     const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+    console.log(
+      "[AppUpdate] Visibility check - Client version:",
+      currentVersion,
+    );
 
     // Always fetch version.json directly and compare with client bundle version
     void fetch("/version.json", { cache: "no-store" })
       .then((res) => res.json())
       .then((data: { version?: string }) => {
+        console.log(
+          "[AppUpdate] Visibility check - Server version.json:",
+          data,
+        );
+
         if (data.version && data.version !== currentVersion) {
+          console.log(
+            `[AppUpdate] Version mismatch: ${currentVersion} -> ${data.version}`,
+          );
           const info: UpdateInfo = {
             version: data.version,
             currentVersion: currentVersion || "unknown",
@@ -73,20 +85,25 @@ export function useAppUpdate(): UseAppUpdateReturn {
           setUpdateInfo(info);
 
           if (!isUpdateDismissed()) {
+            console.log("[AppUpdate] Update available, showing notification");
             setStatus("available");
           } else {
+            console.log("[AppUpdate] Update available but dismissed by user");
             setStatus("dismissed");
           }
         } else {
+          console.log("[AppUpdate] Versions match, no update needed");
           setStatus("not-available");
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("[AppUpdate] Failed to fetch version.json:", error);
         setStatus("not-available");
       });
   }, [isUpdateDismissed]);
 
   // Get service worker registration on mount and check for updates
+  // On version mismatch, automatically clear caches and reload to prevent stale JS errors
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (hasCheckedOnMount.current) return;
@@ -102,30 +119,43 @@ export function useAppUpdate(): UseAppUpdateReturn {
 
     // Check for updates on mount by fetching version.json directly
     const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+    console.log("[AppUpdate] Mount check - Client version:", currentVersion);
 
     void fetch("/version.json", { cache: "no-store" })
       .then((res) => res.json())
-      .then((data: { version?: string }) => {
-        if (data.version && data.version !== currentVersion) {
-          const info: UpdateInfo = {
-            version: data.version,
-            currentVersion: currentVersion || "unknown",
-          };
-          setUpdateInfo(info);
+      .then(async (data: { version?: string }) => {
+        console.log("[AppUpdate] Server version.json:", data);
 
-          if (!isUpdateDismissed()) {
-            setStatus("available");
-          } else {
-            setStatus("dismissed");
+        if (data.version && data.version !== currentVersion) {
+          // Version mismatch - clear all caches and reload immediately
+          // This prevents stale cached JS from causing runtime errors
+          console.log(
+            `[AppUpdate] Version mismatch detected: ${currentVersion} -> ${data.version}, clearing caches...`,
+          );
+
+          try {
+            // Clear all caches to ensure fresh assets
+            const cacheNames = await caches.keys();
+            console.log("[AppUpdate] Caches to clear:", cacheNames);
+            await Promise.all(cacheNames.map((name) => caches.delete(name)));
+            console.log("[AppUpdate] All caches cleared successfully");
+          } catch (e) {
+            console.error("[AppUpdate] Failed to clear caches:", e);
           }
-        } else {
-          setStatus("not-available");
+
+          // Hard reload to get fresh assets
+          console.log("[AppUpdate] Reloading page...");
+          window.location.reload();
+          return;
         }
+        console.log("[AppUpdate] Versions match, no update needed");
+        setStatus("not-available");
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("[AppUpdate] Failed to fetch version.json:", error);
         setStatus("not-available");
       });
-  }, [isUpdateDismissed]);
+  }, []);
 
   // Check for updates when app comes back from background
   useEffect(() => {
@@ -151,6 +181,9 @@ export function useAppUpdate(): UseAppUpdateReturn {
 
         // Delay the check to avoid spamming when user is quickly switching apps
         visibilityTimeout = setTimeout(() => {
+          console.log(
+            "[AppUpdate] App returned from background, checking for updates...",
+          );
           lastCheckTime = Date.now();
           checkForUpdates();
         }, VISIBILITY_DELAY);
